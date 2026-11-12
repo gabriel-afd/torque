@@ -18,7 +18,13 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-      - run: mvn -B verify
+      - run: chmod +x mvnw
+      - run: ./mvnw -B verify
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jacoco-report
+          path: torque-api/target/site/jacoco
 
   web:
     runs-on: ubuntu-latest
@@ -30,5 +36,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - run: npm install
+          cache: npm
+          cache-dependency-path: torque-web/package-lock.json
+      - run: npm ci
       - run: npm run build
+      - run: npm test -- --watch=false --browsers=ChromeHeadlessCI

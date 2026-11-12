@@ -28,18 +28,41 @@ torque/
 
 ## Como executar (desenvolvimento)
 
+Pré-requisitos: Java 21+, Node 20+, Docker. O Maven não precisa estar instalado: use o wrapper (`mvnw`).
+
 ```bash
 # 1. Banco de dados
 docker compose up -d db
 
 # 2. API (http://localhost:8080, Swagger em /api/docs)
-cd torque-api && mvn spring-boot:run
+cd torque-api
+./mvnw spring-boot:run          # Windows: mvnw.cmd spring-boot:run
 
-# 3. Frontend (http://localhost:4200)
-cd torque-web && npm install && npm start
+# 3. Frontend (http://localhost:4200; /api é redirecionado para :8080 via proxy.conf.json)
+cd torque-web
+npm install
+npm start
 ```
 
-Variáveis de ambiente da API: `DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`.
+## Testes
+
+```bash
+# API: testes unitários e de integração (Testcontainers sobe um PostgreSQL 16; Docker precisa estar rodando)
+cd torque-api && ./mvnw -B verify
+# relatório de cobertura: torque-api/target/site/jacoco/index.html
+
+# Frontend
+cd torque-web && npm run build && npm test -- --watch=false --browsers=ChromeHeadless
+```
+
+## Variáveis de ambiente da API
+
+| Variável | Uso | Padrão em desenvolvimento |
+| --- | --- | --- |
+| `DB_URL` | URL JDBC do PostgreSQL | `jdbc:postgresql://localhost:5432/torque` |
+| `DB_USER` | usuário do banco | `torque` |
+| `DB_PASSWORD` | senha do banco | `torque` |
+| `JWT_SECRET` | chave de assinatura do JWT (mínimo 32 bytes) | chave de desenvolvimento — troque em produção |
 
 ## Entregas
 
