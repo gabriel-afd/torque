@@ -1,11 +1,21 @@
 package br.com.torque;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-class TorqueApplicationTests {
+import br.com.torque.shared.IntegracaoTestBase;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+class TorqueApplicationTests extends IntegracaoTestBase {
+
+    @Autowired
+    private JdbcTemplate jdbc;
 
     @Test
-    void estruturaInicialCompila() {
-        // Os testes de domínio e de integração (Testcontainers) entram a partir da Sprint 1.
+    void deveSubirContextoEAplicarMigracoesFlyway() {
+        Integer versoes = jdbc.queryForObject(
+                "SELECT count(*) FROM flyway_schema_history WHERE success", Integer.class);
+        assertThat(versoes).isGreaterThanOrEqualTo(1);
     }
 }
