@@ -144,7 +144,8 @@ Cada execução registrada com data, comando, resultado e commit testado.
 
 | Data | Branch / commit | Comando | Testes | Falhas | Observação |
 | --- | --- | --- | --- | --- | --- |
-| | | | | | |
+| 2026-11-12 | feature/00-ambiente | `./mvnw -B verify` (api) | 1 | 0 | Contexto sobe e Flyway aplica V1. Docker indisponível na máquina (WSL2 sem "Plataforma de Máquina Virtual"); executado com `TORQUE_TEST_DB_URL` em PostgreSQL 17 local descartável. CI bloqueado no GitHub (cobrança da conta). |
+| 2026-11-12 | feature/00-ambiente | `npm run build && npm test -- --watch=false --browsers=ChromeHeadless` (web) | 3 | 0 | Build ok; Karma em ChromeHeadless. |
 
 ## 7. Defeitos
 
