@@ -65,7 +65,20 @@ cd torque-web && npm run build && npm test -- --watch=false --browsers=ChromeHea
 | `DB_URL` | URL JDBC do PostgreSQL | `jdbc:postgresql://localhost:5432/torque` |
 | `DB_USER` | usuário do banco | `torque` |
 | `DB_PASSWORD` | senha do banco | `torque` |
-| `JWT_SECRET` | chave de assinatura do JWT (mínimo 32 bytes) | chave de desenvolvimento — troque em produção |
+| `JWT_SECRET` | chave de assinatura do JWT — **obrigatória**, mínimo 32 bytes; a API não sobe sem ela | — |
+| `JWT_EXPIRACAO_HORAS` | validade do token | `8` |
+| `ADMIN_EMAIL` | e-mail do primeiro administrador (criado só se não houver nenhum usuário) | — |
+| `ADMIN_SENHA` | senha do primeiro administrador (mínimo 8 caracteres) | — |
+
+Primeira subida em desenvolvimento (bash):
+
+```bash
+export JWT_SECRET="uma-chave-local-com-pelo-menos-32-bytes"
+export ADMIN_EMAIL="admin@oficina.local" ADMIN_SENHA="troque-esta-senha"
+cd torque-api && ./mvnw spring-boot:run
+```
+
+Depois que o administrador existir, `ADMIN_EMAIL`/`ADMIN_SENHA` podem ser removidas (nada é recriado se já houver usuários).
 
 ## Entregas
 
