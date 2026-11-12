@@ -1,6 +1,9 @@
 spring:
   application:
     name: torque-api
+  autoconfigure:
+    # Sem usuário em memória padrão (evita senha gerada no log); a autenticação é só por JWT.
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/torque}
     username: ${DB_USER:torque}
@@ -11,11 +14,20 @@ spring:
       ddl-auto: validate
   flyway:
     enabled: true
+  data:
+    web:
+      pageable:
+        max-page-size: 100
 
 torque:
   jwt:
-    secret: ${JWT_SECRET:troque-esta-chave-em-producao-com-pelo-menos-32-bytes}
-    expiracao-horas: 8
+    # Obrigatória, mínimo 32 bytes. Sem valor padrão: a API não sobe sem JWT_SECRET.
+    secret: ${JWT_SECRET:}
+    expiracao-horas: ${JWT_EXPIRACAO_HORAS:8}
+  admin:
+    # Primeiro administrador, criado só se a tabela usuario estiver vazia.
+    email: ${ADMIN_EMAIL:}
+    senha: ${ADMIN_SENHA:}
 
 springdoc:
   swagger-ui:

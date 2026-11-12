@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,7 +44,7 @@ class TratadorDeErrosTest {
         @GetMapping("/teste/{tipo}")
         void lancar(@PathVariable String tipo) {
             switch (tipo) {
-                case "nao-autenticado" -> throw new BadCredentialsException("credencial");
+                case "nao-autenticado" -> throw new InsufficientAuthenticationException("sem token");
                 case "sem-permissao" -> throw new AccessDeniedException("negado");
                 case "nao-encontrado" -> throw new RecursoNaoEncontradoException("Cliente não encontrado: 42");
                 case "conflito" -> throw new ConflitoException("Documento já cadastrado");
