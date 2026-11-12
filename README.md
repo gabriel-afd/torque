@@ -51,6 +51,9 @@ npm start
 cd torque-api && ./mvnw -B verify
 # relatório de cobertura: torque-api/target/site/jacoco/index.html
 
+# Sem Docker? Aponte os testes de integração para um PostgreSQL DESCARTÁVEL (os dados são apagados a cada teste):
+#   TORQUE_TEST_DB_URL=jdbc:postgresql://localhost:55432/torque_teste TORQUE_TEST_DB_USER=torque ./mvnw -B verify
+
 # Frontend
 cd torque-web && npm run build && npm test -- --watch=false --browsers=ChromeHeadless
 ```
