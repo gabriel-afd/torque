@@ -1,0 +1,70 @@
+<!doctype html><html lang="pt-br"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+.crumb { font-size: 12.5px; color: #6B7787; margin-bottom: 8px; }
+.head { padding: 16px 18px; display: flex; gap: 28px; align-items: center; margin-bottom: 14px; }
+.head .big { font-size: 22px; font-weight: 800; letter-spacing: .5px; }
+.kv { font-size: 12px; color: #6B7787; } .kv b { display: block; color: #1E2632; font-size: 13.5px; margin-top: 2px; }
+.grid { display: grid; grid-template-columns: 1fr 330px; gap: 14px; }
+.sec { padding: 14px 16px; margin-bottom: 14px; }
+.sec h2 { font-size: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-size: 11.5px; color: #6B7787; font-weight: 600; padding: 6px 8px; border-bottom: 1px solid #E1E6ED; }
+td { padding: 9px 8px; border-bottom: 1px solid #F0F2F5; }
+td.r, th.r { text-align: right; }
+.x { color: #B42318; font-weight: 700; }
+.addrow { display: flex; gap: 8px; margin-top: 10px; }
+.sum .line { display: flex; justify-content: space-between; padding: 7px 0; font-size: 13.5px; }
+.sum .tot { border-top: 1px solid #E1E6ED; margin-top: 6px; padding-top: 12px; font-size: 18px; font-weight: 800; }
+.hint { font-size: 11.5px; color: #6B7787; margin-top: 2px; }
+.acts .btn { width: 100%; margin-top: 8px; padding: 11px; }
+.btn.green { background: #2E9B4F; color: #fff; } .btn.red { background: #fff; color: #B42318; border: 1px solid #F0B4B4; }
+.tl { font-size: 12.5px; } .tl div { padding: 6px 0 6px 14px; border-left: 2px solid #D5DCE6; position: relative; }
+.tl div::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #1F3A5F; position: absolute; left: -5px; top: 10px; }
+</style></head><body>
+<div class="topbar"><div class="logo"><span class="dot"></span>Torque</div>
+  <nav class="nav"><a class="on">Quadro de OS</a><a>Clientes</a><a>Veículos</a></nav>
+  <div class="user">Ana (Atendente)<div class="avatar">A</div></div></div>
+<div class="page">
+  <div class="crumb">Quadro de OS › OS #1041</div>
+  <div class="card head">
+    <div><div class="kv">OS #1041</div><div class="big">NBV8D45</div></div>
+    <div class="kv">Veículo<b>Renault Sandero 2017 · prata</b></div>
+    <div class="kv">Cliente<b>Rita Silva · (83) 99812-4410</b></div>
+    <div class="kv">Quilometragem<b>84.320 km</b></div>
+    <div class="kv">Problema relatado<b>Ruído ao frear e pedal baixo</b></div>
+    <div style="margin-left:auto"><span class="chip ag">AGUARDANDO APROVAÇÃO</span></div>
+  </div>
+  <div class="grid">
+    <div>
+      <div class="card sec"><h2>Serviços <span class="muted" style="font-size:12px;font-weight:500">Orçamento versão 1</span></h2>
+        <table><tr><th>Serviço</th><th class="r">Mão de obra</th><th></th></tr>
+          <tr><td>Troca de pastilhas dianteiras</td><td class="r">R$ 120,00</td><td class="r x">×</td></tr>
+          <tr><td>Sangria do sistema de freio</td><td class="r">R$ 80,00</td><td class="r x">×</td></tr></table>
+        <div class="addrow"><input class="input" placeholder="Buscar serviço no catálogo"><button class="btn ghost">Adicionar</button></div>
+      </div>
+      <div class="card sec"><h2>Peças</h2>
+        <table><tr><th>Peça</th><th class="r">Qtd.</th><th class="r">Preço unit.</th><th class="r">Subtotal</th><th></th></tr>
+          <tr><td>Jogo de pastilhas dianteiras</td><td class="r">1</td><td class="r">R$ 145,00</td><td class="r">R$ 145,00</td><td class="r x">×</td></tr>
+          <tr><td>Fluido de freio DOT 4 (500 ml)</td><td class="r">2</td><td class="r">R$ 22,50</td><td class="r">R$ 45,00</td><td class="r x">×</td></tr></table>
+        <div class="addrow"><input class="input" placeholder="Buscar peça no catálogo"><input class="input" style="width:80px" value="1"><button class="btn ghost">Adicionar</button></div>
+      </div>
+    </div>
+    <div>
+      <div class="card sec sum"><h2>Resumo</h2>
+        <div class="line"><span>Serviços</span><span>R$ 200,00</span></div>
+        <div class="line"><span>Peças</span><span>R$ 190,00</span></div>
+        <div class="line"><span>Desconto (5%)</span><span>− R$ 19,50</span></div>
+        <div class="hint">Atendente pode dar até 10% (RN05)</div>
+        <div class="line tot"><span>Total</span><span>R$ 370,50</span></div>
+        <div class="acts">
+          <button class="btn blue">Compartilhar (PDF / WhatsApp)</button>
+          <button class="btn green">Registrar aprovação</button>
+          <button class="btn red">Registrar recusa</button>
+        </div>
+      </div>
+      <div class="card sec"><h2>Histórico</h2>
+        <div class="tl"><div><b>Aguardando aprovação</b> · Ana · hoje 11:20</div><div><b>Aberta</b> · Ana · hoje 10:58</div></div>
+      </div>
+    </div>
+  </div>
+</div></body></html>

@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: torque
+      POSTGRES_USER: ${DB_USER:-torque}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-torque}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # Os serviços "api" (Spring Boot) e "web" (Nginx + Angular) entram com os
+  # Dockerfiles na Sprint 4 (item 17 do backlog: implantação).
+
+volumes:
+  pgdata:

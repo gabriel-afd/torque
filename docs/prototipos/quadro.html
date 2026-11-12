@@ -1,0 +1,58 @@
+<!doctype html><html lang="pt-br"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+.filters { display: flex; gap: 10px; margin-left: auto; }
+.filters .input { width: 210px; }
+.board { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+.col { background: #EBEFF4; border-radius: 10px; padding: 10px; min-height: 560px; }
+.col h3 { font-size: 12.5px; text-transform: uppercase; letter-spacing: .4px; color: #4A5565; display: flex; justify-content: space-between; margin: 2px 4px 10px; }
+.col h3 b { background: #fff; border-radius: 999px; padding: 0 8px; font-size: 11.5px; color: #1F3A5F; }
+.os { background: #fff; border-radius: 8px; padding: 10px 11px; margin-bottom: 9px; border-left: 4px solid #C9D3E0; box-shadow: 0 1px 2px rgba(20,30,50,.06); }
+.os .top { display: flex; justify-content: space-between; font-size: 11.5px; color: #6B7787; margin-bottom: 4px; }
+.os .placa { font-weight: 800; font-size: 13.5px; letter-spacing: .5px; }
+.os .car { font-size: 12.5px; margin: 2px 0 6px; }
+.os .bot { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: #6B7787; }
+.mec { display: inline-flex; align-items: center; gap: 5px; }
+.mec i { width: 18px; height: 18px; border-radius: 50%; background: #1F3A5F; color: #fff; font-style: normal; font-size: 9.5px; display: grid; place-items: center; font-weight: 700; }
+.c1 .os { border-left-color: #1F3A5F; } .c2 .os { border-left-color: #E8A33D; } .c3 .os { border-left-color: #2E9B4F; }
+.c4 .os { border-left-color: #1F5FAF; } .c5 .os { border-left-color: #D64545; } .c6 .os { border-left-color: #6A5BD6; }
+.alert { color: #B42318; font-weight: 600; }
+</style></head><body>
+<div class="topbar"><div class="logo"><span class="dot"></span>Torque</div>
+  <nav class="nav"><a class="on">Quadro de OS</a><a>Clientes</a><a>Veículos</a><a>Catálogo</a><a>Painel</a><a>Usuários</a></nav>
+  <div class="user">João (Administrador)<div class="avatar">J</div></div></div>
+<div class="page">
+  <div class="page-head"><h1>Quadro de OS</h1><span class="muted">18 OS em andamento</span>
+    <div class="filters"><input class="input" placeholder="Buscar placa ou cliente"><select class="input" style="width:170px"><option>Todos os mecânicos</option></select><button class="btn primary">+ Nova OS</button></div></div>
+  <div class="board">
+    <div class="col c1"><h3>Aberta <b>3</b></h3>
+      <div class="os"><div class="top"><span>OS #1042</span><span>hoje 08:15</span></div><div class="placa">QFR4E21</div><div class="car">Fiat Strada 2021 · Maria Souza</div><div class="bot"><span>Barulho na suspensão</span></div></div>
+      <div class="os"><div class="top"><span>OS #1043</span><span>hoje 09:02</span></div><div class="placa">MZK2310</div><div class="car">VW Gol 2014 · Pedro Lima</div><div class="bot"><span>Revisão 60 mil km</span></div></div>
+      <div class="os"><div class="top"><span>OS #1044</span><span>hoje 10:30</span></div><div class="placa">RTA9B88</div><div class="car">Honda HR-V 2020 · Ana Costa</div><div class="bot"><span>Luz do motor acesa</span></div></div>
+    </div>
+    <div class="col c2"><h3>Aguard. aprovação <b>4</b></h3>
+      <div class="os"><div class="top"><span>OS #1036</span><span>R$ 1.240,00</span></div><div class="placa">OFG7H12</div><div class="car">Chevrolet Onix 2019 · Carlos Mendes</div><div class="bot"><span class="alert">Enviado há 2 dias</span></div></div>
+      <div class="os"><div class="top"><span>OS #1039</span><span>R$ 380,00</span></div><div class="placa">KLP5521</div><div class="car">Fiat Uno 2012 · José Ramos</div><div class="bot"><span>Enviado ontem</span></div></div>
+      <div class="os"><div class="top"><span>OS #1040</span><span>R$ 2.890,00</span></div><div class="placa">QWE1C34</div><div class="car">Toyota Corolla 2018 · Luiza Alves</div><div class="bot"><span>Enviado hoje</span></div></div>
+      <div class="os"><div class="top"><span>OS #1041</span><span>R$ 370,50</span></div><div class="placa">NBV8D45</div><div class="car">Renault Sandero 2017 · Rita Silva</div><div class="bot"><span>Enviado hoje</span></div></div>
+    </div>
+    <div class="col c3"><h3>Aprovada <b>2</b></h3>
+      <div class="os"><div class="top"><span>OS #1033</span><span>R$ 640,00</span></div><div class="placa">PJH3F90</div><div class="car">Hyundai HB20 2020 · Bruno Dias</div><div class="bot"><span class="mec"><i>R</i>Raimundo</span></div></div>
+      <div class="os"><div class="top"><span>OS #1037</span><span>R$ 1.050,00</span></div><div class="placa">HTR6677</div><div class="car">Ford Ka 2016 · Paula Nunes</div><div class="bot"><span class="muted">Sem mecânico</span></div></div>
+    </div>
+    <div class="col c4"><h3>Em execução <b>4</b></h3>
+      <div class="os"><div class="top"><span>OS #1028</span><span>desde ontem</span></div><div class="placa">QAZ2E67</div><div class="car">Jeep Renegade 2019 · Marcos Paz</div><div class="bot"><span class="mec"><i>R</i>Raimundo</span></div></div>
+      <div class="os"><div class="top"><span>OS #1030</span><span>desde 08:40</span></div><div class="placa">LKJ9087</div><div class="car">VW Fox 2013 · Sônia Reis</div><div class="bot"><span class="mec"><i>T</i>Tiago</span></div></div>
+      <div class="os"><div class="top"><span>OS #1031</span><span>desde 09:10</span></div><div class="placa">PLM4G56</div><div class="car">Fiat Argo 2021 · Igor Melo</div><div class="bot"><span class="mec"><i>T</i>Tiago</span></div></div>
+      <div class="os"><div class="top"><span>OS #1034</span><span>desde 10:05</span></div><div class="placa">MNB3H21</div><div class="car">Chevrolet Prisma 2015 · Vera Luz</div><div class="bot"><span class="mec"><i>R</i>Raimundo</span></div></div>
+    </div>
+    <div class="col c5"><h3>Aguard. peça <b>2</b></h3>
+      <div class="os"><div class="top"><span>OS #1022</span><span>há 3 dias</span></div><div class="placa">JHG7712</div><div class="car">Peugeot 208 2018 · Davi Rocha</div><div class="bot"><span class="mec"><i>T</i>Tiago</span><span class="alert">Bomba d'água</span></div></div>
+      <div class="os"><div class="top"><span>OS #1026</span><span>há 1 dia</span></div><div class="placa">QPO5J33</div><div class="car">Nissan Kicks 2020 · Lia Torres</div><div class="bot"><span class="mec"><i>R</i>Raimundo</span><span>Pastilhas</span></div></div>
+    </div>
+    <div class="col c6"><h3>Concluída <b>3</b></h3>
+      <div class="os"><div class="top"><span>OS #1019</span><span>R$ 780,00</span></div><div class="placa">ERT1K09</div><div class="car">VW Polo 2022 · Gil Prado</div><div class="bot"><span>Avisar cliente</span></div></div>
+      <div class="os"><div class="top"><span>OS #1024</span><span>R$ 320,00</span></div><div class="placa">TYU6789</div><div class="car">Fiat Palio 2010 · Ivo Brito</div><div class="bot"><span>Cliente avisado</span></div></div>
+      <div class="os"><div class="top"><span>OS #1027</span><span>R$ 1.460,00</span></div><div class="placa">QSD8L41</div><div class="car">Honda Fit 2015 · Noemi Sá</div><div class="bot"><span>Avisar cliente</span></div></div>
+    </div>
+  </div>
+</div></body></html>

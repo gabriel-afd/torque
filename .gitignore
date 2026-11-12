@@ -1,0 +1,14 @@
+# Java / Maven
+torque-api/target/
+*.class
+# Node / Angular
+node_modules/
+torque-web/dist/
+torque-web/.angular/
+# IDE e sistema
+.idea/
+.vscode/
+*.iml
+.DS_Store
+# Segredos
+.env

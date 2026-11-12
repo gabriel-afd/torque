@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: torque-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/torque}
+    username: ${DB_USER:torque}
+    password: ${DB_PASSWORD:torque}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+torque:
+  jwt:
+    secret: ${JWT_SECRET:troque-esta-chave-em-producao-com-pelo-menos-32-bytes}
+    expiracao-horas: 8
+
+springdoc:
+  swagger-ui:
+    path: /api/docs
