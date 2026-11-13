@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import br.com.torque.shared.excecao.ConflitoException;
+import br.com.torque.shared.excecao.OperacaoNaoPermitidaException;
 import br.com.torque.shared.excecao.RecursoNaoEncontradoException;
 import br.com.torque.shared.excecao.RegraDeNegocioException;
 import br.com.torque.shared.validacao.CpfCnpj;
@@ -46,6 +47,7 @@ class TratadorDeErrosTest {
             switch (tipo) {
                 case "nao-autenticado" -> throw new InsufficientAuthenticationException("sem token");
                 case "sem-permissao" -> throw new AccessDeniedException("negado");
+                case "nao-permitida" -> throw new OperacaoNaoPermitidaException("OS atribuída a outro mecânico");
                 case "nao-encontrado" -> throw new RecursoNaoEncontradoException("Cliente não encontrado: 42");
                 case "conflito" -> throw new ConflitoException("Documento já cadastrado");
                 case "integridade" -> throw new DataIntegrityViolationException("uk_cliente_documento");
@@ -112,6 +114,13 @@ class TratadorDeErrosTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.status").value(403))
                 .andExpect(jsonPath("$.erro").value("Forbidden"));
+    }
+
+    @Test
+    void deveDevolver403ParaOperacaoNaoPermitidaNoDominio() throws Exception {
+        mvc.perform(get("/teste/nao-permitida"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.mensagem").value("OS atribuída a outro mecânico"));
     }
 
     @Test

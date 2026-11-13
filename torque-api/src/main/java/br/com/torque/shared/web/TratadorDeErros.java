@@ -1,6 +1,7 @@
 package br.com.torque.shared.web;
 
 import br.com.torque.shared.excecao.ConflitoException;
+import br.com.torque.shared.excecao.OperacaoNaoPermitidaException;
 import br.com.torque.shared.excecao.RecursoNaoEncontradoException;
 import br.com.torque.shared.excecao.RegraDeNegocioException;
 import jakarta.validation.ConstraintViolationException;
@@ -116,6 +117,11 @@ public class TratadorDeErros {
     @ExceptionHandler(AccessDeniedException.class)
     ResponseEntity<ErroResponse> semPermissao(AccessDeniedException ex) {
         return resposta(HttpStatus.FORBIDDEN, MENSAGEM_SEM_PERMISSAO);
+    }
+
+    @ExceptionHandler(OperacaoNaoPermitidaException.class)
+    ResponseEntity<ErroResponse> operacaoNaoPermitida(OperacaoNaoPermitidaException ex) {
+        return resposta(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
     // 404 / 405 ---------------------------------------------------------
