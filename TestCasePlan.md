@@ -78,14 +78,14 @@ Status: Não executado · Aprovado · Reprovado · Bloqueado.
 
 | ID | Origem | Cenário | Entrada / passos | Resultado esperado | Prioridade | Nível | Status | Evidência |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| CT19 | RN04 | Cálculo do total | 1 serviço de R$ 120,00 + 2 peças de R$ 35,00 | Total R$ 190,00 | Alta | U | Não executado | |
-| CT20 | RN04 | Total com desconto | Itens somando R$ 390,00, desconto R$ 19,50 | Total R$ 370,50 | Alta | U | Não executado | |
-| CT21 | RN05 | Desconto acima de 10% por atendente | Desconto de 15% com perfil ATENDENTE | 422; orçamento inalterado | Alta | U, I | Não executado | |
-| CT22 | RN05 | Desconto de exatamente 10% por atendente | Desconto de 10% | Aceito (valor de borda) | Alta | U | Não executado | |
-| CT23 | RN05 | Desconto acima de 10% por administrador | Desconto de 15% com perfil ADMINISTRADOR | Aceito | Média | U | Não executado | |
+| CT19 | RN04 | Cálculo do total | 1 serviço de R$ 120,00 + 2 peças de R$ 35,00 | Total R$ 190,00 | Alta | U | Aprovado | OrcamentoTest#deveCalcularTotalComoServicosMaisQuantidadeVezesPrecoDasPecas (2026-11-12) |
+| CT20 | RN04 | Total com desconto | Itens somando R$ 390,00, desconto R$ 19,50 | Total R$ 370,50 | Alta | U | Aprovado | OrcamentoTest#deveSubtrairDescontoDoTotal (2026-11-12) |
+| CT21 | RN05 | Desconto acima de 10% por atendente | Desconto de 15% com perfil ATENDENTE | 422; orçamento inalterado | Alta | U, I | Aprovado (U); I pendente | OrcamentoTest#deveRecusarDescontoAcimaDeDezPorCentoParaAtendenteSemAlterarOrcamento (2026-11-12) |
+| CT22 | RN05 | Desconto de exatamente 10% por atendente | Desconto de 10% | Aceito (valor de borda) | Alta | U | Aprovado | OrcamentoTest#deveAceitarDescontoDeExatamenteDezPorCentoParaAtendente (2026-11-12) |
+| CT23 | RN05 | Desconto acima de 10% por administrador | Desconto de 15% com perfil ADMINISTRADOR | Aceito | Média | U | Aprovado | OrcamentoTest#deveAceitarDescontoAcimaDeDezPorCentoParaAdministrador (2026-11-12) |
 | CT24 | RN10 | Preço congelado no item | Alterar preço no catálogo depois de incluir o item | Item e total da OS mantêm o valor original | Alta | I | Não executado | |
 | CT25 | — | Quantidade inválida de peça | Quantidade 0 ou negativa | 400 | Média | I | Não executado | |
-| CT26 | — | Item inativo no catálogo | Incluir serviço ou peça inativa | 422 | Baixa | U | Não executado | |
+| CT26 | — | Item inativo no catálogo | Incluir serviço ou peça inativa | 422 | Baixa | U | Aprovado | OrcamentoTest#deveRecusarServicoInativoDoCatalogo, #deveRecusarPecaInativaDoCatalogo (2026-11-12) |
 
 ### 5.4 Ordem de serviço e fluxo de status (HU04, HU06, HU07)
 
@@ -93,15 +93,15 @@ Status: Não executado · Aprovado · Reprovado · Bloqueado.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | CT27 | HU04 | Abrir OS | Veículo existente, problema e quilometragem | 201; status ABERTA; número sequencial; histórico gravado | Alta | I | Não executado | |
 | CT28 | HU04 | OS para veículo inexistente | veiculoId inválido | 404 | Média | I | Não executado | |
-| CT29 | HU06 | Aprovar orçamento pendente | POST .../aprovacao | OS APROVADA; orçamento APROVADO com data e usuário | Alta | U, I | Não executado | |
-| CT30 | RN07 | Aprovar orçamento já aprovado | Aprovar duas vezes | 422 na segunda chamada | Alta | U | Não executado | |
-| CT31 | HU06 | Recusar orçamento | POST .../recusa | OS RECUSADA | Alta | U, I | Não executado | |
-| CT32 | RN07 | Alterar orçamento aprovado | Incluir item em OS APROVADA | Nova versão PENDENTE; anterior SUBSTITUIDO; OS volta a AGUARDANDO_APROVACAO | Alta | U, I | Não executado | |
-| CT33 | RN06 | Iniciar execução sem aprovação | ABERTA → EM_EXECUCAO | 422 | Alta | U | Não executado | |
-| CT34 | Seção 2.5 | Todas as transições permitidas | Teste parametrizado com cada linha da tabela de transições | Todas aceitas | Alta | U | Não executado | |
-| CT35 | Seção 2.5 | Transições não permitidas | Teste parametrizado com pares fora da tabela | Todas recusadas com 422 | Alta | U | Não executado | |
-| CT36 | RN08 | Mudar status de OS final | ENTREGUE, RECUSADA ou CANCELADA → qualquer status | 422 | Alta | U | Não executado | |
-| CT37 | HU07 | Peça em falta | EM_EXECUCAO → AGUARDANDO_PECA → EM_EXECUCAO | Ambas aceitas | Média | U | Não executado | |
+| CT29 | HU06 | Aprovar orçamento pendente | POST .../aprovacao | OS APROVADA; orçamento APROVADO com data e usuário | Alta | U, I | Aprovado (U); I pendente | OrdemServicoTest#deveAprovarOrcamentoPendenteRegistrandoDataEUsuario (2026-11-12) |
+| CT30 | RN07 | Aprovar orçamento já aprovado | Aprovar duas vezes | 422 na segunda chamada | Alta | U | Aprovado | OrdemServicoTest#deveRecusarSegundaAprovacaoDoMesmoOrcamento (2026-11-12) |
+| CT31 | HU06 | Recusar orçamento | POST .../recusa | OS RECUSADA | Alta | U, I | Aprovado (U); I pendente | OrdemServicoTest#deveRecusarOrcamentoEFinalizarOsComoRecusada (2026-11-12) |
+| CT32 | RN07 | Alterar orçamento aprovado | Incluir item em OS APROVADA | Nova versão PENDENTE; anterior SUBSTITUIDO; OS volta a AGUARDANDO_APROVACAO | Alta | U, I | Aprovado (U); I pendente | OrdemServicoTest#deveCriarNovaVersaoAoAlterarOrcamentoAprovado (2026-11-12) |
+| CT33 | RN06 | Iniciar execução sem aprovação | ABERTA → EM_EXECUCAO | 422 | Alta | U | Aprovado | OrdemServicoTest#deveRecusarInicioDeExecucaoSemOrcamentoAprovado, TransicoesStatusTest#deveRecusarTransicaoForaDaTabelaComRegraDeNegocio[ABERTA -> EM_EXECUCAO] (2026-11-12) |
+| CT34 | Seção 2.5 | Todas as transições permitidas | Teste parametrizado com cada linha da tabela de transições | Todas aceitas | Alta | U | Aprovado | TransicoesStatusTest#deveAceitarTodaTransicaoDaTabela (16 casos gerados da tabela) (2026-11-12) |
+| CT35 | Seção 2.5 | Transições não permitidas | Teste parametrizado com pares fora da tabela | Todas recusadas com 422 | Alta | U | Aprovado | TransicoesStatusTest#deveRecusarTransicaoForaDaTabelaComRegraDeNegocio (65 pares fora da tabela) (2026-11-12) |
+| CT36 | RN08 | Mudar status de OS final | ENTREGUE, RECUSADA ou CANCELADA → qualquer status | 422 | Alta | U | Aprovado | OrdemServicoTest#deveRecusarQualquerMudancaDeOsEntregue, #deveRecusarQualquerMudancaDeOsRecusadaOuCancelada (2026-11-12) |
+| CT37 | HU07 | Peça em falta | EM_EXECUCAO → AGUARDANDO_PECA → EM_EXECUCAO | Ambas aceitas | Média | U | Aprovado | OrdemServicoTest#deveIrEVoltarDeAguardandoPeca (2026-11-12) |
 | CT38 | RN09 | Mecânico atribuído inicia serviço | Token do mecânico atribuído | 200; OS EM_EXECUCAO | Alta | I | Não executado | |
 | CT39 | RN09 | Mecânico não atribuído | Token de outro mecânico | 403; status inalterado | Alta | I | Não executado | |
 | CT40 | — | Histórico de status | Executar 3 transições | 3 registros em historico_status com usuário, data, de/para | Alta | I | Não executado | |
@@ -150,6 +150,7 @@ Cada execução registrada com data, comando, resultado e commit testado.
 | 2026-11-12 | feature/02-autenticacao | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 101 | 0 | 1 falha intermediária por teste mal escrito (token com caractere extra é aceito pelo decodificador base64; trocado por payload adulterado). Subida manual: sem JWT_SECRET a API recusa subir; admin inicial criado; login 200/401. |
 | 2026-11-12 | feature/03-clientes-veiculos | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 126 | 0 | Clientes e veículos; ddl-auto validate ok com CHAR(7) e SMALLINT. |
 | 2026-11-12 | feature/04-catalogo | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 141 | 0 | Catálogo: CRUD, 403 para atendente, código duplicado 409, preço negativo 400, inativos só para admin. Sem CT específico no plano (item 6 do backlog). |
+| 2026-11-12 | feature/05-dominio-os | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 295 | 0 | Domínio da OS: 152 testes unitários puros + 1 de mapeamento JPA. JaCoCo pacote ordens: 94,8% linhas, 81,0% ramos. |
 
 ## 7. Defeitos
 
@@ -171,4 +172,4 @@ Preenchido ao fim da Macro Entrega 3.
 | Aprovados | |
 | Reprovados / bloqueados | |
 | Defeitos encontrados / corrigidos | |
-| Cobertura do pacote `ordens` (JaCoCo) | |
+| Cobertura do pacote `ordens` (JaCoCo) | 94,8% linhas / 81,0% ramos (parcial, feature/05, 2026-11-12) |
