@@ -5,10 +5,10 @@ import br.com.torque.clientes.dto.ClienteRequest;
 import br.com.torque.clientes.dto.ClienteResponse;
 import br.com.torque.clientes.dto.VeiculoRequest;
 import br.com.torque.clientes.dto.VeiculoResponse;
+import br.com.torque.shared.Busca;
 import br.com.torque.shared.excecao.ConflitoException;
 import br.com.torque.shared.excecao.RecursoNaoEncontradoException;
 import br.com.torque.shared.validacao.CpfCnpjUtil;
-import java.util.Locale;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,12 +33,11 @@ public class ClienteService {
     /** Busca por parte do nome (sem diferenciar maiúsculas) ou do documento (com ou sem máscara). */
     @Transactional(readOnly = true)
     public Page<ClienteResponse> listar(String busca, Pageable pageable) {
-        if (busca == null || busca.isBlank()) {
+        if (Busca.vazia(busca)) {
             return clientes.findAll(pageable).map(ClienteResponse::de);
         }
-        String termo = busca.trim().toLowerCase(Locale.ROOT);
-        String padraoNome = "%" + escaparLike(termo) + "%";
-        String digitos = CpfCnpjUtil.normalizar(termo);
+        String padraoNome = Busca.contem(busca);
+        String digitos = CpfCnpjUtil.normalizar(busca);
         // Sem dígitos no termo, o padrão vazio não casa com nenhum documento (todos têm 11 ou 14 dígitos).
         String padraoDocumento = digitos.isEmpty() ? "" : "%" + digitos + "%";
         return clientes.buscar(padraoNome, padraoDocumento, pageable).map(ClienteResponse::de);
@@ -97,9 +96,5 @@ public class ClienteService {
     private Cliente carregar(Long id) {
         return clientes.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Cliente não encontrado: " + id));
-    }
-
-    private static String escaparLike(String termo) {
-        return termo.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
     }
 }
