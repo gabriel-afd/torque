@@ -4,6 +4,7 @@ import br.com.torque.auth.Perfil;
 import br.com.torque.auth.Usuario;
 import br.com.torque.clientes.Veiculo;
 import br.com.torque.ordens.StatusOS.Transicao;
+import br.com.torque.shared.excecao.ConflitoException;
 import br.com.torque.shared.excecao.OperacaoNaoPermitidaException;
 import br.com.torque.shared.excecao.RecursoNaoEncontradoException;
 import br.com.torque.shared.excecao.RegraDeNegocioException;
@@ -184,25 +185,61 @@ public class OrdemServico {
      * SUBSTITUIDO e a OS volta a AGUARDANDO_APROVACAO.
      */
     public Orcamento orcamentoParaEdicao(Usuario usuario) {
+        Orcamento vigente = exigirOrcamentoAlteravel(usuario);
+        if (dispensaNovaVersao(vigente)) {
+            return vigente;
+        }
+        Orcamento nova = Orcamento.novaVersaoDe(vigente);
+        adotarNovaVersao(vigente, nova, usuario);
+        return nova;
+    }
+
+    /**
+     * Aplica a alteração do PUT do orçamento. {@code versao} é a versão que o usuário estava editando:
+     * se não for mais a vigente, 409. Com orçamento aprovado (RN07) a alteração é aplicada na nova versão
+     * antes de ela substituir a anterior — se a alteração for inválida, nada muda.
+     */
+    public Orcamento alterarOrcamento(int versao, Orcamento.Alteracao alteracao, Usuario usuario) {
+        Orcamento vigente = exigirOrcamentoAlteravel(usuario);
+        if (vigente.getVersao() != versao) {
+            throw new ConflitoException("O orçamento já está na versão " + vigente.getVersao()
+                    + ". Recarregue a OS antes de alterar.");
+        }
+        if (dispensaNovaVersao(vigente)) {
+            vigente.alterar(alteracao, usuario);
+            return vigente;
+        }
+        Orcamento nova = Orcamento.novaVersaoDe(vigente);
+        nova.alterar(alteracao, usuario);
+        adotarNovaVersao(vigente, nova, usuario);
+        return nova;
+    }
+
+    private Orcamento exigirOrcamentoAlteravel(Usuario usuario) {
         Permissoes.exigirBalcao(usuario, "alterar o orçamento");
         if (status.isFinal()) {
             throw new RegraDeNegocioException("OS " + status + " está finalizada e não pode ser alterada");
         }
         Orcamento vigente = getOrcamentoVigente();
-        if (vigente.isPendente() && (status == StatusOS.ABERTA || status == StatusOS.AGUARDANDO_APROVACAO)) {
-            return vigente;
+        if (!dispensaNovaVersao(vigente)) {
+            Transicao voltaParaAprovacao = status.transicaoPara(StatusOS.AGUARDANDO_APROVACAO)
+                    .filter(Transicao::viaOrcamento)
+                    .orElseThrow(() -> new RegraDeNegocioException(
+                            "O orçamento não pode ser alterado com a OS em " + status));
+            exigirExecutor(voltaParaAprovacao, usuario);
         }
-        Transicao voltaParaAprovacao = status.transicaoPara(StatusOS.AGUARDANDO_APROVACAO)
-                .filter(Transicao::viaOrcamento)
-                .orElseThrow(() -> new RegraDeNegocioException(
-                        "O orçamento não pode ser alterado com a OS em " + status));
-        exigirExecutor(voltaParaAprovacao, usuario);
+        return vigente;
+    }
 
-        Orcamento nova = Orcamento.novaVersaoDe(vigente);
+    private boolean dispensaNovaVersao(Orcamento vigente) {
+        return vigente.isPendente() && (status == StatusOS.ABERTA || status == StatusOS.AGUARDANDO_APROVACAO);
+    }
+
+    /** RN07: anterior vira SUBSTITUIDO, a nova passa a vigente e a OS volta a AGUARDANDO_APROVACAO. */
+    private void adotarNovaVersao(Orcamento vigente, Orcamento nova, Usuario usuario) {
         vigente.substituir();
         orcamentos.add(nova);
         mudarPara(StatusOS.AGUARDANDO_APROVACAO, usuario);
-        return nova;
     }
 
     /** Cliente aprovou: orçamento APROVADO (com data e usuário) e OS APROVADA. */

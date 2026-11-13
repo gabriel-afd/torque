@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -22,6 +23,10 @@ public class OrcamentoItemServico {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    /** Id do item da versão anterior quando este é uma cópia ainda não gravada (RN07). */
+    @Transient
+    private Long idOrigem;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "orcamento_id", nullable = false)
@@ -49,7 +54,14 @@ public class OrcamentoItemServico {
 
     /** Cópia congelada para uma nova versão do orçamento (mantém descrição e preço originais). */
     OrcamentoItemServico copiarPara(Orcamento novo) {
-        return new OrcamentoItemServico(novo, servico, descricao, preco);
+        OrcamentoItemServico copia = new OrcamentoItemServico(novo, servico, descricao, preco);
+        copia.idOrigem = chave();
+        return copia;
+    }
+
+    /** Identifica o item numa alteração: o próprio id ou, numa cópia ainda não gravada, o id de origem. */
+    Long chave() {
+        return id != null ? id : idOrigem;
     }
 
     public Long getId() {

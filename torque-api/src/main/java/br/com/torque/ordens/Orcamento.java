@@ -163,6 +163,7 @@ public class Orcamento {
      *
      * @param servicosMantidos ids dos itens de serviço que continuam (os demais saem)
      * @param pecasMantidas    id do item de peça que continua → nova quantidade (os demais saem)
+     *                         (numa nova versão ainda não gravada, valem os ids dos itens da versão anterior)
      */
     public record Alteracao(Set<Long> servicosMantidos, Map<Long, Integer> pecasMantidas,
                             List<Servico> servicosNovos, List<PecaNova> pecasNovas, BigDecimal desconto) {
@@ -174,12 +175,12 @@ public class Orcamento {
 
         BigDecimal subtotalFinal = Dinheiro.ZERO;
         for (OrcamentoItemServico item : itensServico) {
-            if (alteracao.servicosMantidos().contains(item.getId())) {
+            if (alteracao.servicosMantidos().contains(item.chave())) {
                 subtotalFinal = subtotalFinal.add(item.getPreco());
             }
         }
         for (OrcamentoItemPeca item : itensPeca) {
-            Integer quantidade = alteracao.pecasMantidas().get(item.getId());
+            Integer quantidade = alteracao.pecasMantidas().get(item.chave());
             if (quantidade != null) {
                 exigirQuantidadePositiva(quantidade);
                 subtotalFinal = subtotalFinal.add(item.getPrecoUnitario().multiply(BigDecimal.valueOf(quantidade)));
@@ -197,9 +198,9 @@ public class Orcamento {
         BigDecimal novoDesconto = validarDesconto(alteracao.desconto(), Dinheiro.de(subtotalFinal), usuario);
 
         // Validado: aplica.
-        itensServico.removeIf(item -> !alteracao.servicosMantidos().contains(item.getId()));
-        itensPeca.removeIf(item -> !alteracao.pecasMantidas().containsKey(item.getId()));
-        itensPeca.forEach(item -> item.alterarQuantidade(alteracao.pecasMantidas().get(item.getId())));
+        itensServico.removeIf(item -> !alteracao.servicosMantidos().contains(item.chave()));
+        itensPeca.removeIf(item -> !alteracao.pecasMantidas().containsKey(item.chave()));
+        itensPeca.forEach(item -> item.alterarQuantidade(alteracao.pecasMantidas().get(item.chave())));
         alteracao.servicosNovos().forEach(s ->
                 itensServico.add(new OrcamentoItemServico(this, s, s.getDescricao(), s.getPrecoMaoDeObra())));
         alteracao.pecasNovas().forEach(n -> itensPeca.add(
@@ -209,8 +210,8 @@ public class Orcamento {
     }
 
     private void validarIdsExistentes(Alteracao alteracao) {
-        Set<Long> idsServico = itensServico.stream().map(OrcamentoItemServico::getId).collect(Collectors.toSet());
-        Set<Long> idsPeca = itensPeca.stream().map(OrcamentoItemPeca::getId).collect(Collectors.toSet());
+        Set<Long> idsServico = itensServico.stream().map(OrcamentoItemServico::chave).collect(Collectors.toSet());
+        Set<Long> idsPeca = itensPeca.stream().map(OrcamentoItemPeca::chave).collect(Collectors.toSet());
         if (!idsServico.containsAll(alteracao.servicosMantidos())
                 || !idsPeca.containsAll(alteracao.pecasMantidas().keySet())) {
             throw new RegraDeNegocioException("Item informado não pertence a este orçamento");

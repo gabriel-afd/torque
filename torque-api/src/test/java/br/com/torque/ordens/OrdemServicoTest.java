@@ -181,6 +181,36 @@ class OrdemServicoTest {
     }
 
     @Test
+    void deveAplicarAlteracaoNaNovaVersaoUsandoIdsDosItensDaVersaoAnterior() {
+        OrdemServico os = osAguardandoAprovacao();
+        Fixtures.gravarItens(os.getOrcamentoVigente());
+        Long idOleo = os.getOrcamentoVigente().getItensServico().get(0).getId();
+        os.aprovarOrcamento(1, atendente);
+
+        Orcamento nova = os.alterarOrcamento(1, new Orcamento.Alteracao(java.util.Set.of(idOleo), java.util.Map.of(),
+                java.util.List.of(), java.util.List.of(new Orcamento.PecaNova(peca("Filtro", "35.00"), 2)),
+                BigDecimal.ZERO), atendente);
+
+        assertThat(nova.getVersao()).isEqualTo(2);
+        assertThat(nova.getItensServico()).extracting(OrcamentoItemServico::getDescricao).containsExactly("Troca de óleo");
+        assertThat(nova.getTotal()).isEqualByComparingTo("190.00");
+        assertThat(os.getOrcamento(1).getSituacao()).isEqualTo(SituacaoOrcamento.SUBSTITUIDO);
+        assertThat(os.getStatus()).isEqualTo(StatusOS.AGUARDANDO_APROVACAO);
+    }
+
+    @Test
+    void deveRecusarAlteracaoPorVersaoQueNaoEhMaisAVigente() {
+        OrdemServico os = osAguardandoAprovacao();
+        os.aprovarOrcamento(1, atendente);
+        os.orcamentoParaEdicao(atendente); // versão 2
+        var alteracao = new Orcamento.Alteracao(java.util.Set.of(), java.util.Map.of(), java.util.List.of(),
+                java.util.List.of(), BigDecimal.ZERO);
+
+        assertThatThrownBy(() -> os.alterarOrcamento(1, alteracao, atendente))
+                .isInstanceOf(br.com.torque.shared.excecao.ConflitoException.class);
+    }
+
+    @Test
     void deveUsarOProprioOrcamentoPendenteSemCriarVersao() {
         OrdemServico os = osAguardandoAprovacao();
         assertThat(os.orcamentoParaEdicao(atendente).getVersao()).isEqualTo(1);
