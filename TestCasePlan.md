@@ -62,17 +62,17 @@ Status: Não executado · Aprovado · Reprovado · Bloqueado.
 
 | ID | Origem | Cenário | Entrada / passos | Resultado esperado | Prioridade | Nível | Status | Evidência |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| CT08 | HU02, RN03 | Cadastro com CPF válido | Nome, telefone e CPF válido | 201; cliente encontrado na busca | Alta | I | Não executado | |
-| CT09 | RN03 | CPF com dígito verificador inválido | CPF 111.111.111-12 | 400 com erro no campo documento | Alta | U, I | Aprovado (U); I pendente | CpfCnpjValidatorTest#deveRecusarDocumentoInvalido, TratadorDeErrosTest#deveDevolver400ComErrosPorCampo (2026-11-12) |
-| CT10 | RN03 | CPF duplicado | Cadastrar duas vezes o mesmo CPF | 409; nenhum registro duplicado | Alta | I | Não executado | |
+| CT08 | HU02, RN03 | Cadastro com CPF válido | Nome, telefone e CPF válido | 201; cliente encontrado na busca | Alta | I | Aprovado | ClienteIntegracaoTest#deveCadastrarClienteComCpfValidoEEncontrarNaBusca (2026-11-12) |
+| CT09 | RN03 | CPF com dígito verificador inválido | CPF 111.111.111-12 | 400 com erro no campo documento | Alta | U, I | Aprovado | CpfCnpjValidatorTest#deveRecusarDocumentoInvalido, ClienteIntegracaoTest#deveRecusarCpfComDigitoInvalidoCom400NoCampoDocumento (2026-11-12) |
+| CT10 | RN03 | CPF duplicado | Cadastrar duas vezes o mesmo CPF | 409; nenhum registro duplicado | Alta | I | Aprovado | ClienteIntegracaoTest#deveRecusarCpfDuplicadoCom409SemGravarDuplicado, ClienteServiceTest#deveConverterViolacaoDeUniqueDoBancoEmConflito (2026-11-12) |
 | CT11 | RN03 | CNPJ válido | Cliente com CNPJ válido | 201 | Média | U | Aprovado | CpfCnpjValidatorTest#deveAceitarCnpjValidoComOuSemMascara (2026-11-12) |
-| CT12 | HU03, RN02 | Placa no formato Mercosul | ABC1D23 | Aceita | Alta | U, I | Aprovado (U); I pendente | PlacaValidatorTest#deveAceitarPlacaMercosul (2026-11-12) |
+| CT12 | HU03, RN02 | Placa no formato Mercosul | ABC1D23 | Aceita | Alta | U, I | Aprovado | PlacaValidatorTest#deveAceitarPlacaMercosul, VeiculoIntegracaoTest#deveCadastrarPlacaMercosulNormalizada (2026-11-12) |
 | CT13 | RN02 | Placa no formato antigo | ABC1234 | Aceita | Alta | U | Aprovado | PlacaValidatorTest#deveAceitarPlacaNoFormatoAntigo (2026-11-12) |
-| CT14 | RN02 | Placa inválida | AB-1234, ABCD123 | 400 com erro no campo placa | Alta | U, I | Aprovado (U); I pendente | PlacaValidatorTest#deveRecusarPlacaInvalida (2026-11-12) |
+| CT14 | RN02 | Placa inválida | AB-1234, ABCD123 | 400 com erro no campo placa | Alta | U, I | Aprovado | PlacaValidatorTest#deveRecusarPlacaInvalida, VeiculoIntegracaoTest#deveRecusarPlacaInvalidaCom400NoCampoPlaca (2026-11-12) |
 | CT15 | RN02 | Normalização da placa | abc-1d23 | Gravada como ABC1D23 | Média | U | Aprovado | PlacaValidatorTest#deveNormalizarParaMaiusculasSemHifenEEspacos (2026-11-12) |
-| CT16 | RN02 | Placa duplicada | Cadastrar a mesma placa duas vezes | 409 | Alta | I | Não executado | |
-| CT17 | HU03 | Busca por placa | GET /api/veiculos?placa=ABC1D23 | 200 com veículo e dono; placa inexistente → 404 | Alta | I | Não executado | |
-| CT18 | RN01 | Veículo sem cliente | POST de veículo para cliente inexistente | 404; nada gravado | Média | I | Não executado | |
+| CT16 | RN02 | Placa duplicada | Cadastrar a mesma placa duas vezes | 409 | Alta | I | Aprovado | VeiculoIntegracaoTest#deveRecusarPlacaDuplicadaCom409, ClienteServiceTest#deveConverterViolacaoDeUniqueDaPlacaEmConflito (2026-11-12) |
+| CT17 | HU03 | Busca por placa | GET /api/veiculos?placa=ABC1D23 | 200 com veículo e dono; placa inexistente → 404 | Alta | I | Aprovado | VeiculoIntegracaoTest#deveBuscarVeiculoPorPlacaComDadosDoDono, #deveDevolver404ParaPlacaInexistente (2026-11-12) |
+| CT18 | RN01 | Veículo sem cliente | POST de veículo para cliente inexistente | 404; nada gravado | Média | I | Aprovado | VeiculoIntegracaoTest#deveDevolver404AoCadastrarVeiculoParaClienteInexistenteSemGravarNada (2026-11-12) |
 
 ### 5.3 Catálogo e orçamento (HU05)
 
@@ -148,6 +148,7 @@ Cada execução registrada com data, comando, resultado e commit testado.
 | 2026-11-12 | feature/00-ambiente | `npm run build && npm test -- --watch=false --browsers=ChromeHeadless` (web) | 3 | 0 | Build ok; Karma em ChromeHeadless. |
 | 2026-11-12 | feature/01-base-compartilhada | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 70 | 0 | Validadores CPF/CNPJ e placa, handler de erros (500 sem stack trace). |
 | 2026-11-12 | feature/02-autenticacao | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 101 | 0 | 1 falha intermediária por teste mal escrito (token com caractere extra é aceito pelo decodificador base64; trocado por payload adulterado). Subida manual: sem JWT_SECRET a API recusa subir; admin inicial criado; login 200/401. |
+| 2026-11-12 | feature/03-clientes-veiculos | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 126 | 0 | Clientes e veículos; ddl-auto validate ok com CHAR(7) e SMALLINT. |
 
 ## 7. Defeitos
 
