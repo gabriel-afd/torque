@@ -10,6 +10,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -35,6 +36,8 @@ public class TratadorDeErros {
     public static final String MENSAGEM_VALIDACAO = "Dados inválidos. Verifique os campos informados.";
     public static final String MENSAGEM_NAO_AUTENTICADO = "Autenticação necessária.";
     public static final String MENSAGEM_SEM_PERMISSAO = "Você não tem permissão para esta operação.";
+    public static final String MENSAGEM_VERSAO_DESATUALIZADA =
+            "Este registro foi alterado por outro usuário. Recarregue a página e tente novamente.";
     public static final String MENSAGEM_ERRO_INTERNO = "Erro interno. Tente novamente mais tarde.";
 
     public static ErroResponse corpo(HttpStatus status, String mensagem, Map<String, String> campos) {
@@ -146,6 +149,12 @@ public class TratadorDeErros {
     @ExceptionHandler(ConflitoException.class)
     ResponseEntity<ErroResponse> conflito(ConflitoException ex) {
         return resposta(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    /** Bloqueio otimista ({@code @Version}): outra transação alterou o registro antes. */
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    ResponseEntity<ErroResponse> versaoDesatualizada(OptimisticLockingFailureException ex) {
+        return resposta(HttpStatus.CONFLICT, MENSAGEM_VERSAO_DESATUALIZADA);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

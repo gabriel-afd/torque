@@ -19,6 +19,7 @@ import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -51,6 +52,7 @@ class TratadorDeErrosTest {
                 case "nao-encontrado" -> throw new RecursoNaoEncontradoException("Cliente não encontrado: 42");
                 case "conflito" -> throw new ConflitoException("Documento já cadastrado");
                 case "integridade" -> throw new DataIntegrityViolationException("uk_cliente_documento");
+                case "versao" -> throw new ObjectOptimisticLockingFailureException("OrdemServico", 1L);
                 case "regra" -> throw new RegraDeNegocioException("Desconto acima do permitido");
                 default -> throw new IllegalStateException("detalhe interno: senha=segredo123 em TabelaSecreta");
             }
@@ -141,6 +143,13 @@ class TratadorDeErrosTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(content().string(not(containsString("uk_cliente_documento"))));
+    }
+
+    @Test
+    void deveDevolver409ParaConflitoDeVersaoPedindoRecarga() throws Exception {
+        mvc.perform(get("/teste/versao"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.mensagem").value(containsString("Recarregue")));
     }
 
     @Test
