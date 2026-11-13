@@ -50,13 +50,13 @@ Status: Não executado · Aprovado · Reprovado · Bloqueado.
 
 | ID | Origem | Cenário | Entrada / passos | Resultado esperado | Prioridade | Nível | Status | Evidência |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| CT01 | HU01 | Login com credenciais válidas | POST /api/auth/login com e-mail e senha corretos | 200 com token JWT contendo o perfil | Alta | I | Não executado | |
-| CT02 | HU01 | Senha incorreta | POST /api/auth/login com senha errada | 401 com mensagem "E-mail ou senha inválidos" | Alta | I | Não executado | |
-| CT03 | HU01 | E-mail inexistente | POST /api/auth/login com e-mail não cadastrado | 401 com a mesma mensagem do CT02 | Alta | I | Não executado | |
-| CT04 | HU01 | Usuário inativo | Login de usuário com ativo = false | 401 | Média | I | Não executado | |
-| CT05 | RNF04 | Requisição sem token | GET /api/clientes sem Authorization | 401 | Alta | I | Não executado | |
-| CT06 | RNF04 | Mecânico em rota de administrador | GET /api/usuarios com token de MECANICO | 403 | Alta | I | Não executado | |
-| CT07 | RNF03 | Senha protegida | Cadastrar usuário e consultar banco e resposta | Senha gravada com hash BCrypt; nunca retornada pela API | Alta | I | Não executado | |
+| CT01 | HU01 | Login com credenciais válidas | POST /api/auth/login com e-mail e senha corretos | 200 com token JWT contendo o perfil | Alta | I | Aprovado | AuthIntegracaoTest#deveAutenticarComCredenciaisValidasEDevolverTokenComPerfil (2026-11-12) |
+| CT02 | HU01 | Senha incorreta | POST /api/auth/login com senha errada | 401 com mensagem "E-mail ou senha inválidos" | Alta | I | Aprovado | AuthIntegracaoTest#deveRecusarSenhaIncorretaCom401 (2026-11-12) |
+| CT03 | HU01 | E-mail inexistente | POST /api/auth/login com e-mail não cadastrado | 401 com a mesma mensagem do CT02 | Alta | I | Aprovado | AuthIntegracaoTest#deveRecusarEmailInexistenteComAMesmaMensagem (2026-11-12) |
+| CT04 | HU01 | Usuário inativo | Login de usuário com ativo = false | 401 | Média | I | Aprovado | AuthIntegracaoTest#deveRecusarUsuarioInativoComAMesmaMensagem (2026-11-12) |
+| CT05 | RNF04 | Requisição sem token | GET /api/clientes sem Authorization | 401 | Alta | I | Aprovado | AuthIntegracaoTest#deveExigirTokenNasRotasProtegidas (2026-11-12) |
+| CT06 | RNF04 | Mecânico em rota de administrador | GET /api/usuarios com token de MECANICO | 403 | Alta | I | Aprovado | UsuarioIntegracaoTest#deveRecusarMecanicoNaRotaDeUsuariosCom403 (2026-11-12) |
+| CT07 | RNF03 | Senha protegida | Cadastrar usuário e consultar banco e resposta | Senha gravada com hash BCrypt; nunca retornada pela API | Alta | I | Aprovado | UsuarioIntegracaoTest#deveGravarSenhaComBcryptENuncaDevolverASenha (2026-11-12) |
 
 ### 5.2 Clientes e veículos (HU02, HU03)
 
@@ -147,6 +147,7 @@ Cada execução registrada com data, comando, resultado e commit testado.
 | 2026-11-12 | feature/00-ambiente | `./mvnw -B verify` (api) | 1 | 0 | Contexto sobe e Flyway aplica V1. Docker indisponível na máquina (WSL2 sem "Plataforma de Máquina Virtual"); executado com `TORQUE_TEST_DB_URL` em PostgreSQL 17 local descartável. CI bloqueado no GitHub (cobrança da conta). |
 | 2026-11-12 | feature/00-ambiente | `npm run build && npm test -- --watch=false --browsers=ChromeHeadless` (web) | 3 | 0 | Build ok; Karma em ChromeHeadless. |
 | 2026-11-12 | feature/01-base-compartilhada | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 70 | 0 | Validadores CPF/CNPJ e placa, handler de erros (500 sem stack trace). |
+| 2026-11-12 | feature/02-autenticacao | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 101 | 0 | 1 falha intermediária por teste mal escrito (token com caractere extra é aceito pelo decodificador base64; trocado por payload adulterado). Subida manual: sem JWT_SECRET a API recusa subir; admin inicial criado; login 200/401. |
 
 ## 7. Defeitos
 
@@ -154,7 +155,8 @@ Defeitos encontrados durante o desenvolvimento e os testes, com causa e correç�
 
 | ID | Data | Caso | Descrição do defeito | Severidade | Causa | Correção (commit) | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| | | | | | | | |
+| D01 | 2026-11-12 | CT57 | Swagger UI inacessível: /api/docs redireciona para /api/swagger-ui/index.html, que respondia 401 | Baixa | Rota /api/swagger-ui/** fora da lista pública do SecurityFilterChain (encontrado no teste manual de subida) | Rota liberada + teste AuthIntegracaoTest#deveDeixarDocumentacaoDaApiPublica (7598265) | Corrigido |
+| D02 | 2026-11-12 | CT57 | Senha de usuário padrão gerada pelo Spring impressa no log na subida | Média | UserDetailsServiceAutoConfiguration ativa por não haver UserDetailsService próprio (encontrado no teste manual de subida) | Autoconfiguração excluída no application.yml (7598265) | Corrigido |
 
 ## 8. Resumo final
 
