@@ -149,6 +149,7 @@ Cada execução registrada com data, comando, resultado e commit testado.
 | 2026-11-12 | feature/01-base-compartilhada | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 70 | 0 | Validadores CPF/CNPJ e placa, handler de erros (500 sem stack trace). |
 | 2026-11-12 | feature/02-autenticacao | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 101 | 0 | 1 falha intermediária por teste mal escrito (token com caractere extra é aceito pelo decodificador base64; trocado por payload adulterado). Subida manual: sem JWT_SECRET a API recusa subir; admin inicial criado; login 200/401. |
 | 2026-11-12 | feature/03-clientes-veiculos | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 126 | 0 | Clientes e veículos; ddl-auto validate ok com CHAR(7) e SMALLINT. |
+| 2026-11-12 | feature/04-catalogo | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 141 | 0 | Catálogo: CRUD, 403 para atendente, código duplicado 409, preço negativo 400, inativos só para admin. Sem CT específico no plano (item 6 do backlog). |
 
 ## 7. Defeitos
 
