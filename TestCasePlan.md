@@ -80,40 +80,40 @@ Status: Não executado · Aprovado · Reprovado · Bloqueado.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | CT19 | RN04 | Cálculo do total | 1 serviço de R$ 120,00 + 2 peças de R$ 35,00 | Total R$ 190,00 | Alta | U | Aprovado | OrcamentoTest#deveCalcularTotalComoServicosMaisQuantidadeVezesPrecoDasPecas (2026-11-12) |
 | CT20 | RN04 | Total com desconto | Itens somando R$ 390,00, desconto R$ 19,50 | Total R$ 370,50 | Alta | U | Aprovado | OrcamentoTest#deveSubtrairDescontoDoTotal (2026-11-12) |
-| CT21 | RN05 | Desconto acima de 10% por atendente | Desconto de 15% com perfil ATENDENTE | 422; orçamento inalterado | Alta | U, I | Aprovado (U); I pendente | OrcamentoTest#deveRecusarDescontoAcimaDeDezPorCentoParaAtendenteSemAlterarOrcamento (2026-11-12) |
+| CT21 | RN05 | Desconto acima de 10% por atendente | Desconto de 15% com perfil ATENDENTE | 422; orçamento inalterado | Alta | U, I | Aprovado | OrcamentoTest#deveRecusarDescontoAcimaDeDezPorCentoParaAtendenteSemAlterarOrcamento, OrdemServicoIntegracaoTest#deveRecusarDescontoAcimaDeDezPorCentoParaAtendenteCom422SemAlterarOrcamento (2026-11-12) |
 | CT22 | RN05 | Desconto de exatamente 10% por atendente | Desconto de 10% | Aceito (valor de borda) | Alta | U | Aprovado | OrcamentoTest#deveAceitarDescontoDeExatamenteDezPorCentoParaAtendente (2026-11-12) |
 | CT23 | RN05 | Desconto acima de 10% por administrador | Desconto de 15% com perfil ADMINISTRADOR | Aceito | Média | U | Aprovado | OrcamentoTest#deveAceitarDescontoAcimaDeDezPorCentoParaAdministrador (2026-11-12) |
-| CT24 | RN10 | Preço congelado no item | Alterar preço no catálogo depois de incluir o item | Item e total da OS mantêm o valor original | Alta | I | Não executado | |
-| CT25 | — | Quantidade inválida de peça | Quantidade 0 ou negativa | 400 | Média | I | Não executado | |
+| CT24 | RN10 | Preço congelado no item | Alterar preço no catálogo depois de incluir o item | Item e total da OS mantêm o valor original | Alta | I | Aprovado | OrdemServicoIntegracaoTest#deveManterPrecoDoItemAoAlterarCatalogoDepois (2026-11-12) |
+| CT25 | — | Quantidade inválida de peça | Quantidade 0 ou negativa | 400 | Média | I | Aprovado | OrdemServicoIntegracaoTest#deveRecusarQuantidadeDePecaZeroOuNegativaCom400 (2026-11-12) |
 | CT26 | — | Item inativo no catálogo | Incluir serviço ou peça inativa | 422 | Baixa | U | Aprovado | OrcamentoTest#deveRecusarServicoInativoDoCatalogo, #deveRecusarPecaInativaDoCatalogo (2026-11-12) |
 
 ### 5.4 Ordem de serviço e fluxo de status (HU04, HU06, HU07)
 
 | ID | Origem | Cenário | Entrada / passos | Resultado esperado | Prioridade | Nível | Status | Evidência |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| CT27 | HU04 | Abrir OS | Veículo existente, problema e quilometragem | 201; status ABERTA; número sequencial; histórico gravado | Alta | I | Não executado | |
-| CT28 | HU04 | OS para veículo inexistente | veiculoId inválido | 404 | Média | I | Não executado | |
-| CT29 | HU06 | Aprovar orçamento pendente | POST .../aprovacao | OS APROVADA; orçamento APROVADO com data e usuário | Alta | U, I | Aprovado (U); I pendente | OrdemServicoTest#deveAprovarOrcamentoPendenteRegistrandoDataEUsuario (2026-11-12) |
+| CT27 | HU04 | Abrir OS | Veículo existente, problema e quilometragem | 201; status ABERTA; número sequencial; histórico gravado | Alta | I | Aprovado | OrdemServicoIntegracaoTest#deveAbrirOsComNumeroSequencialStatusAbertaEHistorico (2026-11-12) |
+| CT28 | HU04 | OS para veículo inexistente | veiculoId inválido | 404 | Média | I | Aprovado | OrdemServicoIntegracaoTest#deveDevolver404AoAbrirOsParaVeiculoInexistente (2026-11-12) |
+| CT29 | HU06 | Aprovar orçamento pendente | POST .../aprovacao | OS APROVADA; orçamento APROVADO com data e usuário | Alta | U, I | Aprovado | OrdemServicoTest#deveAprovarOrcamentoPendenteRegistrandoDataEUsuario, OrdemServicoIntegracaoTest#deveAprovarOrcamentoRegistrandoDataEUsuario (2026-11-12) |
 | CT30 | RN07 | Aprovar orçamento já aprovado | Aprovar duas vezes | 422 na segunda chamada | Alta | U | Aprovado | OrdemServicoTest#deveRecusarSegundaAprovacaoDoMesmoOrcamento (2026-11-12) |
-| CT31 | HU06 | Recusar orçamento | POST .../recusa | OS RECUSADA | Alta | U, I | Aprovado (U); I pendente | OrdemServicoTest#deveRecusarOrcamentoEFinalizarOsComoRecusada (2026-11-12) |
-| CT32 | RN07 | Alterar orçamento aprovado | Incluir item em OS APROVADA | Nova versão PENDENTE; anterior SUBSTITUIDO; OS volta a AGUARDANDO_APROVACAO | Alta | U, I | Aprovado (U); I pendente | OrdemServicoTest#deveCriarNovaVersaoAoAlterarOrcamentoAprovado (2026-11-12) |
+| CT31 | HU06 | Recusar orçamento | POST .../recusa | OS RECUSADA | Alta | U, I | Aprovado | OrdemServicoTest#deveRecusarOrcamentoEFinalizarOsComoRecusada, OrdemServicoIntegracaoTest#deveRecusarOrcamentoEFinalizarOs (2026-11-12) |
+| CT32 | RN07 | Alterar orçamento aprovado | Incluir item em OS APROVADA | Nova versão PENDENTE; anterior SUBSTITUIDO; OS volta a AGUARDANDO_APROVACAO | Alta | U, I | Aprovado | OrdemServicoTest#deveCriarNovaVersaoAoAlterarOrcamentoAprovado, OrdemServicoIntegracaoTest#deveCriarNovaVersaoAoAlterarOrcamentoAprovado (2026-11-12) |
 | CT33 | RN06 | Iniciar execução sem aprovação | ABERTA → EM_EXECUCAO | 422 | Alta | U | Aprovado | OrdemServicoTest#deveRecusarInicioDeExecucaoSemOrcamentoAprovado, TransicoesStatusTest#deveRecusarTransicaoForaDaTabelaComRegraDeNegocio[ABERTA -> EM_EXECUCAO] (2026-11-12) |
 | CT34 | Seção 2.5 | Todas as transições permitidas | Teste parametrizado com cada linha da tabela de transições | Todas aceitas | Alta | U | Aprovado | TransicoesStatusTest#deveAceitarTodaTransicaoDaTabela (16 casos gerados da tabela) (2026-11-12) |
 | CT35 | Seção 2.5 | Transições não permitidas | Teste parametrizado com pares fora da tabela | Todas recusadas com 422 | Alta | U | Aprovado | TransicoesStatusTest#deveRecusarTransicaoForaDaTabelaComRegraDeNegocio (65 pares fora da tabela) (2026-11-12) |
 | CT36 | RN08 | Mudar status de OS final | ENTREGUE, RECUSADA ou CANCELADA → qualquer status | 422 | Alta | U | Aprovado | OrdemServicoTest#deveRecusarQualquerMudancaDeOsEntregue, #deveRecusarQualquerMudancaDeOsRecusadaOuCancelada (2026-11-12) |
 | CT37 | HU07 | Peça em falta | EM_EXECUCAO → AGUARDANDO_PECA → EM_EXECUCAO | Ambas aceitas | Média | U | Aprovado | OrdemServicoTest#deveIrEVoltarDeAguardandoPeca (2026-11-12) |
-| CT38 | RN09 | Mecânico atribuído inicia serviço | Token do mecânico atribuído | 200; OS EM_EXECUCAO | Alta | I | Não executado | |
-| CT39 | RN09 | Mecânico não atribuído | Token de outro mecânico | 403; status inalterado | Alta | I | Não executado | |
-| CT40 | — | Histórico de status | Executar 3 transições | 3 registros em historico_status com usuário, data, de/para | Alta | I | Não executado | |
-| CT41 | — | Edição concorrente | Duas atualizações com a mesma versão da OS | A segunda recebe 409 | Média | I | Não executado | |
+| CT38 | RN09 | Mecânico atribuído inicia serviço | Token do mecânico atribuído | 200; OS EM_EXECUCAO | Alta | I | Aprovado | OrdemServicoIntegracaoTest#deveDeixarMecanicoAtribuidoIniciarServico (2026-11-12) |
+| CT39 | RN09 | Mecânico não atribuído | Token de outro mecânico | 403; status inalterado | Alta | I | Aprovado | OrdemServicoIntegracaoTest#deveRecusarMecanicoNaoAtribuidoCom403SemAlterarStatus (2026-11-12) |
+| CT40 | — | Histórico de status | Executar 3 transições | 3 registros em historico_status com usuário, data, de/para | Alta | I | Aprovado | OrdemServicoIntegracaoTest#deveGravarHistoricoDeCadaTransicao (2026-11-12) |
+| CT41 | — | Edição concorrente | Duas atualizações com a mesma versão da OS | A segunda recebe 409 | Média | I | Aprovado | OrdemServicoIntegracaoTest#deveRecusarSegundaAtualizacaoComAMesmaVersaoDaOsCom409, TratadorDeErrosTest#deveDevolver409ParaConflitoDeVersaoPedindoRecarga (2026-11-12) |
 
 ### 5.5 Consultas, compartilhamento e painel (HU06, HU08, HU09)
 
 | ID | Origem | Cenário | Entrada / passos | Resultado esperado | Prioridade | Nível | Status | Evidência |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| CT42 | HU08 | Quadro por status | GET /api/ordens?status=EM_EXECUCAO | Só OS no status pedido, paginadas | Alta | I | Não executado | |
-| CT43 | HU08 | Filtro por mecânico | GET /api/ordens?mecanico={id} | Só OS do mecânico | Média | I | Não executado | |
-| CT44 | HU09 | Histórico do veículo | Veículo com 3 OS | Lista da mais recente para a mais antiga, com data, km, serviços e valor | Alta | I | Não executado | |
+| CT42 | HU08 | Quadro por status | GET /api/ordens?status=EM_EXECUCAO | Só OS no status pedido, paginadas | Alta | I | Aprovado | OrdemServicoConsultaIntegracaoTest#deveFiltrarQuadroPorStatusComPaginacao (2026-11-12) |
+| CT43 | HU08 | Filtro por mecânico | GET /api/ordens?mecanico={id} | Só OS do mecânico | Média | I | Aprovado | OrdemServicoConsultaIntegracaoTest#deveFiltrarQuadroPorMecanico, #deveMostrarAoMecanicoSoAsPropriasOsMesmoPedindoOutro (2026-11-12) |
+| CT44 | HU09 | Histórico do veículo | Veículo com 3 OS | Lista da mais recente para a mais antiga, com data, km, serviços e valor | Alta | I | Aprovado | OrdemServicoConsultaIntegracaoTest#deveListarHistoricoDoVeiculoDaMaisRecenteParaAMaisAntiga (2026-11-12) |
 | CT45 | HU06 | PDF do orçamento | GET .../pdf | 200, application/pdf, com número da OS, placa e total | Média | I | Não executado | |
 | CT46 | HU06 | Link do WhatsApp | Gerar link de compartilhamento | URL wa.me com telefone do cliente e total | Média | U, F | Não executado | |
 | CT47 | RF16 | Painel do mês | OS abertas, concluídas e entregues no mês | Contagens corretas; faturamento = soma das OS entregues | Baixa | I | Não executado | |
@@ -151,6 +151,7 @@ Cada execução registrada com data, comando, resultado e commit testado.
 | 2026-11-12 | feature/03-clientes-veiculos | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 126 | 0 | Clientes e veículos; ddl-auto validate ok com CHAR(7) e SMALLINT. |
 | 2026-11-12 | feature/04-catalogo | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 141 | 0 | Catálogo: CRUD, 403 para atendente, código duplicado 409, preço negativo 400, inativos só para admin. Sem CT específico no plano (item 6 do backlog). |
 | 2026-11-12 | feature/05-dominio-os | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 295 | 0 | Domínio da OS: 152 testes unitários puros + 1 de mapeamento JPA. JaCoCo pacote ordens: 94,8% linhas, 81,0% ramos. |
+| 2026-11-12 | feature/06-api-os | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 337 | 1 → 0 | 1 falha por defeito de código (D03, corrigido em 266bc7a); 4 falhas intermediárias por testes mal escritos (leitura da resposta em ISO-8859-1 e termo de busca errado). N+1 conferido no log SQL e por teste com Hibernate Statistics. JaCoCo ordens: 97,0% linhas / 84,7% ramos. |
 
 ## 7. Defeitos
 
@@ -160,6 +161,7 @@ Defeitos encontrados durante o desenvolvimento e os testes, com causa e correç�
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | D01 | 2026-11-12 | CT57 | Swagger UI inacessível: /api/docs redireciona para /api/swagger-ui/index.html, que respondia 401 | Baixa | Rota /api/swagger-ui/** fora da lista pública do SecurityFilterChain (encontrado no teste manual de subida) | Rota liberada + teste AuthIntegracaoTest#deveDeixarDocumentacaoDaApiPublica (7598265) | Corrigido |
 | D02 | 2026-11-12 | CT57 | Senha de usuário padrão gerada pelo Spring impressa no log na subida | Média | UserDetailsServiceAutoConfiguration ativa por não haver UserDetailsService próprio (encontrado no teste manual de subida) | Autoconfiguração excluída no application.yml (7598265) | Corrigido |
+| D03 | 2026-11-12 | CT32 | Orcamento.alterar lança NullPointerException (500) quando há item sem id e os conjuntos de itens mantidos são imutáveis (Set.of/Map.of) | Média | Consulta contains/containsKey com a chave nula do item; coleções imutáveis do Java recusam null (teste OrdemServicoTest#naoDeveCriarNovaVersaoQuandoAlteracaoDoOrcamentoAprovadoEhInvalida) | Tratamento da chave nula com `mantido`/`mantida` em Orcamento + teste de regressão (266bc7a) | Corrigido |
 
 ## 8. Resumo final
 
@@ -172,4 +174,4 @@ Preenchido ao fim da Macro Entrega 3.
 | Aprovados | |
 | Reprovados / bloqueados | |
 | Defeitos encontrados / corrigidos | |
-| Cobertura do pacote `ordens` (JaCoCo) | 94,8% linhas / 81,0% ramos (parcial, feature/05, 2026-11-12) |
+| Cobertura do pacote `ordens` (JaCoCo) | 97,0% linhas / 84,7% ramos (parcial, feature/06, 2026-11-12) |
