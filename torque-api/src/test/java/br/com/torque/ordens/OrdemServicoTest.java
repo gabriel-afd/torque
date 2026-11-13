@@ -199,6 +199,21 @@ class OrdemServicoTest {
     }
 
     @Test
+    void naoDeveCriarNovaVersaoQuandoAlteracaoDoOrcamentoAprovadoEhInvalida() {
+        OrdemServico os = osAguardandoAprovacao();
+        os.aprovarOrcamento(1, atendente);
+        var alteracaoInvalida = new Orcamento.Alteracao(java.util.Set.of(), java.util.Map.of(),
+                java.util.List.of(servico("Alinhamento", "60.00")), java.util.List.of(), new BigDecimal("30.00"));
+
+        assertThatThrownBy(() -> os.alterarOrcamento(1, alteracaoInvalida, atendente))
+                .isInstanceOf(RegraDeNegocioException.class);
+
+        assertThat(os.getOrcamentos()).hasSize(1);
+        assertThat(os.getOrcamento(1).getSituacao()).isEqualTo(SituacaoOrcamento.APROVADO);
+        assertThat(os.getStatus()).isEqualTo(StatusOS.APROVADA);
+    }
+
+    @Test
     void deveRecusarAlteracaoPorVersaoQueNaoEhMaisAVigente() {
         OrdemServico os = osAguardandoAprovacao();
         os.aprovarOrcamento(1, atendente);

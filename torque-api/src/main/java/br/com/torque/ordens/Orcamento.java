@@ -175,12 +175,12 @@ public class Orcamento {
 
         BigDecimal subtotalFinal = Dinheiro.ZERO;
         for (OrcamentoItemServico item : itensServico) {
-            if (alteracao.servicosMantidos().contains(item.chave())) {
+            if (mantido(item, alteracao)) {
                 subtotalFinal = subtotalFinal.add(item.getPreco());
             }
         }
         for (OrcamentoItemPeca item : itensPeca) {
-            Integer quantidade = alteracao.pecasMantidas().get(item.chave());
+            Integer quantidade = item.chave() == null ? null : alteracao.pecasMantidas().get(item.chave());
             if (quantidade != null) {
                 exigirQuantidadePositiva(quantidade);
                 subtotalFinal = subtotalFinal.add(item.getPrecoUnitario().multiply(BigDecimal.valueOf(quantidade)));
@@ -198,8 +198,8 @@ public class Orcamento {
         BigDecimal novoDesconto = validarDesconto(alteracao.desconto(), Dinheiro.de(subtotalFinal), usuario);
 
         // Validado: aplica.
-        itensServico.removeIf(item -> !alteracao.servicosMantidos().contains(item.chave()));
-        itensPeca.removeIf(item -> !alteracao.pecasMantidas().containsKey(item.chave()));
+        itensServico.removeIf(item -> !mantido(item, alteracao));
+        itensPeca.removeIf(item -> !mantida(item, alteracao));
         itensPeca.forEach(item -> item.alterarQuantidade(alteracao.pecasMantidas().get(item.chave())));
         alteracao.servicosNovos().forEach(s ->
                 itensServico.add(new OrcamentoItemServico(this, s, s.getDescricao(), s.getPrecoMaoDeObra())));
@@ -207,6 +207,15 @@ public class Orcamento {
                 new OrcamentoItemPeca(this, n.peca(), n.peca().getDescricao(), n.quantidade(), n.peca().getPrecoVenda())));
         this.desconto = novoDesconto;
         recalcularTotal();
+    }
+
+    /** Item sem chave (nunca gravado) não pode ter sido referenciado: sai. Evita null em coleções imutáveis. */
+    private static boolean mantido(OrcamentoItemServico item, Alteracao alteracao) {
+        return item.chave() != null && alteracao.servicosMantidos().contains(item.chave());
+    }
+
+    private static boolean mantida(OrcamentoItemPeca item, Alteracao alteracao) {
+        return item.chave() != null && alteracao.pecasMantidas().containsKey(item.chave());
     }
 
     private void validarIdsExistentes(Alteracao alteracao) {
