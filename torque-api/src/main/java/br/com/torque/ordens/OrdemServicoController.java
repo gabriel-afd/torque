@@ -69,8 +69,8 @@ public class OrdemServicoController {
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "OS com orçamento vigente e histórico")
-    public OrdemServicoResponse detalhar(@PathVariable Long id) {
-        return service.detalhar(id);
+    public OrdemServicoResponse detalhar(@PathVariable Long id, @AuthenticationPrincipal UsuarioAutenticado usuario) {
+        return service.detalhar(id, usuario);
     }
 
     @PutMapping("/{id}/orcamentos/{versao}")

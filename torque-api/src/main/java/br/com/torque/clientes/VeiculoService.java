@@ -1,5 +1,7 @@
 package br.com.torque.clientes;
 
+import br.com.torque.auth.Perfil;
+import br.com.torque.auth.UsuarioAutenticado;
 import br.com.torque.clientes.dto.VeiculoComDonoResponse;
 import br.com.torque.clientes.dto.VeiculoRequest;
 import br.com.torque.clientes.dto.VeiculoResponse;
@@ -22,10 +24,11 @@ public class VeiculoService {
     }
 
     @Transactional(readOnly = true)
-    public VeiculoComDonoResponse buscarPorPlaca(String placa) {
+    public VeiculoComDonoResponse buscarPorPlaca(String placa, UsuarioAutenticado usuario) {
         String normalizada = PlacaUtil.normalizar(placa);
         return veiculos.buscarPorPlacaComDono(normalizada)
                 .map(VeiculoComDonoResponse::de)
+                .map(v -> usuario.perfil() == Perfil.MECANICO ? v.semDadosPessoais() : v)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Veículo não encontrado: " + normalizada));
     }
 

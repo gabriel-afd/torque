@@ -85,7 +85,7 @@ class VeiculoIntegracaoTest extends IntegracaoTestBase {
     void deveBuscarVeiculoPorPlacaComDadosDoDono() throws Exception {
         postVeiculo(clienteId, "ABC1D23").andExpect(status().isCreated());
 
-        mvc.perform(get("/api/veiculos?placa=ABC1D23").header(HttpHeaders.AUTHORIZATION, bearer(Perfil.MECANICO)))
+        mvc.perform(get("/api/veiculos?placa=ABC1D23").header(HttpHeaders.AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.placa").value("ABC1D23"))
                 .andExpect(jsonPath("$.modelo").value("Gol"))
@@ -93,8 +93,11 @@ class VeiculoIntegracaoTest extends IntegracaoTestBase {
                 .andExpect(jsonPath("$.dono.nome").value("Joana Fictícia"))
                 .andExpect(jsonPath("$.dono.telefone").value("83988887777"));
 
-        mvc.perform(get("/api/veiculos?placa=abc-1d23").header(HttpHeaders.AUTHORIZATION, token))
-                .andExpect(status().isOk());
+        // MECANICO também busca por placa, mas sem os dados pessoais do dono (auditoria A02)
+        mvc.perform(get("/api/veiculos?placa=abc-1d23").header(HttpHeaders.AUTHORIZATION, bearer(Perfil.MECANICO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dono.nome").value("Joana Fictícia"))
+                .andExpect(jsonPath("$.dono.telefone").doesNotExist());
     }
 
     @Test

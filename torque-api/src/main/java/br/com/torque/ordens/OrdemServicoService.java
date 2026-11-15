@@ -103,11 +103,13 @@ public class OrdemServicoService {
         });
     }
 
-    public OrdemServicoResponse detalhar(Long id) {
-        return leitura.execute(tx -> {
+    /** Detalhe da OS. MECANICO não recebe documento, telefone e e-mail do cliente. */
+    public OrdemServicoResponse detalhar(Long id, UsuarioAutenticado usuario) {
+        OrdemServicoResponse resposta = leitura.execute(tx -> {
             OrdemServico os = ordens.buscarDetalhe(id).orElseThrow(() -> naoEncontrada(id));
             return OrdemServicoResponse.de(os, ordens.historicoComUsuarios(id));
         });
+        return usuario.perfil() == Perfil.MECANICO ? resposta.semDadosPessoais() : resposta;
     }
 
     /** HU09: OS do veículo, da mais recente para a mais antiga. */
@@ -153,7 +155,7 @@ public class OrdemServicoService {
                     usuario(autenticado));
             return ordens.saveAndFlush(os).getId();
         });
-        return detalhar(id);
+        return detalhar(id, autenticado);
     }
 
     public OrdemServicoResponse alterarOrcamento(Long id, int versao, OrcamentoRequest request,
@@ -191,7 +193,7 @@ public class OrdemServicoService {
             }
             acao.accept(os, usuario(autenticado));
         });
-        return detalhar(id);
+        return detalhar(id, autenticado);
     }
 
     /** Converte o request em {@link Orcamento.Alteracao}, buscando no catálogo só os itens novos. */

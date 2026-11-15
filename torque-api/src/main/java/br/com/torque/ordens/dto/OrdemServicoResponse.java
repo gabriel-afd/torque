@@ -1,6 +1,7 @@
 package br.com.torque.ordens.dto;
 
 import br.com.torque.auth.Usuario;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import br.com.torque.clientes.Cliente;
 import br.com.torque.clientes.Veiculo;
 import br.com.torque.ordens.HistoricoStatus;
@@ -29,6 +30,8 @@ public record OrdemServicoResponse(Long id, Long numero, StatusOS status, Intege
     public record VeiculoResumo(Long id, String placa, String marca, String modelo, Integer ano, String cor) {
     }
 
+    /** Documento, telefone e e-mail ficam de fora (null) para o MECANICO. */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public record ClienteResumo(Long id, String nome, String documento, String telefone, String email) {
     }
 
@@ -70,6 +73,13 @@ public record OrdemServicoResponse(Long id, Long numero, StatusOS status, Intege
                         .map(o -> new VersaoOrcamento(o.getVersao(), o.getSituacao(), o.getTotal())).toList(),
                 historico.stream().map(h -> new HistoricoResponse(h.getStatusAnterior(), h.getStatusNovo(),
                         h.getUsuario().getId(), h.getUsuario().getNome(), h.getDataHora())).toList());
+    }
+
+    /** Cópia sem CPF/CNPJ, telefone e e-mail do cliente (minimização de dados para o MECANICO). */
+    public OrdemServicoResponse semDadosPessoais() {
+        return new OrdemServicoResponse(id, numero, status, version, problemaRelatado, quilometragem, dataAbertura,
+                dataEntrega, veiculo, new ClienteResumo(cliente.id(), cliente.nome(), null, null, null), mecanico,
+                orcamento, versoes, historico);
     }
 
     private static OrcamentoResponse orcamento(Orcamento o) {

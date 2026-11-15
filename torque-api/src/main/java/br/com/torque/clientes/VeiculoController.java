@@ -1,5 +1,7 @@
 package br.com.torque.clientes;
 
+import br.com.torque.auth.UsuarioAutenticado;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import br.com.torque.clientes.dto.VeiculoComDonoResponse;
 import br.com.torque.clientes.dto.VeiculoRequest;
 import br.com.torque.clientes.dto.VeiculoResponse;
@@ -30,8 +32,9 @@ public class VeiculoController {
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Busca rápida por placa (aceita minúsculas e hífen); 404 se não existir")
-    public VeiculoComDonoResponse buscarPorPlaca(@RequestParam @NotBlank String placa) {
-        return service.buscarPorPlaca(placa);
+    public VeiculoComDonoResponse buscarPorPlaca(@RequestParam @NotBlank String placa,
+                                                 @AuthenticationPrincipal UsuarioAutenticado usuario) {
+        return service.buscarPorPlaca(placa, usuario);
     }
 
     @PutMapping("/{id}")
