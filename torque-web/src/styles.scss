@@ -1,1 +1,166 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+
+// Paletas do protótipo: azul-escuro #1F3A5F (navegação) e laranja #F28C28 (ação principal).
+$torque-azul: (
+  50: #e4e8ee,
+  100: #bcc6d4,
+  200: #8fa1b8,
+  300: #627b9b,
+  400: #415f85,
+  500: #1f3a5f,
+  600: #1b3457,
+  700: #172c4d,
+  800: #122543,
+  900: #0a1832,
+  A100: #6d9bff,
+  A200: #3a78ff,
+  A400: #0756ff,
+  A700: #004bec,
+  contrast: (
+    50: rgba(0, 0, 0, 0.87), 100: rgba(0, 0, 0, 0.87), 200: rgba(0, 0, 0, 0.87), 300: #fff, 400: #fff,
+    500: #fff, 600: #fff, 700: #fff, 800: #fff, 900: #fff,
+    A100: rgba(0, 0, 0, 0.87), A200: #fff, A400: #fff, A700: #fff,
+  ),
+);
+
+$torque-laranja: (
+  50: #fef1e5,
+  100: #fbdcbf,
+  200: #f9c694,
+  300: #f6af69,
+  400: #f49d48,
+  500: #f28c28,
+  600: #f08424,
+  700: #ee791e,
+  800: #ec6f18,
+  900: #e85c0f,
+  A100: #fff,
+  A200: #ffeadf,
+  A400: #ffc9ac,
+  A700: #ffb892,
+  contrast: (
+    50: rgba(0, 0, 0, 0.87), 100: rgba(0, 0, 0, 0.87), 200: rgba(0, 0, 0, 0.87), 300: rgba(0, 0, 0, 0.87),
+    400: rgba(0, 0, 0, 0.87), 500: #fff, 600: #fff, 700: #fff, 800: #fff, 900: #fff,
+    A100: rgba(0, 0, 0, 0.87), A200: rgba(0, 0, 0, 0.87), A400: rgba(0, 0, 0, 0.87), A700: rgba(0, 0, 0, 0.87),
+  ),
+);
+
+$tema: mat.m2-define-light-theme((
+  color: (
+    primary: mat.m2-define-palette($torque-azul, 500),
+    accent: mat.m2-define-palette($torque-laranja, 500),
+    warn: mat.m2-define-palette(mat.$m2-red-palette, 700),
+  ),
+  typography: mat.m2-define-typography-config($font-family: '"Inter", "Segoe UI", Roboto, Arial, sans-serif'),
+  density: 0,
+));
+
+@include mat.core();
+@include mat.all-component-themes($tema);
+
+:root {
+  --torque-azul: #1f3a5f;
+  --torque-laranja: #f28c28;
+  --torque-fundo: #f4f6f9;
+  --torque-texto: #1e2632;
+  --torque-texto-suave: #6b7787;
+  --torque-borda: #e1e6ed;
+  --torque-perigo: #b42318;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+  background: var(--torque-fundo);
+  color: var(--torque-texto);
+  font-size: 14px;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+// Componentes visuais do protótipo (base.css), reaproveitados pelas telas.
+.logo {
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ponto {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--torque-laranja);
+  display: inline-block;
+}
+
+.page-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  h1 {
+    font-size: 20px;
+  }
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--torque-borda);
+  border-radius: 10px;
+}
+
+.muted {
+  color: var(--torque-texto-suave);
+}
+
+// Placa em destaque (cartões do quadro, veículos, histórico).
+.placa {
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+// Ação principal sempre laranja, com cantos arredondados como no protótipo.
+.mat-mdc-unelevated-button.acao-principal:not(:disabled) {
+  background-color: var(--torque-laranja);
+  color: #fff;
+}
+
+.mdc-button {
+  border-radius: 8px !important;
+}
+
+.msg-erro {
+  --mdc-snackbar-container-color: #b42318;
+  --mat-snack-bar-button-color: #fff;
+}
+
+.msg-sucesso {
+  --mdc-snackbar-container-color: #1e7a34;
+  --mat-snack-bar-button-color: #fff;
+}
+
+.msg-aviso {
+  --mdc-snackbar-container-color: #1f3a5f;
+  --mat-snack-bar-button-color: #f9c694;
+}

@@ -1,0 +1,188 @@
+# Plano e Casos de Teste — Torque
+
+Sistema de ordens de serviço para oficinas mecânicas de pequeno porte.
+Projeto Integrador - EAD · Gabriel Medeiros de Mendonça · RA 2515050024
+
+## 1. Objetivo
+
+Verificar se o Torque atende às histórias de usuário (HU01–HU09), às regras de negócio (RN01–RN10) e aos requisitos não funcionais definidos na Macro Entrega 1, e registrar a execução dos testes, os defeitos encontrados e suas correções.
+
+## 2. Escopo
+
+| Dentro do escopo | Fora do escopo |
+| --- | --- |
+| Regras de domínio (status da OS, orçamento, desconto) | Emissão de nota fiscal e estoque (fora do MVP) |
+| API REST: autenticação, autorização, validações, códigos HTTP | Integração oficial com WhatsApp (o MVP gera link) |
+| Persistência no PostgreSQL e migrações Flyway | Testes de carga em escala de produção |
+| Frontend: autenticação, rotas protegidas, cálculo do orçamento | Compatibilidade com navegadores antigos |
+| Fluxo completo da OS (teste manual ponta a ponta) | |
+
+## 3. Estratégia
+
+| Nível | O que cobre | Ferramenta | Onde |
+| --- | --- | --- | --- |
+| Unitário de domínio | Máquina de estados, cálculo do orçamento, validadores | JUnit 5 | `torque-api/src/test/.../(modulo)` |
+| Unitário de serviço | Casos de uso com repositórios simulados | JUnit 5 + Mockito | idem |
+| Integração | Endpoints, segurança e banco real | Spring Boot Test + Testcontainers (PostgreSQL 16) | idem |
+| Frontend | Guard, interceptor, componentes e serviços | Jasmine + Karma | `torque-web/src/app/**/*.spec.ts` |
+| Manual (ponta a ponta) | Fluxo completo, responsividade e desempenho | Navegador + Swagger UI | roteiro na seção 5 |
+
+Os testes automatizados rodam localmente (`mvn -B verify`, `npm test`) e no GitHub Actions a cada push e pull request.
+
+## 4. Critérios
+
+**Entrada:** funcionalidade implementada na branch, código compilando, migrações aplicadas sem erro.
+
+**Aprovação de um caso:** o resultado obtido é igual ao esperado, sem erro não tratado no log.
+
+**Saída (pronto para entrega):**
+- 100% dos casos de prioridade **Alta** executados e aprovados.
+- Nenhum defeito de severidade **Alta** em aberto.
+- Pipeline de CI verde na `main`.
+- Cobertura de linhas do pacote `ordens` ≥ 80% (relatório JaCoCo).
+
+## 5. Casos de teste
+
+Legenda de nível: **U** unitário · **I** integração · **F** frontend · **M** manual.
+Status: Não executado · Aprovado · Reprovado · Bloqueado.
+
+### 5.1 Autenticação e autorização (HU01)
+
+| ID | Origem | Cenário | Entrada / passos | Resultado esperado | Prioridade | Nível | Status | Evidência |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| CT01 | HU01 | Login com credenciais válidas | POST /api/auth/login com e-mail e senha corretos | 200 com token JWT contendo o perfil | Alta | I | Aprovado | AuthIntegracaoTest#deveAutenticarComCredenciaisValidasEDevolverTokenComPerfil (2026-11-12) |
+| CT02 | HU01 | Senha incorreta | POST /api/auth/login com senha errada | 401 com mensagem "E-mail ou senha inválidos" | Alta | I | Aprovado | AuthIntegracaoTest#deveRecusarSenhaIncorretaCom401 (2026-11-12) |
+| CT03 | HU01 | E-mail inexistente | POST /api/auth/login com e-mail não cadastrado | 401 com a mesma mensagem do CT02 | Alta | I | Aprovado | AuthIntegracaoTest#deveRecusarEmailInexistenteComAMesmaMensagem (2026-11-12) |
+| CT04 | HU01 | Usuário inativo | Login de usuário com ativo = false | 401 | Média | I | Aprovado | AuthIntegracaoTest#deveRecusarUsuarioInativoComAMesmaMensagem (2026-11-12) |
+| CT05 | RNF04 | Requisição sem token | GET /api/clientes sem Authorization | 401 | Alta | I | Aprovado | AuthIntegracaoTest#deveExigirTokenNasRotasProtegidas (2026-11-12) |
+| CT06 | RNF04 | Mecânico em rota de administrador | GET /api/usuarios com token de MECANICO | 403 | Alta | I | Aprovado | UsuarioIntegracaoTest#deveRecusarMecanicoNaRotaDeUsuariosCom403 (2026-11-12) |
+| CT07 | RNF03 | Senha protegida | Cadastrar usuário e consultar banco e resposta | Senha gravada com hash BCrypt; nunca retornada pela API | Alta | I | Aprovado | UsuarioIntegracaoTest#deveGravarSenhaComBcryptENuncaDevolverASenha (2026-11-12) |
+
+### 5.2 Clientes e veículos (HU02, HU03)
+
+| ID | Origem | Cenário | Entrada / passos | Resultado esperado | Prioridade | Nível | Status | Evidência |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| CT08 | HU02, RN03 | Cadastro com CPF válido | Nome, telefone e CPF válido | 201; cliente encontrado na busca | Alta | I | Aprovado | ClienteIntegracaoTest#deveCadastrarClienteComCpfValidoEEncontrarNaBusca (2026-11-12) |
+| CT09 | RN03 | CPF com dígito verificador inválido | CPF 111.111.111-12 | 400 com erro no campo documento | Alta | U, I | Aprovado | CpfCnpjValidatorTest#deveRecusarDocumentoInvalido, ClienteIntegracaoTest#deveRecusarCpfComDigitoInvalidoCom400NoCampoDocumento (2026-11-12) |
+| CT10 | RN03 | CPF duplicado | Cadastrar duas vezes o mesmo CPF | 409; nenhum registro duplicado | Alta | I | Aprovado | ClienteIntegracaoTest#deveRecusarCpfDuplicadoCom409SemGravarDuplicado, ClienteServiceTest#deveConverterViolacaoDeUniqueDoBancoEmConflito (2026-11-12) |
+| CT11 | RN03 | CNPJ válido | Cliente com CNPJ válido | 201 | Média | U | Aprovado | CpfCnpjValidatorTest#deveAceitarCnpjValidoComOuSemMascara (2026-11-12) |
+| CT12 | HU03, RN02 | Placa no formato Mercosul | ABC1D23 | Aceita | Alta | U, I | Aprovado | PlacaValidatorTest#deveAceitarPlacaMercosul, VeiculoIntegracaoTest#deveCadastrarPlacaMercosulNormalizada (2026-11-12) |
+| CT13 | RN02 | Placa no formato antigo | ABC1234 | Aceita | Alta | U | Aprovado | PlacaValidatorTest#deveAceitarPlacaNoFormatoAntigo (2026-11-12) |
+| CT14 | RN02 | Placa inválida | AB-1234, ABCD123 | 400 com erro no campo placa | Alta | U, I | Aprovado | PlacaValidatorTest#deveRecusarPlacaInvalida, VeiculoIntegracaoTest#deveRecusarPlacaInvalidaCom400NoCampoPlaca (2026-11-12) |
+| CT15 | RN02 | Normalização da placa | abc-1d23 | Gravada como ABC1D23 | Média | U | Aprovado | PlacaValidatorTest#deveNormalizarParaMaiusculasSemHifenEEspacos (2026-11-12) |
+| CT16 | RN02 | Placa duplicada | Cadastrar a mesma placa duas vezes | 409 | Alta | I | Aprovado | VeiculoIntegracaoTest#deveRecusarPlacaDuplicadaCom409, ClienteServiceTest#deveConverterViolacaoDeUniqueDaPlacaEmConflito (2026-11-12) |
+| CT17 | HU03 | Busca por placa | GET /api/veiculos?placa=ABC1D23 | 200 com veículo e dono; placa inexistente → 404 | Alta | I | Aprovado | VeiculoIntegracaoTest#deveBuscarVeiculoPorPlacaComDadosDoDono, #deveDevolver404ParaPlacaInexistente (2026-11-12) |
+| CT18 | RN01 | Veículo sem cliente | POST de veículo para cliente inexistente | 404; nada gravado | Média | I | Aprovado | VeiculoIntegracaoTest#deveDevolver404AoCadastrarVeiculoParaClienteInexistenteSemGravarNada (2026-11-12) |
+
+### 5.3 Catálogo e orçamento (HU05)
+
+| ID | Origem | Cenário | Entrada / passos | Resultado esperado | Prioridade | Nível | Status | Evidência |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| CT19 | RN04 | Cálculo do total | 1 serviço de R$ 120,00 + 2 peças de R$ 35,00 | Total R$ 190,00 | Alta | U | Aprovado | OrcamentoTest#deveCalcularTotalComoServicosMaisQuantidadeVezesPrecoDasPecas (2026-11-12) |
+| CT20 | RN04 | Total com desconto | Itens somando R$ 390,00, desconto R$ 19,50 | Total R$ 370,50 | Alta | U | Aprovado | OrcamentoTest#deveSubtrairDescontoDoTotal (2026-11-12) |
+| CT21 | RN05 | Desconto acima de 10% por atendente | Desconto de 15% com perfil ATENDENTE | 422; orçamento inalterado | Alta | U, I | Aprovado | OrcamentoTest#deveRecusarDescontoAcimaDeDezPorCentoParaAtendenteSemAlterarOrcamento, OrdemServicoIntegracaoTest#deveRecusarDescontoAcimaDeDezPorCentoParaAtendenteCom422SemAlterarOrcamento (2026-11-12) |
+| CT22 | RN05 | Desconto de exatamente 10% por atendente | Desconto de 10% | Aceito (valor de borda) | Alta | U | Aprovado | OrcamentoTest#deveAceitarDescontoDeExatamenteDezPorCentoParaAtendente (2026-11-12) |
+| CT23 | RN05 | Desconto acima de 10% por administrador | Desconto de 15% com perfil ADMINISTRADOR | Aceito | Média | U | Aprovado | OrcamentoTest#deveAceitarDescontoAcimaDeDezPorCentoParaAdministrador (2026-11-12) |
+| CT24 | RN10 | Preço congelado no item | Alterar preço no catálogo depois de incluir o item | Item e total da OS mantêm o valor original | Alta | I | Aprovado | OrdemServicoIntegracaoTest#deveManterPrecoDoItemAoAlterarCatalogoDepois (2026-11-12) |
+| CT25 | — | Quantidade inválida de peça | Quantidade 0 ou negativa | 400 | Média | I | Aprovado | OrdemServicoIntegracaoTest#deveRecusarQuantidadeDePecaZeroOuNegativaCom400 (2026-11-12) |
+| CT26 | — | Item inativo no catálogo | Incluir serviço ou peça inativa | 422 | Baixa | U | Aprovado | OrcamentoTest#deveRecusarServicoInativoDoCatalogo, #deveRecusarPecaInativaDoCatalogo (2026-11-12) |
+
+### 5.4 Ordem de serviço e fluxo de status (HU04, HU06, HU07)
+
+| ID | Origem | Cenário | Entrada / passos | Resultado esperado | Prioridade | Nível | Status | Evidência |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| CT27 | HU04 | Abrir OS | Veículo existente, problema e quilometragem | 201; status ABERTA; número sequencial; histórico gravado | Alta | I | Aprovado | OrdemServicoIntegracaoTest#deveAbrirOsComNumeroSequencialStatusAbertaEHistorico (2026-11-12) |
+| CT28 | HU04 | OS para veículo inexistente | veiculoId inválido | 404 | Média | I | Aprovado | OrdemServicoIntegracaoTest#deveDevolver404AoAbrirOsParaVeiculoInexistente (2026-11-12) |
+| CT29 | HU06 | Aprovar orçamento pendente | POST .../aprovacao | OS APROVADA; orçamento APROVADO com data e usuário | Alta | U, I | Aprovado | OrdemServicoTest#deveAprovarOrcamentoPendenteRegistrandoDataEUsuario, OrdemServicoIntegracaoTest#deveAprovarOrcamentoRegistrandoDataEUsuario (2026-11-12) |
+| CT30 | RN07 | Aprovar orçamento já aprovado | Aprovar duas vezes | 422 na segunda chamada | Alta | U | Aprovado | OrdemServicoTest#deveRecusarSegundaAprovacaoDoMesmoOrcamento (2026-11-12) |
+| CT31 | HU06 | Recusar orçamento | POST .../recusa | OS RECUSADA | Alta | U, I | Aprovado | OrdemServicoTest#deveRecusarOrcamentoEFinalizarOsComoRecusada, OrdemServicoIntegracaoTest#deveRecusarOrcamentoEFinalizarOs (2026-11-12) |
+| CT32 | RN07 | Alterar orçamento aprovado | Incluir item em OS APROVADA | Nova versão PENDENTE; anterior SUBSTITUIDO; OS volta a AGUARDANDO_APROVACAO | Alta | U, I | Aprovado | OrdemServicoTest#deveCriarNovaVersaoAoAlterarOrcamentoAprovado, OrdemServicoIntegracaoTest#deveCriarNovaVersaoAoAlterarOrcamentoAprovado (2026-11-12) |
+| CT33 | RN06 | Iniciar execução sem aprovação | ABERTA → EM_EXECUCAO | 422 | Alta | U | Aprovado | OrdemServicoTest#deveRecusarInicioDeExecucaoSemOrcamentoAprovado, TransicoesStatusTest#deveRecusarTransicaoForaDaTabelaComRegraDeNegocio[ABERTA -> EM_EXECUCAO] (2026-11-12) |
+| CT34 | Seção 2.5 | Todas as transições permitidas | Teste parametrizado com cada linha da tabela de transições | Todas aceitas | Alta | U | Aprovado | TransicoesStatusTest#deveAceitarTodaTransicaoDaTabela (16 casos gerados da tabela) (2026-11-12) |
+| CT35 | Seção 2.5 | Transições não permitidas | Teste parametrizado com pares fora da tabela | Todas recusadas com 422 | Alta | U | Aprovado | TransicoesStatusTest#deveRecusarTransicaoForaDaTabelaComRegraDeNegocio (65 pares fora da tabela) (2026-11-12) |
+| CT36 | RN08 | Mudar status de OS final | ENTREGUE, RECUSADA ou CANCELADA → qualquer status | 422 | Alta | U | Aprovado | OrdemServicoTest#deveRecusarQualquerMudancaDeOsEntregue, #deveRecusarQualquerMudancaDeOsRecusadaOuCancelada (2026-11-12) |
+| CT37 | HU07 | Peça em falta | EM_EXECUCAO → AGUARDANDO_PECA → EM_EXECUCAO | Ambas aceitas | Média | U | Aprovado | OrdemServicoTest#deveIrEVoltarDeAguardandoPeca (2026-11-12) |
+| CT38 | RN09 | Mecânico atribuído inicia serviço | Token do mecânico atribuído | 200; OS EM_EXECUCAO | Alta | I | Aprovado | OrdemServicoIntegracaoTest#deveDeixarMecanicoAtribuidoIniciarServico (2026-11-12) |
+| CT39 | RN09 | Mecânico não atribuído | Token de outro mecânico | 403; status inalterado | Alta | I | Aprovado | OrdemServicoIntegracaoTest#deveRecusarMecanicoNaoAtribuidoCom403SemAlterarStatus (2026-11-12) |
+| CT40 | — | Histórico de status | Executar 3 transições | 3 registros em historico_status com usuário, data, de/para | Alta | I | Aprovado | OrdemServicoIntegracaoTest#deveGravarHistoricoDeCadaTransicao (2026-11-12) |
+| CT41 | — | Edição concorrente | Duas atualizações com a mesma versão da OS | A segunda recebe 409 | Média | I | Aprovado | OrdemServicoIntegracaoTest#deveRecusarSegundaAtualizacaoComAMesmaVersaoDaOsCom409, TratadorDeErrosTest#deveDevolver409ParaConflitoDeVersaoPedindoRecarga (2026-11-12) |
+
+### 5.5 Consultas, compartilhamento e painel (HU06, HU08, HU09)
+
+| ID | Origem | Cenário | Entrada / passos | Resultado esperado | Prioridade | Nível | Status | Evidência |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| CT42 | HU08 | Quadro por status | GET /api/ordens?status=EM_EXECUCAO | Só OS no status pedido, paginadas | Alta | I | Aprovado | OrdemServicoConsultaIntegracaoTest#deveFiltrarQuadroPorStatusComPaginacao (2026-11-12) |
+| CT43 | HU08 | Filtro por mecânico | GET /api/ordens?mecanico={id} | Só OS do mecânico | Média | I | Aprovado | OrdemServicoConsultaIntegracaoTest#deveFiltrarQuadroPorMecanico, #deveMostrarAoMecanicoSoAsPropriasOsMesmoPedindoOutro (2026-11-12) |
+| CT44 | HU09 | Histórico do veículo | Veículo com 3 OS | Lista da mais recente para a mais antiga, com data, km, serviços e valor | Alta | I | Aprovado | OrdemServicoConsultaIntegracaoTest#deveListarHistoricoDoVeiculoDaMaisRecenteParaAMaisAntiga (2026-11-12) |
+| CT45 | HU06 | PDF do orçamento | GET .../pdf | 200, application/pdf, com número da OS, placa e total | Média | I | Aprovado | OrcamentoDocumentosIntegracaoTest#deveGerarPdfDoOrcamentoComNumeroDaOsPlacaETotal, #deveNegarPdfAoMecanico, #deveResponder404ParaVersaoOuOsInexistente; OrcamentoPdfTest (2026-11-15) |
+| CT46 | HU06 | Link do WhatsApp | Gerar link de compartilhamento | URL wa.me com telefone do cliente e total | Média | U, F | Aprovado (U) | CompartilhamentoWhatsAppTest#deveGerarLinkWaMeComDdiDoBrasilETelefoneDoCliente, #deveIncluirResumoComNumeroDaOsVeiculoItensETotal, #deveCodificarTextoParaUrlSemEspacosNemCaracteresEspeciaisCrus; OrcamentoDocumentosIntegracaoTest#deveGerarLinkDoWhatsAppComTelefoneDoClienteETotal (2026-11-15). Parte F pendente (prompt 12) |
+| CT47 | RF16 | Painel do mês | OS abertas, concluídas e entregues no mês | Contagens corretas; faturamento = soma das OS entregues | Baixa | I | Aprovado | PainelMesIntegracaoTest#deveContarOsDoMesESomarFaturamentoDasEntregues, #deveConsiderarSoOMesPedido, #deveNegarPainelAAtendenteEMecanico (2026-11-15) |
+
+### 5.6 Frontend
+
+| ID | Origem | Cenário | Entrada / passos | Resultado esperado | Prioridade | Nível | Status | Evidência |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| CT48 | HU01 | Rota protegida sem login | Acessar /quadro sem token | Redireciona para /login | Alta | F | Aprovado | auth.guard.spec.ts "deve redirecionar para /login quem acessa /quadro sem token" (2026-11-15) |
+| CT49 | RNF04 | Interceptor de autenticação | Requisição HTTP com usuário logado | Cabeçalho Authorization: Bearer <token> | Alta | F | Aprovado | auth.interceptor.spec.ts "deve enviar Authorization: Bearer <token> nas chamadas à API com usuário logado" (2026-11-15) |
+| CT50 | HU01 | Token expirado | API responde 401 | Usuário volta ao login com aviso | Média | F | Aprovado | auth.interceptor.spec.ts "deve voltar ao login com aviso quando a API responder 401 (token expirado)"; auth.service.spec.ts "deve descartar sessão salva com token expirado" (2026-11-15) |
+| CT51 | HU05 | Resumo do orçamento na tela | Incluir e remover itens | Subtotais e total atualizados na hora | Média | F | Não executado | |
+| CT52 | HU08 | Menu por perfil | Logar como atendente | Itens Usuários, Catálogo e Painel não aparecem | Média | F | Aprovado | layout.component.spec.ts "não deve mostrar Usuários, Catálogo e Painel para ATENDENTE" (2026-11-15) |
+
+### 5.7 Testes manuais e não funcionais
+
+| ID | Origem | Cenário | Entrada / passos | Resultado esperado | Prioridade | Nível | Status | Evidência |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| CT53 | Todas as HUs | Fluxo completo | Login → cadastrar cliente e veículo → abrir OS → orçar → compartilhar → aprovar → atribuir → executar → aguardar peça → concluir → entregar | Todas as etapas sem erro; OS aparece no histórico do veículo | Alta | M | Não executado | |
+| CT54 | RNF01 | Uso no celular | Abrir login, quadro e histórico com largura de 360 px | Telas legíveis e utilizáveis, sem rolagem horizontal | Média | M | Não executado | |
+| CT55 | RNF02 | Abrir OS rapidamente | Contar telas até abrir OS de veículo cadastrado | No máximo 3 telas | Média | M | Não executado | |
+| CT56 | RNF05 | Desempenho da listagem | Banco com 10 mil OS; GET /api/ordens | Resposta em até 2 segundos | Média | M | Não executado | |
+| CT57 | RNF06 | Dados pessoais | Revisar respostas e logs da API | Sem senha, token ou dado desnecessário exposto | Alta | M | Não executado | |
+
+## 6. Execuções
+
+Cada execução registrada com data, comando, resultado e commit testado.
+
+| Data | Branch / commit | Comando | Testes | Falhas | Observação |
+| --- | --- | --- | --- | --- | --- |
+| 2026-11-12 | feature/00-ambiente | `./mvnw -B verify` (api) | 1 | 0 | Contexto sobe e Flyway aplica V1. Docker indisponível na máquina (WSL2 sem "Plataforma de Máquina Virtual"); executado com `TORQUE_TEST_DB_URL` em PostgreSQL 17 local descartável. CI bloqueado no GitHub (cobrança da conta). |
+| 2026-11-12 | feature/00-ambiente | `npm run build && npm test -- --watch=false --browsers=ChromeHeadless` (web) | 3 | 0 | Build ok; Karma em ChromeHeadless. |
+| 2026-11-12 | feature/01-base-compartilhada | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 70 | 0 | Validadores CPF/CNPJ e placa, handler de erros (500 sem stack trace). |
+| 2026-11-12 | feature/02-autenticacao | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 101 | 0 | 1 falha intermediária por teste mal escrito (token com caractere extra é aceito pelo decodificador base64; trocado por payload adulterado). Subida manual: sem JWT_SECRET a API recusa subir; admin inicial criado; login 200/401. |
+| 2026-11-12 | feature/03-clientes-veiculos | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 126 | 0 | Clientes e veículos; ddl-auto validate ok com CHAR(7) e SMALLINT. |
+| 2026-11-12 | feature/04-catalogo | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 141 | 0 | Catálogo: CRUD, 403 para atendente, código duplicado 409, preço negativo 400, inativos só para admin. Sem CT específico no plano (item 6 do backlog). |
+| 2026-11-12 | feature/05-dominio-os | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 295 | 0 | Domínio da OS: 152 testes unitários puros + 1 de mapeamento JPA. JaCoCo pacote ordens: 94,8% linhas, 81,0% ramos. |
+| 2026-11-12 | feature/06-api-os | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 337 | 1 → 0 | 1 falha por defeito de código (D03, corrigido em 266bc7a); 4 falhas intermediárias por testes mal escritos (leitura da resposta em ISO-8859-1 e termo de busca errado). N+1 conferido no log SQL e por teste com Hibernate Statistics. JaCoCo ordens: 97,0% linhas / 84,7% ramos. |
+| 2026-11-15 | feature/07-pdf-whatsapp-painel | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 362 | 0 | PDF (CT45), link do WhatsApp (CT46) e painel do mês (CT47). 1 falha intermediária por teste mal escrito (a extração de texto do PDF junta células vizinhas da tabela sem espaço). Nenhum defeito de código. JaCoCo ordens: 97,5% linhas / 86,7% ramos; relatorios: 100%. |
+| 2026-11-15 | feature/08-auditoria-backend | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 375 | 8 → 0 | Auditoria (docs/auditoria-backend.md): 8 testes novos falharam antes das correções, reproduzindo D05–D09; D04 evidenciado por `mvn dependency:list`. Após Spring Boot 3.5.7 nenhum teste antigo quebrou. 2 falhas intermediárias por testes mal escritos (senha de 73 caracteres barrada pelo @Size antes de chegar ao BCrypt; asserção com acento dependente do charset do console). 1 teste antigo ajustado por mudança intencional (MECANICO não recebe mais o telefone do dono). JaCoCo total: 96,0% linhas / 85,5% ramos. |
+| 2026-11-15 | feature/09-web-nucleo | `npm run build && npm test -- --watch=false --browsers=ChromeHeadless` (web) | 33 | 0 | Núcleo do frontend: CT48, CT49, CT50, CT52. Build ok (budget inicial ajustado para 800 kB por causa do Angular Material). Teste manual: API (jar) + `ng serve`; login do admin pelo proxy 200, senha errada 401 com "E-mail ou senha inválidos", rota sem token 401, Swagger 200. |
+| 2026-11-15 | feature/10-web-clientes | `npm run build && npm test -- --watch=false --browsers=ChromeHeadless` (web) | 59 | 4 → 0 | Clientes e veículos: validadores CPF/CNPJ e placa (validadores.spec.ts), erros 400/409 no campo (cliente-form, cadastro-rapido), fluxo "placa não encontrada → oferecer cadastro" (busca-placa.component.spec.ts). 4 falhas por defeito de código (D10). Complementa no frontend CT09, CT14, CT16 e CT17. |
+
+## 7. Defeitos
+
+Defeitos encontrados durante o desenvolvimento e os testes, com causa e correção.
+
+| ID | Data | Caso | Descrição do defeito | Severidade | Causa | Correção (commit) | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| D01 | 2026-11-12 | CT57 | Swagger UI inacessível: /api/docs redireciona para /api/swagger-ui/index.html, que respondia 401 | Baixa | Rota /api/swagger-ui/** fora da lista pública do SecurityFilterChain (encontrado no teste manual de subida) | Rota liberada + teste AuthIntegracaoTest#deveDeixarDocumentacaoDaApiPublica (7598265) | Corrigido |
+| D02 | 2026-11-12 | CT57 | Senha de usuário padrão gerada pelo Spring impressa no log na subida | Média | UserDetailsServiceAutoConfiguration ativa por não haver UserDetailsService próprio (encontrado no teste manual de subida) | Autoconfiguração excluída no application.yml (7598265) | Corrigido |
+| D03 | 2026-11-12 | CT32 | Orcamento.alterar lança NullPointerException (500) quando há item sem id e os conjuntos de itens mantidos são imutáveis (Set.of/Map.of) | Média | Consulta contains/containsKey com a chave nula do item; coleções imutáveis do Java recusam null (teste OrdemServicoTest#naoDeveCriarNovaVersaoQuandoAlteracaoDoOrcamentoAprovadoEhInvalida) | Tratamento da chave nula com `mantido`/`mantida` em Orcamento + teste de regressão (266bc7a) | Corrigido |
+| D04 | 2026-11-15 | Auditoria A01 | Dependências com vulnerabilidades publicadas (Tomcat 10.1.31, Spring Security 6.3.4, Spring Framework 6.1.14, logback 1.5.11, commons-lang3 3.14.0) e Spring Boot 3.3 fora do suporte | Alta | Versões do projeto inicial nunca atualizadas (`mvn dependency:list`) | Spring Boot 3.5.7, springdoc 2.8.13, commons-lang3 3.18.0 (e5486d2) | Corrigido |
+| D05 | 2026-11-15 | Auditoria A02 | MECANICO recebe CPF/CNPJ, telefone e e-mail do cliente em GET /api/ordens/{id} e GET /api/veiculos?placa= | Média | Respostas montadas sem considerar o perfil (DadosPessoaisMecanicoIntegracaoTest falhava) | Campos omitidos para MECANICO (790204a) | Corrigido |
+| D06 | 2026-11-15 | Auditoria A03 | Log de violação de integridade contém valores do registro (ex.: CPF duplicado) | Média | Handler registrava `getMostSpecificCause().getMessage()` (TratadorDeErrosTest#naoDeveRegistrarNoLogOsValoresDaViolacaoDeIntegridade falhava) | Log só com SQLState e restrição (1c58d3d) | Corrigido |
+| D07 | 2026-11-15 | Auditoria A04 | Quantidade enorme de peça ou total acima de NUMERIC(10,2) responde 409 "conflito" | Média | Sem limite na quantidade nem no total; o estouro chega ao banco (LimitesOrcamentoIntegracaoTest falhava com 409) | `@Max(9999)` (400) e limite do total no domínio (422) (edfb8ce) | Corrigido |
+| D08 | 2026-11-15 | Auditoria A05 | Senha com acentos acima de 72 bytes: login aceita outra senha com o mesmo prefixo (200) e, no Spring Security 6.5, o cadastro dá 500 | Média | `@Size` conta caracteres; o BCrypt usa 72 bytes (AuthIntegracaoTest e UsuarioIntegracaoTest falhavam) | Validação em bytes UTF-8 no cadastro/edição e no login (f08679b) | Corrigido |
+| D09 | 2026-11-15 | Auditoria A06 | Parâmetro `busca` sem tamanho máximo | Baixa | Sem validação no `@RequestParam` (LimitesDeBuscaIntegracaoTest falhava com 200) | `@Size(max = 100)` nas quatro listagens (a437b75) | Corrigido |
+| D10 | 2026-11-15 | Frontend HU03 | Busca rápida por placa não buscava: botão "Buscar" e Enter não faziam nada | Alta | `<form (ngSubmit)>` sem `[formGroup]`: com só ReactiveFormsModule não há diretiva de formulário, então `ngSubmit` nunca é emitido (busca-placa.component.spec.ts falhava: nenhuma requisição a /api/veiculos) | Formulário ligado a um `FormGroup` (11d50af; encontrado pelo teste antes do primeiro commit do componente) | Corrigido |
+
+## 8. Resumo final
+
+Preenchido ao fim da Macro Entrega 3.
+
+| Indicador | Valor |
+| --- | --- |
+| Casos planejados | 57 |
+| Casos executados | |
+| Aprovados | |
+| Reprovados / bloqueados | |
+| Defeitos encontrados / corrigidos | |
+| Cobertura do pacote `ordens` (JaCoCo) | 97,0% linhas / 84,7% ramos (parcial, feature/06, 2026-11-12) |

@@ -1,0 +1,43 @@
+<main class="login">
+  <div class="marca">
+    <div class="logo"><span class="ponto"></span>Torque</div>
+    <p>Ordens de serviço da sua oficina</p>
+  </div>
+
+  <form class="caixa" [formGroup]="form" (ngSubmit)="entrar()" novalidate>
+    <h1>Entrar</h1>
+    <p class="sub">Use o e-mail cadastrado pelo administrador.</p>
+
+    @if (erro()) {
+      <div class="erro" role="alert" data-testid="erro-login">{{ erro() }}</div>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>E-mail</mat-label>
+      <input matInput type="email" formControlName="email" autocomplete="username" inputmode="email" />
+      @if (form.controls.email.hasError('required')) {
+        <mat-error>Informe o e-mail</mat-error>
+      } @else if (form.controls.email.hasError('email')) {
+        <mat-error>E-mail inválido</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Senha</mat-label>
+      <input matInput type="password" formControlName="senha" autocomplete="current-password" />
+      @if (form.controls.senha.hasError('required')) {
+        <mat-error>Informe a senha</mat-error>
+      }
+    </mat-form-field>
+
+    <button mat-flat-button class="acao-principal" type="submit" [disabled]="enviando()">
+      @if (enviando()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        Entrar
+      }
+    </button>
+  </form>
+
+  <p class="rodape">Torque · versão MVP</p>
+</main>

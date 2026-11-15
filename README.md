@@ -28,18 +28,71 @@ torque/
 
 ## Como executar (desenvolvimento)
 
+Pré-requisitos: Java 21+, Node 20+, Docker. O Maven não precisa estar instalado: use o wrapper (`mvnw`).
+
 ```bash
 # 1. Banco de dados
 docker compose up -d db
 
 # 2. API (http://localhost:8080, Swagger em /api/docs)
-cd torque-api && mvn spring-boot:run
+cd torque-api
+./mvnw spring-boot:run          # Windows: mvnw.cmd spring-boot:run
 
-# 3. Frontend (http://localhost:4200)
-cd torque-web && npm install && npm start
+# 3. Frontend (http://localhost:4200; /api é redirecionado para :8080 via proxy.conf.json)
+cd torque-web
+npm install
+npm start
 ```
 
-Variáveis de ambiente da API: `DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`.
+### Primeiro acesso
+
+A API só sobe com `JWT_SECRET` (mínimo de 32 bytes). Com o banco vazio, ela cria o primeiro administrador a partir de `ADMIN_EMAIL` e `ADMIN_SENHA` (mínimo de 8 caracteres):
+
+```bash
+# Linux/macOS (Git Bash no Windows funciona igual)
+export JWT_SECRET="troque-por-um-segredo-com-mais-de-32-bytes"
+export ADMIN_EMAIL="admin@suaoficina.com.br"
+export ADMIN_SENHA="uma-senha-forte"
+cd torque-api && ./mvnw spring-boot:run
+```
+
+No log aparece `Administrador inicial criado: admin@...`. Abra http://localhost:4200, entre com esse e-mail e senha e cadastre os demais usuários em **Usuários**. Opcional: `OFICINA_NOME` define o nome impresso no PDF e na mensagem do WhatsApp.
+
+## Testes
+
+```bash
+# API: testes unitários e de integração (Testcontainers sobe um PostgreSQL 16; Docker precisa estar rodando)
+cd torque-api && ./mvnw -B verify
+# relatório de cobertura: torque-api/target/site/jacoco/index.html
+
+# Sem Docker? Aponte os testes de integração para um PostgreSQL DESCARTÁVEL (os dados são apagados a cada teste):
+#   TORQUE_TEST_DB_URL=jdbc:postgresql://localhost:55432/torque_teste TORQUE_TEST_DB_USER=torque ./mvnw -B verify
+
+# Frontend
+cd torque-web && npm run build && npm test -- --watch=false --browsers=ChromeHeadless
+```
+
+## Variáveis de ambiente da API
+
+| Variável | Uso | Padrão em desenvolvimento |
+| --- | --- | --- |
+| `DB_URL` | URL JDBC do PostgreSQL | `jdbc:postgresql://localhost:5432/torque` |
+| `DB_USER` | usuário do banco | `torque` |
+| `DB_PASSWORD` | senha do banco | `torque` |
+| `JWT_SECRET` | chave de assinatura do JWT — **obrigatória**, mínimo 32 bytes; a API não sobe sem ela | — |
+| `JWT_EXPIRACAO_HORAS` | validade do token | `8` |
+| `ADMIN_EMAIL` | e-mail do primeiro administrador (criado só se não houver nenhum usuário) | — |
+| `ADMIN_SENHA` | senha do primeiro administrador (mínimo 8 caracteres) | — |
+
+Primeira subida em desenvolvimento (bash):
+
+```bash
+export JWT_SECRET="uma-chave-local-com-pelo-menos-32-bytes"
+export ADMIN_EMAIL="admin@oficina.local" ADMIN_SENHA="troque-esta-senha"
+cd torque-api && ./mvnw spring-boot:run
+```
+
+Depois que o administrador existir, `ADMIN_EMAIL`/`ADMIN_SENHA` podem ser removidas (nada é recriado se já houver usuários).
 
 ## Entregas
 

@@ -1,0 +1,93 @@
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 56px;
+  background: var(--torque-azul);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+}
+
+.logo {
+  color: #fff;
+  text-decoration: none;
+}
+
+.nav {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+
+  a {
+    color: #c9d6e8;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13.5px;
+    white-space: nowrap;
+
+    &.on {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+      font-weight: 600;
+    }
+  }
+}
+
+.usuario {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .nome {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-size: 13px;
+    color: #dde6f2;
+
+    span {
+      font-size: 11.5px;
+      color: #b8c7db;
+    }
+  }
+}
+
+.avatar {
+  background: var(--torque-laranja);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.so-celular {
+  display: none;
+  color: #fff;
+}
+
+.pagina {
+  padding: 20px 24px;
+}
+
+@media (max-width: 900px) {
+  .so-tela-grande {
+    display: none;
+  }
+
+  .so-celular {
+    display: inline-flex;
+  }
+
+  .topbar {
+    gap: 8px;
+    padding: 0 8px;
+  }
+
+  .pagina {
+    padding: 16px;
+  }
+}

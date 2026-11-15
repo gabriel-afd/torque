@@ -1,0 +1,3 @@
+torque:
+  jwt:
+    secret: chave-de-teste-ficticia-com-mais-de-32-bytes-0123456789
