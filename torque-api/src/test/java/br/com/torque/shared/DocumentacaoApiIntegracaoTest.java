@@ -29,6 +29,8 @@ class DocumentacaoApiIntegracaoTest extends IntegracaoTestBase {
                 {"/api/ordens/{id}/orcamentos/{versao}/aprovacao", "post"},
                 {"/api/ordens/{id}/orcamentos/{versao}/recusa", "post"},
                 {"/api/ordens/{id}/status", "patch"}, {"/api/ordens/{id}/mecanico", "patch"},
+                {"/api/ordens/{id}/orcamentos/{versao}/pdf", "get"}, {"/api/ordens/{id}/compartilhamento", "get"},
+                {"/api/relatorios/mes", "get"},
         };
         for (String[] e : esperados) {
             assertThat(paths.has(e[0])).as("rota %s", e[0]).isTrue();
@@ -41,6 +43,10 @@ class DocumentacaoApiIntegracaoTest extends IntegracaoTestBase {
         assertThat(ref(paths, "/api/ordens/{id}/status", "patch", true)).endsWith("StatusRequest");
         assertThat(ref(paths, "/api/ordens/{id}/mecanico", "patch", true)).endsWith("MecanicoRequest");
         assertThat(ref(paths, "/api/auth/login", "post", false)).endsWith("LoginResponse");
+        assertThat(ref(paths, "/api/relatorios/mes", "get", false)).endsWith("PainelMesResponse");
+        assertThat(ref(paths, "/api/ordens/{id}/compartilhamento", "get", false)).endsWith("CompartilhamentoResponse");
+        assertThat(paths.at("/~1api~1ordens~1{id}~1orcamentos~1{versao}~1pdf/get/responses/200/content")
+                .has("application/pdf")).isTrue();
 
         JsonNode schemas = docs.at("/components/schemas");
         assertThat(schemas.has("UsuarioResponse")).isTrue();
