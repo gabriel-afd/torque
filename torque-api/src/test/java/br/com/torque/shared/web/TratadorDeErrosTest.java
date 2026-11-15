@@ -189,8 +189,8 @@ class TratadorDeErrosTest {
         mvc.perform(get("/teste/integridade-com-dados")).andExpect(status().isConflict());
 
         org.assertj.core.api.Assertions.assertThat(saida.getOut() + saida.getErr())
-                .contains("Violação de integridade")
-                .contains("23505")
+                // sem acentos na asserção: o charset do console varia conforme o contexto de log já iniciado
+                .contains("SQLState 23505")
                 .doesNotContain("52998224725");
     }
 }
