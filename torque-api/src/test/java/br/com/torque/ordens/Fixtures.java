@@ -54,6 +54,18 @@ final class Fixtures {
         return OrdemServico.abrir(veiculo(), "Barulho na suspensão", 85_000, atendente());
     }
 
+    /** Simula o número sequencial que a sequence do banco atribuiria à OS. */
+    static OrdemServico comNumero(OrdemServico os, long numero) {
+        try {
+            Field campo = OrdemServico.class.getDeclaredField("numero");
+            campo.setAccessible(true);
+            campo.set(os, numero);
+            return os;
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     /** Simula o id que o banco atribuiria. */
     static <T> T comId(T entidade, Long id) {
         try {
