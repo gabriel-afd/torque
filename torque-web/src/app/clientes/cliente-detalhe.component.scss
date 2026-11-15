@@ -1,0 +1,60 @@
+.acoes {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.inativo {
+  font-size: 11px;
+  font-weight: 700;
+  color: #4a5565;
+  background: #edeff2;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.dados {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  padding: 16px;
+
+  .rotulo {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--torque-texto-suave);
+    margin-bottom: 4px;
+  }
+}
+
+.veiculos-head {
+  margin-top: 24px;
+
+  h2 {
+    font-size: 16px;
+  }
+
+  button {
+    margin-left: auto;
+  }
+}
+
+.veiculos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.veiculo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+
+  .descricao {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+}

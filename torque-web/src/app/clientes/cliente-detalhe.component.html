@@ -1,0 +1,49 @@
+@if (carregando() && !cliente()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (cliente(); as c) {
+  <div class="page-head">
+    <a mat-icon-button routerLink="/clientes" aria-label="Voltar para clientes"><mat-icon>arrow_back</mat-icon></a>
+    <h1>{{ c.nome }}</h1>
+    @if (!c.ativo) {
+      <span class="inativo">inativo</span>
+    }
+    <div class="acoes">
+      <a mat-stroked-button [routerLink]="['/clientes', c.id, 'editar']"><mat-icon>edit</mat-icon> Editar</a>
+      @if (c.ativo) {
+        <button mat-stroked-button (click)="inativar()">Inativar</button>
+      }
+    </div>
+  </div>
+
+  <section class="card dados">
+    <div><span class="rotulo">CPF/CNPJ</span>{{ documento(c.documento) }}</div>
+    <div><span class="rotulo">Telefone</span>{{ telefone(c.telefone) }}</div>
+    <div><span class="rotulo">E-mail</span>{{ c.email || '—' }}</div>
+  </section>
+
+  <div class="page-head veiculos-head">
+    <h2>Veículos</h2>
+    <button mat-flat-button class="acao-principal" (click)="abrirVeiculo()" data-testid="novo-veiculo">
+      <mat-icon>add</mat-icon> Novo veículo
+    </button>
+  </div>
+
+  <section class="veiculos">
+    @for (v of c.veiculos; track v.id) {
+      <article class="card veiculo" data-testid="veiculo">
+        <span class="placa">{{ v.placa }}</span>
+        <div class="descricao">
+          <strong>{{ v.marca }} {{ v.modelo }}</strong>
+          <span class="muted">{{ v.ano || 'ano não informado' }}{{ v.cor ? ' · ' + v.cor : '' }}</span>
+        </div>
+        <button mat-icon-button (click)="abrirVeiculo(v)" [attr.aria-label]="'Editar veículo ' + v.placa">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </article>
+    } @empty {
+      <p class="muted">Nenhum veículo cadastrado.</p>
+    }
+  </section>
+}

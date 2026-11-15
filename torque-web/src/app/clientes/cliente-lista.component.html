@@ -1,0 +1,46 @@
+<div class="page-head">
+  <h1>Clientes</h1>
+  <a mat-flat-button class="acao-principal novo" routerLink="novo">
+    <mat-icon>add</mat-icon> Novo cliente
+  </a>
+</div>
+
+<mat-form-field class="busca">
+  <mat-icon matPrefix>search</mat-icon>
+  <mat-label>Buscar por nome ou CPF/CNPJ</mat-label>
+  <input matInput [formControl]="busca" data-testid="busca-cliente" />
+</mat-form-field>
+
+<div class="card lista">
+  @if (carregando()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @for (cliente of clientes(); track cliente.id) {
+    <a class="linha" [routerLink]="[cliente.id]" data-testid="linha-cliente">
+      <div class="principal">
+        <strong>{{ cliente.nome }}</strong>
+        @if (!cliente.ativo) {
+          <span class="inativo">inativo</span>
+        }
+      </div>
+      <span class="muted">{{ documento(cliente.documento) }}</span>
+      <span class="muted">{{ telefone(cliente.telefone) }}</span>
+    </a>
+  } @empty {
+    @if (!carregando()) {
+      <p class="vazio">
+        {{ busca.value ? 'Nenhum cliente encontrado para "' + busca.value + '".' : 'Nenhum cliente cadastrado ainda.' }}
+      </p>
+    }
+  }
+
+  <mat-paginator
+    [length]="total()"
+    [pageIndex]="pagina()"
+    [pageSize]="tamanho()"
+    [pageSizeOptions]="[10, 20, 50]"
+    (page)="mudarPagina($event)"
+    aria-label="Páginas de clientes"
+  />
+</div>
