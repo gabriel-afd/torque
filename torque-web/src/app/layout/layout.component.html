@@ -1,0 +1,42 @@
+<header class="topbar">
+  <button mat-icon-button class="so-celular" [matMenuTriggerFor]="menuCelular" aria-label="Abrir menu">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <a class="logo" routerLink="/quadro"><span class="ponto"></span>Torque</a>
+
+  <nav class="nav so-tela-grande" aria-label="Menu principal">
+    @for (item of itens(); track item.rota) {
+      <a [routerLink]="item.rota" routerLinkActive="on" data-testid="item-menu">{{ item.rotulo }}</a>
+    }
+  </nav>
+
+  <div class="usuario">
+    <div class="nome so-tela-grande">
+      <strong>{{ usuario()?.nome }}</strong>
+      <span>{{ rotuloPerfil() }}</span>
+    </div>
+    <button mat-icon-button class="avatar" [matMenuTriggerFor]="menuUsuario" aria-label="Menu do usuário">
+      {{ iniciais() }}
+    </button>
+  </div>
+</header>
+
+<mat-menu #menuCelular="matMenu">
+  @for (item of itens(); track item.rota) {
+    <a mat-menu-item [routerLink]="item.rota">{{ item.rotulo }}</a>
+  }
+</mat-menu>
+
+<mat-menu #menuUsuario="matMenu" xPosition="before">
+  <div class="menu-cabecalho" mat-menu-item disabled>
+    {{ usuario()?.nome }} · {{ rotuloPerfil() }}
+  </div>
+  <button mat-menu-item (click)="sair()" data-testid="sair">
+    <mat-icon>logout</mat-icon>
+    <span>Sair</span>
+  </button>
+</mat-menu>
+
+<main class="pagina">
+  <router-outlet />
+</main>
