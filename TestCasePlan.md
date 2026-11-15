@@ -114,9 +114,9 @@ Status: Não executado · Aprovado · Reprovado · Bloqueado.
 | CT42 | HU08 | Quadro por status | GET /api/ordens?status=EM_EXECUCAO | Só OS no status pedido, paginadas | Alta | I | Aprovado | OrdemServicoConsultaIntegracaoTest#deveFiltrarQuadroPorStatusComPaginacao (2026-11-12) |
 | CT43 | HU08 | Filtro por mecânico | GET /api/ordens?mecanico={id} | Só OS do mecânico | Média | I | Aprovado | OrdemServicoConsultaIntegracaoTest#deveFiltrarQuadroPorMecanico, #deveMostrarAoMecanicoSoAsPropriasOsMesmoPedindoOutro (2026-11-12) |
 | CT44 | HU09 | Histórico do veículo | Veículo com 3 OS | Lista da mais recente para a mais antiga, com data, km, serviços e valor | Alta | I | Aprovado | OrdemServicoConsultaIntegracaoTest#deveListarHistoricoDoVeiculoDaMaisRecenteParaAMaisAntiga (2026-11-12) |
-| CT45 | HU06 | PDF do orçamento | GET .../pdf | 200, application/pdf, com número da OS, placa e total | Média | I | Não executado | |
-| CT46 | HU06 | Link do WhatsApp | Gerar link de compartilhamento | URL wa.me com telefone do cliente e total | Média | U, F | Não executado | |
-| CT47 | RF16 | Painel do mês | OS abertas, concluídas e entregues no mês | Contagens corretas; faturamento = soma das OS entregues | Baixa | I | Não executado | |
+| CT45 | HU06 | PDF do orçamento | GET .../pdf | 200, application/pdf, com número da OS, placa e total | Média | I | Aprovado | OrcamentoDocumentosIntegracaoTest#deveGerarPdfDoOrcamentoComNumeroDaOsPlacaETotal, #deveNegarPdfAoMecanico, #deveResponder404ParaVersaoOuOsInexistente; OrcamentoPdfTest (2026-11-15) |
+| CT46 | HU06 | Link do WhatsApp | Gerar link de compartilhamento | URL wa.me com telefone do cliente e total | Média | U, F | Aprovado (U) | CompartilhamentoWhatsAppTest#deveGerarLinkWaMeComDdiDoBrasilETelefoneDoCliente, #deveIncluirResumoComNumeroDaOsVeiculoItensETotal, #deveCodificarTextoParaUrlSemEspacosNemCaracteresEspeciaisCrus; OrcamentoDocumentosIntegracaoTest#deveGerarLinkDoWhatsAppComTelefoneDoClienteETotal (2026-11-15). Parte F pendente (prompt 12) |
+| CT47 | RF16 | Painel do mês | OS abertas, concluídas e entregues no mês | Contagens corretas; faturamento = soma das OS entregues | Baixa | I | Aprovado | PainelMesIntegracaoTest#deveContarOsDoMesESomarFaturamentoDasEntregues, #deveConsiderarSoOMesPedido, #deveNegarPainelAAtendenteEMecanico (2026-11-15) |
 
 ### 5.6 Frontend
 
@@ -152,6 +152,7 @@ Cada execução registrada com data, comando, resultado e commit testado.
 | 2026-11-12 | feature/04-catalogo | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 141 | 0 | Catálogo: CRUD, 403 para atendente, código duplicado 409, preço negativo 400, inativos só para admin. Sem CT específico no plano (item 6 do backlog). |
 | 2026-11-12 | feature/05-dominio-os | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 295 | 0 | Domínio da OS: 152 testes unitários puros + 1 de mapeamento JPA. JaCoCo pacote ordens: 94,8% linhas, 81,0% ramos. |
 | 2026-11-12 | feature/06-api-os | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 337 | 1 → 0 | 1 falha por defeito de código (D03, corrigido em 266bc7a); 4 falhas intermediárias por testes mal escritos (leitura da resposta em ISO-8859-1 e termo de busca errado). N+1 conferido no log SQL e por teste com Hibernate Statistics. JaCoCo ordens: 97,0% linhas / 84,7% ramos. |
+| 2026-11-15 | feature/07-pdf-whatsapp-painel | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 362 | 0 | PDF (CT45), link do WhatsApp (CT46) e painel do mês (CT47). 1 falha intermediária por teste mal escrito (a extração de texto do PDF junta células vizinhas da tabela sem espaço). Nenhum defeito de código. JaCoCo ordens: 97,5% linhas / 86,7% ramos; relatorios: 100%. |
 
 ## 7. Defeitos
 
