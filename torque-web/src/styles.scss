@@ -132,6 +132,14 @@ p {
   color: var(--torque-texto-suave);
 }
 
+// Placa em destaque (cartões do quadro, veículos, histórico).
+.placa {
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  font-variant-numeric: tabular-nums;
+}
+
 // Ação principal sempre laranja, com cantos arredondados como no protótipo.
 .mat-mdc-unelevated-button.acao-principal:not(:disabled) {
   background-color: var(--torque-laranja);
