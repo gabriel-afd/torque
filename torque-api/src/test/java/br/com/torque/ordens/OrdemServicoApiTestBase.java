@@ -29,7 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
 /** Cenário comum dos testes de API da OS: usuários, cliente, veículo e catálogo fictícios. */
-abstract class OrdemServicoApiTestBase extends IntegracaoTestBase {
+public abstract class OrdemServicoApiTestBase extends IntegracaoTestBase {
 
     @Autowired
     protected ClienteRepository clientes;
