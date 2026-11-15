@@ -13,6 +13,7 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'quadro' },
       { path: 'quadro', loadChildren: () => import('./ordens/ordens.routes').then((m) => m.ORDENS_ROUTES) },
+      { path: 'ordens', loadChildren: () => import('./ordens/ordens.routes').then((m) => m.OS_ROUTES) },
       {
         path: 'clientes',
         canMatch: [perfilGuard('ATENDENTE', 'ADMINISTRADOR')],

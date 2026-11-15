@@ -1,0 +1,68 @@
+<div class="page-head">
+  <h1>Quadro de OS</h1>
+  <span class="muted" data-testid="total-andamento">{{ ordens().length }} OS em andamento</span>
+
+  <div class="filtros">
+    <mat-form-field class="busca">
+      <mat-icon matPrefix>search</mat-icon>
+      <mat-label>Buscar placa ou cliente</mat-label>
+      <input matInput [formControl]="busca" data-testid="busca-quadro" />
+    </mat-form-field>
+
+    @if (!ehMecanico()) {
+      <mat-form-field class="mecanico" data-testid="filtro-mecanico">
+        <mat-label>Mecânico</mat-label>
+        <mat-select [formControl]="mecanico">
+          <mat-option [value]="null">Todos os mecânicos</mat-option>
+          @for (m of mecanicos(); track m.id) {
+            <mat-option [value]="m.id">{{ m.nome }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    <button mat-icon-button (click)="carregar()" aria-label="Atualizar quadro"><mat-icon>refresh</mat-icon></button>
+
+    @if (podeAbrirOs()) {
+      <button mat-flat-button class="acao-principal" (click)="novaOs()" data-testid="nova-os">+ Nova OS</button>
+    }
+  </div>
+</div>
+
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+@if (totalNaApi() > ordens().length) {
+  <p class="aviso-limite">Mostrando {{ ordens().length }} de {{ totalNaApi() }} OS. Use a busca para encontrar as demais.</p>
+}
+
+<div class="quadro" role="list">
+  @for (coluna of colunas; track coluna.status; let i = $index) {
+    <section class="coluna c{{ i + 1 }}" role="listitem" [attr.data-status]="coluna.status">
+      <h2>{{ coluna.titulo }} <b data-testid="contador">{{ quantidade(coluna.status) }}</b></h2>
+
+      @for (os of grupos().get(coluna.status); track os.id) {
+        <button type="button" class="cartao" (click)="abrir(os)" data-testid="cartao" [attr.aria-label]="'Abrir OS ' + os.numero">
+          <div class="topo">
+            <span>OS #{{ os.numero }}</span>
+            <span>{{ info(os) }}</span>
+          </div>
+          <div class="placa">{{ os.placa }}</div>
+          <div class="carro">{{ os.veiculo }} · {{ os.cliente }}</div>
+          <div class="base">
+            @if (os.mecanico) {
+              <span class="mec"><i>{{ os.mecanico[0] }}</i>{{ os.mecanico }}</span>
+            } @else if (coluna.status !== 'ABERTA' && coluna.status !== 'AGUARDANDO_APROVACAO') {
+              <span class="muted">Sem mecânico</span>
+            }
+            @if (situacao(os); as texto) {
+              <span [class.alerta]="emAlerta(os)" data-testid="situacao">{{ texto }}</span>
+            }
+          </div>
+        </button>
+      } @empty {
+        <p class="vazia">Nenhuma OS</p>
+      }
+    </section>
+  }
+</div>
