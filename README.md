@@ -44,6 +44,20 @@ npm install
 npm start
 ```
 
+### Primeiro acesso
+
+A API só sobe com `JWT_SECRET` (mínimo de 32 bytes). Com o banco vazio, ela cria o primeiro administrador a partir de `ADMIN_EMAIL` e `ADMIN_SENHA` (mínimo de 8 caracteres):
+
+```bash
+# Linux/macOS (Git Bash no Windows funciona igual)
+export JWT_SECRET="troque-por-um-segredo-com-mais-de-32-bytes"
+export ADMIN_EMAIL="admin@suaoficina.com.br"
+export ADMIN_SENHA="uma-senha-forte"
+cd torque-api && ./mvnw spring-boot:run
+```
+
+No log aparece `Administrador inicial criado: admin@...`. Abra http://localhost:4200, entre com esse e-mail e senha e cadastre os demais usuários em **Usuários**. Opcional: `OFICINA_NOME` define o nome impresso no PDF e na mensagem do WhatsApp.
+
 ## Testes
 
 ```bash
