@@ -11,6 +11,7 @@ import br.com.torque.catalogo.ServicoRepository;
 import br.com.torque.clientes.Veiculo;
 import br.com.torque.clientes.VeiculoRepository;
 import br.com.torque.ordens.dto.AberturaOsRequest;
+import br.com.torque.ordens.dto.CompartilhamentoResponse;
 import br.com.torque.ordens.dto.ConsultasOrdem.TotalVigente;
 import br.com.torque.ordens.dto.ConsultasOrdem.UltimaMudanca;
 import br.com.torque.ordens.dto.HistoricoVeiculoResponse;
@@ -35,6 +36,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -60,10 +62,12 @@ public class OrdemServicoService {
     private final PecaRepository pecas;
     private final TransactionTemplate escrita;
     private final TransactionTemplate leitura;
+    private final String oficina;
 
     public OrdemServicoService(OrdemServicoRepository ordens, VeiculoRepository veiculos, UsuarioRepository usuarios,
                                ServicoRepository servicos, PecaRepository pecas,
-                               PlatformTransactionManager transacoes) {
+                               PlatformTransactionManager transacoes,
+                               @Value("${torque.oficina.nome}") String oficina) {
         this.ordens = ordens;
         this.veiculos = veiculos;
         this.usuarios = usuarios;
@@ -72,6 +76,11 @@ public class OrdemServicoService {
         this.escrita = new TransactionTemplate(transacoes);
         this.leitura = new TransactionTemplate(transacoes);
         this.leitura.setReadOnly(true);
+        this.oficina = oficina;
+    }
+
+    /** PDF gerado para download: nome sugerido do arquivo e conteúdo. */
+    public record ArquivoPdf(String nomeArquivo, byte[] conteudo) {
     }
 
     // Consultas -------------------------------------------------------------------
@@ -113,6 +122,24 @@ public class OrdemServicoService {
                     : ordens.vigentesComServicos(ids).stream()
                     .collect(Collectors.toMap(o -> o.getOrdemServico().getId(), Function.identity()));
             return pagina.map(os -> HistoricoVeiculoResponse.de(os, vigentes.get(os.getId())));
+        });
+    }
+
+    /** HU06: PDF de uma versão do orçamento (qualquer situação). */
+    public ArquivoPdf gerarPdfOrcamento(Long id, int versao) {
+        return leitura.execute(tx -> {
+            OrdemServico os = ordens.buscarDetalhe(id).orElseThrow(() -> naoEncontrada(id));
+            Orcamento orcamento = os.getOrcamento(versao);
+            byte[] pdf = OrcamentoPdf.gerar(os, orcamento, oficina, LocalDateTime.now());
+            return new ArquivoPdf("orcamento-os-" + os.getNumero() + "-v" + versao + ".pdf", pdf);
+        });
+    }
+
+    /** HU06: link do WhatsApp com o resumo do orçamento vigente. */
+    public CompartilhamentoResponse compartilhar(Long id) {
+        return leitura.execute(tx -> {
+            OrdemServico os = ordens.buscarDetalhe(id).orElseThrow(() -> naoEncontrada(id));
+            return new CompartilhamentoResponse(CompartilhamentoWhatsApp.link(os, os.getOrcamentoVigente(), oficina));
         });
     }
 

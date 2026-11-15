@@ -20,6 +20,9 @@ spring:
         max-page-size: 100
 
 torque:
+  oficina:
+    # Nome impresso no PDF do orçamento e na mensagem do WhatsApp.
+    nome: ${OFICINA_NOME:Oficina Torque}
   jwt:
     # Obrigatória, mínimo 32 bytes. Sem valor padrão: a API não sobe sem JWT_SECRET.
     secret: ${JWT_SECRET:}

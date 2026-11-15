@@ -2,6 +2,7 @@ package br.com.torque.ordens;
 
 import br.com.torque.auth.UsuarioAutenticado;
 import br.com.torque.ordens.dto.AberturaOsRequest;
+import br.com.torque.ordens.dto.CompartilhamentoResponse;
 import br.com.torque.ordens.dto.MecanicoRequest;
 import br.com.torque.ordens.dto.OrcamentoRequest;
 import br.com.torque.ordens.dto.OrdemResumoResponse;
@@ -17,6 +18,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -92,6 +96,25 @@ public class OrdemServicoController {
     public OrdemServicoResponse recusar(@PathVariable Long id, @PathVariable int versao,
                                         @AuthenticationPrincipal UsuarioAutenticado usuario) {
         return service.recusarOrcamento(id, versao, usuario);
+    }
+
+    @GetMapping(value = "/{id}/orcamentos/{versao}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    @PreAuthorize("hasAnyRole('ATENDENTE', 'ADMINISTRADOR')")
+    @Operation(summary = "PDF do orçamento para imprimir ou enviar ao cliente")
+    public ResponseEntity<byte[]> pdfOrcamento(@PathVariable Long id, @PathVariable int versao) {
+        OrdemServicoService.ArquivoPdf arquivo = service.gerarPdfOrcamento(id, versao);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.inline().filename(arquivo.nomeArquivo()).build().toString())
+                .body(arquivo.conteudo());
+    }
+
+    @GetMapping("/{id}/compartilhamento")
+    @PreAuthorize("hasAnyRole('ATENDENTE', 'ADMINISTRADOR')")
+    @Operation(summary = "Link do WhatsApp com o resumo e o total do orçamento vigente")
+    public CompartilhamentoResponse compartilhamento(@PathVariable Long id) {
+        return service.compartilhar(id);
     }
 
     @PatchMapping("/{id}/status")
