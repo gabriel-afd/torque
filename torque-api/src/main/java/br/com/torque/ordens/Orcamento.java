@@ -279,7 +279,13 @@ public class Orcamento {
         return Dinheiro.de(getSubtotal().subtract(desconto));
     }
 
+    /** Maior valor que cabe em NUMERIC(10,2). */
+    public static final BigDecimal VALOR_MAXIMO = new BigDecimal("99999999.99");
+
     private void recalcularTotal() {
+        if (getSubtotal().compareTo(VALOR_MAXIMO) > 0) {
+            throw new RegraDeNegocioException("O valor do orçamento ultrapassa o limite de R$ 99.999.999,99");
+        }
         this.total = calcularTotal();
     }
 

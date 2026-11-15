@@ -287,4 +287,23 @@ class OrcamentoTest {
         assertThatThrownBy(() -> orcamento.recusar(atendente(), java.time.LocalDateTime.now()))
                 .isInstanceOf(RegraDeNegocioException.class);
     }
+
+    /** Auditoria A04 (D07): o total precisa caber em NUMERIC(10,2). */
+    @Test
+    void deveRecusarItemQueLevaOValorDoOrcamentoAcimaDoLimite() {
+        orcamento.adicionarPeca(peca("Motor completo", "50000.00"), 1999); // 99.950.000,00: ainda cabe
+
+        assertThatThrownBy(() -> orcamento.adicionarServico(servico("Retífica", "50000.01")))
+                .isInstanceOf(RegraDeNegocioException.class)
+                .hasMessageContaining("limite");
+        assertThat(orcamento.getTotal()).isEqualByComparingTo("99950000.00");
+    }
+
+    @Test
+    void deveAceitarOrcamentoExatamenteNoLimite() {
+        orcamento.adicionarPeca(peca("Motor completo", "50000.00"), 1999);
+        orcamento.adicionarServico(servico("Retífica", "49999.99"));
+
+        assertThat(orcamento.getTotal()).isEqualByComparingTo(Orcamento.VALOR_MAXIMO);
+    }
 }

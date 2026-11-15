@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -36,7 +37,8 @@ public record OrcamentoRequest(
     }
 
     public record ItemPeca(Long itemId, Long pecaId,
-                           @NotNull @Positive(message = "A quantidade deve ser maior que zero") Integer quantidade) {
+                           @NotNull @Positive(message = "A quantidade deve ser maior que zero")
+                           @Max(value = 9999, message = "A quantidade deve ser no máximo 9999") Integer quantidade) {
 
         @JsonIgnore
         @Schema(hidden = true)
