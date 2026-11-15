@@ -1,5 +1,6 @@
 package br.com.torque.catalogo;
 
+import jakarta.validation.constraints.Size;
 import br.com.torque.auth.UsuarioAutenticado;
 import br.com.torque.catalogo.dto.PecaRequest;
 import br.com.torque.catalogo.dto.PecaResponse;
@@ -39,7 +40,7 @@ public class PecaController {
     @PreAuthorize("isAuthenticated()")
     public Page<PecaResponse> listar(
             @Parameter(description = "Parte da descrição ou do código")
-            @RequestParam(required = false) String busca,
+            @RequestParam(required = false) @Size(max = 100) String busca,
             @Parameter(description = "Só tem efeito para ADMINISTRADOR")
             @RequestParam(defaultValue = "false") boolean incluirInativos,
             @AuthenticationPrincipal UsuarioAutenticado usuario,

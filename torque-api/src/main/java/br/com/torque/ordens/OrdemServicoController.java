@@ -1,5 +1,6 @@
 package br.com.torque.ordens;
 
+import jakarta.validation.constraints.Size;
 import br.com.torque.auth.UsuarioAutenticado;
 import br.com.torque.ordens.dto.AberturaOsRequest;
 import br.com.torque.ordens.dto.CompartilhamentoResponse;
@@ -51,7 +52,7 @@ public class OrdemServicoController {
     public Page<OrdemResumoResponse> listar(
             @Parameter(description = "Um ou mais status") @RequestParam(required = false) List<StatusOS> status,
             @Parameter(description = "Id do mecânico") @RequestParam(required = false) Long mecanico,
-            @Parameter(description = "Parte da placa ou do nome do cliente") @RequestParam(required = false) String busca,
+            @Parameter(description = "Parte da placa ou do nome do cliente") @RequestParam(required = false) @Size(max = 100) String busca,
             @AuthenticationPrincipal UsuarioAutenticado usuario,
             @PageableDefault(size = 50, sort = "dataAbertura", direction = Sort.Direction.DESC) Pageable pageable) {
         return service.listar(status, mecanico, busca, usuario, pageable);

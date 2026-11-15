@@ -1,5 +1,6 @@
 package br.com.torque.catalogo;
 
+import jakarta.validation.constraints.Size;
 import br.com.torque.auth.UsuarioAutenticado;
 import br.com.torque.catalogo.dto.ServicoRequest;
 import br.com.torque.catalogo.dto.ServicoResponse;
@@ -38,7 +39,7 @@ public class ServicoController {
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public Page<ServicoResponse> listar(
-            @RequestParam(required = false) String busca,
+            @RequestParam(required = false) @Size(max = 100) String busca,
             @Parameter(description = "Só tem efeito para ADMINISTRADOR")
             @RequestParam(defaultValue = "false") boolean incluirInativos,
             @AuthenticationPrincipal UsuarioAutenticado usuario,

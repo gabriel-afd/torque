@@ -1,5 +1,6 @@
 package br.com.torque.clientes;
 
+import jakarta.validation.constraints.Size;
 import br.com.torque.clientes.dto.ClienteDetalheResponse;
 import br.com.torque.clientes.dto.ClienteRequest;
 import br.com.torque.clientes.dto.ClienteResponse;
@@ -37,7 +38,7 @@ public class ClienteController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ATENDENTE', 'ADMINISTRADOR')")
-    public Page<ClienteResponse> listar(@RequestParam(required = false) String busca,
+    public Page<ClienteResponse> listar(@RequestParam(required = false) @Size(max = 100) String busca,
                                         @PageableDefault(sort = "nome", direction = Sort.Direction.ASC) Pageable pageable) {
         return service.listar(busca, pageable);
     }
