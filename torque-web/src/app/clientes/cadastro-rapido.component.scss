@@ -1,0 +1,44 @@
+h3 {
+  font-size: 14px;
+  margin: 12px 0 8px;
+}
+
+mat-button-toggle-group {
+  margin-bottom: 12px;
+}
+
+.busca {
+  width: 100%;
+}
+
+.opcao {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #fff;
+  border: 1px solid var(--torque-borda);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  font: inherit;
+
+  &:hover {
+    background: #f7f9fc;
+  }
+}
+
+.escolhido {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--torque-borda);
+  border-radius: 8px;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+}

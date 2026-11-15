@@ -1,0 +1,49 @@
+<h2 mat-dialog-title>Cadastrar veículo {{ dados.placa }}</h2>
+
+<mat-dialog-content>
+  <h3>Dono do veículo</h3>
+  <mat-button-toggle-group [value]="modo()" (change)="modo.set($event.value)" aria-label="Cliente existente ou novo">
+    <mat-button-toggle value="existente">Cliente já cadastrado</mat-button-toggle>
+    <mat-button-toggle value="novo" data-testid="modo-novo">Cliente novo</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  @if (modo() === 'existente') {
+    @if (selecionado(); as c) {
+      <div class="escolhido" data-testid="cliente-escolhido">
+        <mat-icon>person</mat-icon>
+        <div>
+          <strong>{{ c.nome }}</strong>
+          <span class="muted">{{ documento(c.documento) }}</span>
+        </div>
+        <button mat-button type="button" (click)="selecionado.set(null)">Trocar</button>
+      </div>
+    } @else {
+      <mat-form-field class="busca">
+        <mat-icon matPrefix>search</mat-icon>
+        <mat-label>Nome ou CPF/CNPJ do cliente</mat-label>
+        <input matInput [formControl]="buscaCliente" data-testid="busca-dono" />
+      </mat-form-field>
+      @for (c of encontrados(); track c.id) {
+        <button type="button" class="opcao" (click)="escolher(c)" data-testid="opcao-cliente">
+          <strong>{{ c.nome }}</strong> <span class="muted">{{ documento(c.documento) }}</span>
+        </button>
+      } @empty {
+        @if (buscaCliente.value.trim().length >= 2) {
+          <p class="muted">Nenhum cliente encontrado. Use "Cliente novo".</p>
+        }
+      }
+    }
+  } @else {
+    <app-cliente-campos [form]="formCliente" />
+  }
+
+  <h3>Veículo</h3>
+  <app-veiculo-campos [form]="formVeiculo" />
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" mat-dialog-close>Cancelar</button>
+  <button mat-flat-button class="acao-principal" type="button" (click)="salvar()" [disabled]="salvando()" data-testid="salvar-cadastro">
+    Cadastrar
+  </button>
+</mat-dialog-actions>

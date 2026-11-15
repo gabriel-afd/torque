@@ -1,0 +1,52 @@
+<form class="busca" [formGroup]="form" (ngSubmit)="buscar()" novalidate>
+  <mat-form-field>
+    <mat-label>Placa</mat-label>
+    <input matInput [formControl]="placa" appMascara="placa" autocapitalize="characters" data-testid="busca-placa" />
+    <mat-hint>ABC1234 ou ABC1D23</mat-hint>
+    @if (placa.hasError('required')) {
+      <mat-error>Informe a placa</mat-error>
+    } @else if (placa.hasError('placa')) {
+      <mat-error>Placa inválida (use ABC1234 ou ABC1D23)</mat-error>
+    }
+  </mat-form-field>
+  <button mat-flat-button color="primary" type="submit" [disabled]="buscando()" data-testid="buscar-placa">
+    <mat-icon>search</mat-icon> Buscar
+  </button>
+</form>
+
+@if (naoEncontrada(); as placaNova) {
+  <div class="card aviso" data-testid="placa-nao-encontrada">
+    <mat-icon>info</mat-icon>
+    <div class="texto">
+      <strong>Veículo {{ placaNova }} não encontrado.</strong>
+      @if (podeCadastrar()) {
+        <span class="muted">Cadastre o veículo agora (e o cliente, se ainda não tiver cadastro).</span>
+      } @else {
+        <span class="muted">Peça ao balcão para cadastrar o veículo.</span>
+      }
+    </div>
+    @if (podeCadastrar()) {
+      <button mat-flat-button class="acao-principal" (click)="cadastrar()" data-testid="oferecer-cadastro">
+        Cadastrar veículo
+      </button>
+    }
+  </div>
+}
+
+@if (mostrarResultado() && veiculo(); as v) {
+  <div class="card resultado" data-testid="veiculo-encontrado">
+    <span class="placa">{{ v.placa }}</span>
+    <div class="texto">
+      <strong>{{ v.marca }} {{ v.modelo }}{{ v.ano ? ' ' + v.ano : '' }}</strong>
+      <span class="muted">
+        {{ v.dono.nome }}{{ v.dono.telefone ? ' · ' + telefone(v.dono.telefone) : '' }}
+      </span>
+    </div>
+    @if (podeCadastrar()) {
+      <a mat-stroked-button [routerLink]="['/clientes', v.dono.id]">Ver cliente</a>
+    }
+    @if (textoAcao()) {
+      <button mat-flat-button class="acao-principal" (click)="acao.emit(v)" data-testid="acao-veiculo">{{ textoAcao() }}</button>
+    }
+  </div>
+}

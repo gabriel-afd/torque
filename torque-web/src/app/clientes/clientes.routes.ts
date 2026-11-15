@@ -1,10 +1,16 @@
 import { Routes } from '@angular/router';
-import { PaginaVaziaComponent } from '../shared/pagina-vazia.component';
+import { ClienteDetalheComponent } from './cliente-detalhe.component';
+import { ClienteFormComponent } from './cliente-form.component';
+import { ClienteListaComponent } from './cliente-lista.component';
+import { VeiculosPaginaComponent } from './veiculos-pagina.component';
 
 export const CLIENTES_ROUTES: Routes = [
-  { path: '', component: PaginaVaziaComponent, title: 'Clientes · Torque', data: { titulo: 'Clientes' } },
+  { path: '', component: ClienteListaComponent, title: 'Clientes · Torque' },
+  { path: 'novo', component: ClienteFormComponent, title: 'Novo cliente · Torque' },
+  { path: ':id', component: ClienteDetalheComponent, title: 'Cliente · Torque' },
+  { path: ':id/editar', component: ClienteFormComponent, title: 'Editar cliente · Torque' },
 ];
 
 export const VEICULOS_ROUTES: Routes = [
-  { path: '', component: PaginaVaziaComponent, title: 'Veículos · Torque', data: { titulo: 'Veículos' } },
+  { path: '', component: VeiculosPaginaComponent, title: 'Veículos · Torque' },
 ];
