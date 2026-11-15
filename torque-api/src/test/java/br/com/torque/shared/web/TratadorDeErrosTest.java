@@ -30,7 +30,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
+import java.sql.SQLException;
 
+@ExtendWith(OutputCaptureExtension.class)
 class TratadorDeErrosTest {
 
     record ClienteFicticioRequest(@NotBlank String nome, @NotBlank @CpfCnpj String documento, @Placa String placa) {
@@ -52,6 +57,10 @@ class TratadorDeErrosTest {
                 case "nao-encontrado" -> throw new RecursoNaoEncontradoException("Cliente não encontrado: 42");
                 case "conflito" -> throw new ConflitoException("Documento já cadastrado");
                 case "integridade" -> throw new DataIntegrityViolationException("uk_cliente_documento");
+                case "integridade-com-dados" -> throw new DataIntegrityViolationException("could not execute statement",
+                        new SQLException("ERRO: duplicar valor da chave viola a restrição de unicidade "
+                                + "\"uk_cliente_documento\" Detalhe: Chave (documento)=(52998224725) já existe.",
+                                "23505"));
                 case "versao" -> throw new ObjectOptimisticLockingFailureException("OrdemServico", 1L);
                 case "regra" -> throw new RegraDeNegocioException("Desconto acima do permitido");
                 default -> throw new IllegalStateException("detalhe interno: senha=segredo123 em TabelaSecreta");
@@ -173,5 +182,15 @@ class TratadorDeErrosTest {
                 .andExpect(content().string(not(containsString("at br.com"))))
                 .andExpect(jsonPath("$.trace").doesNotExist())
                 .andExpect(jsonPath("$.exception").doesNotExist());
+    }
+
+    @Test
+    void naoDeveRegistrarNoLogOsValoresDaViolacaoDeIntegridade(CapturedOutput saida) throws Exception {
+        mvc.perform(get("/teste/integridade-com-dados")).andExpect(status().isConflict());
+
+        org.assertj.core.api.Assertions.assertThat(saida.getOut() + saida.getErr())
+                .contains("Violação de integridade")
+                .contains("23505")
+                .doesNotContain("52998224725");
     }
 }

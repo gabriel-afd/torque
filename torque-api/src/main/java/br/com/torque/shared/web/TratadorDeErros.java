@@ -159,7 +159,18 @@ public class TratadorDeErros {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     ResponseEntity<ErroResponse> integridade(DataIntegrityViolationException ex) {
-        log.warn("Violação de integridade no banco: {}", ex.getMostSpecificCause().getMessage());
+        // A mensagem do banco traz os valores do registro (ex.: CPF duplicado): registra só código e restrição.
+        String sqlState = null;
+        String restricao = null;
+        for (Throwable causa = ex; causa != null; causa = causa.getCause()) {
+            if (restricao == null && causa instanceof org.hibernate.exception.ConstraintViolationException violacao) {
+                restricao = violacao.getConstraintName();
+            }
+            if (sqlState == null && causa instanceof java.sql.SQLException sql) {
+                sqlState = sql.getSQLState();
+            }
+        }
+        log.warn("Violação de integridade no banco (SQLState {}, restrição {})", sqlState, restricao);
         return resposta(HttpStatus.CONFLICT, "Operação conflita com dados já cadastrados.");
     }
 
