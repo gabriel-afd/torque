@@ -122,11 +122,11 @@ Status: Não executado · Aprovado · Reprovado · Bloqueado.
 
 | ID | Origem | Cenário | Entrada / passos | Resultado esperado | Prioridade | Nível | Status | Evidência |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| CT48 | HU01 | Rota protegida sem login | Acessar /quadro sem token | Redireciona para /login | Alta | F | Não executado | |
-| CT49 | RNF04 | Interceptor de autenticação | Requisição HTTP com usuário logado | Cabeçalho Authorization: Bearer <token> | Alta | F | Não executado | |
-| CT50 | HU01 | Token expirado | API responde 401 | Usuário volta ao login com aviso | Média | F | Não executado | |
+| CT48 | HU01 | Rota protegida sem login | Acessar /quadro sem token | Redireciona para /login | Alta | F | Aprovado | auth.guard.spec.ts "deve redirecionar para /login quem acessa /quadro sem token" (2026-11-15) |
+| CT49 | RNF04 | Interceptor de autenticação | Requisição HTTP com usuário logado | Cabeçalho Authorization: Bearer <token> | Alta | F | Aprovado | auth.interceptor.spec.ts "deve enviar Authorization: Bearer <token> nas chamadas à API com usuário logado" (2026-11-15) |
+| CT50 | HU01 | Token expirado | API responde 401 | Usuário volta ao login com aviso | Média | F | Aprovado | auth.interceptor.spec.ts "deve voltar ao login com aviso quando a API responder 401 (token expirado)"; auth.service.spec.ts "deve descartar sessão salva com token expirado" (2026-11-15) |
 | CT51 | HU05 | Resumo do orçamento na tela | Incluir e remover itens | Subtotais e total atualizados na hora | Média | F | Não executado | |
-| CT52 | HU08 | Menu por perfil | Logar como atendente | Itens Usuários, Catálogo e Painel não aparecem | Média | F | Não executado | |
+| CT52 | HU08 | Menu por perfil | Logar como atendente | Itens Usuários, Catálogo e Painel não aparecem | Média | F | Aprovado | layout.component.spec.ts "não deve mostrar Usuários, Catálogo e Painel para ATENDENTE" (2026-11-15) |
 
 ### 5.7 Testes manuais e não funcionais
 
@@ -154,6 +154,7 @@ Cada execução registrada com data, comando, resultado e commit testado.
 | 2026-11-12 | feature/06-api-os | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 337 | 1 → 0 | 1 falha por defeito de código (D03, corrigido em 266bc7a); 4 falhas intermediárias por testes mal escritos (leitura da resposta em ISO-8859-1 e termo de busca errado). N+1 conferido no log SQL e por teste com Hibernate Statistics. JaCoCo ordens: 97,0% linhas / 84,7% ramos. |
 | 2026-11-15 | feature/07-pdf-whatsapp-painel | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 362 | 0 | PDF (CT45), link do WhatsApp (CT46) e painel do mês (CT47). 1 falha intermediária por teste mal escrito (a extração de texto do PDF junta células vizinhas da tabela sem espaço). Nenhum defeito de código. JaCoCo ordens: 97,5% linhas / 86,7% ramos; relatorios: 100%. |
 | 2026-11-15 | feature/08-auditoria-backend | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 375 | 8 → 0 | Auditoria (docs/auditoria-backend.md): 8 testes novos falharam antes das correções, reproduzindo D05–D09; D04 evidenciado por `mvn dependency:list`. Após Spring Boot 3.5.7 nenhum teste antigo quebrou. 2 falhas intermediárias por testes mal escritos (senha de 73 caracteres barrada pelo @Size antes de chegar ao BCrypt; asserção com acento dependente do charset do console). 1 teste antigo ajustado por mudança intencional (MECANICO não recebe mais o telefone do dono). JaCoCo total: 96,0% linhas / 85,5% ramos. |
+| 2026-11-15 | feature/09-web-nucleo | `npm run build && npm test -- --watch=false --browsers=ChromeHeadless` (web) | 33 | 0 | Núcleo do frontend: CT48, CT49, CT50, CT52. Build ok (budget inicial ajustado para 800 kB por causa do Angular Material). Teste manual: API (jar) + `ng serve`; login do admin pelo proxy 200, senha errada 401 com "E-mail ou senha inválidos", rota sem token 401, Swagger 200. |
 
 ## 7. Defeitos
 
