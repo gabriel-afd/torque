@@ -29,6 +29,10 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
+        if (!SenhaBcrypt.Validador.cabe(request.senha())) {
+            // o BCrypt truncaria em 72 bytes e aceitaria outra senha com o mesmo prefixo
+            throw new BadCredentialsException(MENSAGEM_CREDENCIAIS_INVALIDAS);
+        }
         Optional<Usuario> encontrado = usuarios.findByEmail(Usuario.normalizarEmail(request.email()));
         String hash = encontrado.map(Usuario::getSenhaHash).orElse(hashFicticio);
         boolean senhaConfere = passwordEncoder.matches(request.senha(), hash);

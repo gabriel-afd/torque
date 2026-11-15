@@ -1,6 +1,7 @@
 package br.com.torque.auth.dto;
 
 import br.com.torque.auth.Perfil;
+import br.com.torque.auth.SenhaBcrypt;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,7 +11,7 @@ import jakarta.validation.constraints.Size;
 public record UsuarioAtualizacaoRequest(
         @NotBlank @Size(max = 120) String nome,
         @NotBlank @Email @Size(max = 160) String email,
-        @Size(min = 8, max = 72, message = "A senha deve ter entre 8 e 72 caracteres") String senha,
+        @Size(min = 8, max = 72, message = "A senha deve ter entre 8 e 72 caracteres") @SenhaBcrypt String senha,
         @NotNull Perfil perfil) {
 
     @Override

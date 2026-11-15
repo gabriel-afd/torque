@@ -130,4 +130,16 @@ class AuthIntegracaoTest extends IntegracaoTestBase {
         assertThat(campos.has("email")).isTrue();
         assertThat(campos.has("senha")).isTrue();
     }
+
+    /** Auditoria A05: senha com mais de 72 bytes nunca confere (nem por truncamento do BCrypt), e não gera 500. */
+    @Test
+    void deveRecusarLoginComSenhaDeMaisDe72BytesMesmoComPrefixoCorreto() throws Exception {
+        String senha72Bytes = "a".repeat(70) + "é"; // 71 caracteres, 72 bytes
+        jdbc.update("insert into usuario (nome, email, senha_hash, perfil, ativo) values (?, ?, ?, 'ATENDENTE', true)",
+                "Bia Atendente", "bia@oficina.teste",
+                new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode(senha72Bytes));
+
+        // 72 caracteres (passa no @Size), 74 bytes: o BCrypt truncaria para a senha cadastrada
+        login("bia@oficina.teste", senha72Bytes + "é").andExpect(status().isUnauthorized());
+    }
 }

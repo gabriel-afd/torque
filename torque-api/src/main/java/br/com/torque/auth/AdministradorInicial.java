@@ -47,6 +47,10 @@ public class AdministradorInicial implements ApplicationRunner {
             log.warn("ADMIN_SENHA tem menos de {} caracteres: administrador inicial não criado.", TAMANHO_MINIMO_SENHA);
             return;
         }
+        if (!SenhaBcrypt.Validador.cabe(senha)) {
+            log.warn("ADMIN_SENHA tem mais de {} bytes: administrador inicial não criado.", SenhaBcrypt.MAXIMO_BYTES);
+            return;
+        }
         Usuario admin = new Usuario("Administrador", email, passwordEncoder.encode(senha), Perfil.ADMINISTRADOR);
         usuarios.save(admin);
         log.info("Administrador inicial criado: {}", admin.getEmail());

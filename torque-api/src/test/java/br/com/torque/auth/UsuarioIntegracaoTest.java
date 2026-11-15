@@ -156,4 +156,16 @@ class UsuarioIntegracaoTest extends IntegracaoTestBase {
         mvc.perform(get("/api/usuarios/999999").header(HttpHeaders.AUTHORIZATION, tokenAdmin))
                 .andExpect(status().isNotFound());
     }
+
+    /** Auditoria A05: o BCrypt só usa os primeiros 72 bytes; 40 "é" têm 40 caracteres mas 80 bytes em UTF-8. */
+    @Test
+    void deveRecusarSenhaComMaisDe72BytesEmUtf8() throws Exception {
+        String senha = "é".repeat(40);
+        mvc.perform(post("/api/usuarios").header(HttpHeaders.AUTHORIZATION, tokenAdmin)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(paraJson(Map.of("nome", "Carla Atendente", "email", "carla@oficina.teste",
+                                "senha", senha, "perfil", "ATENDENTE"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos.senha").exists());
+    }
 }
