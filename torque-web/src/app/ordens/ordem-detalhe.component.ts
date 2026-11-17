@@ -2,7 +2,6 @@ import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,17 +10,15 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
-import { Observable, catchError, debounceTime, filter, forkJoin, of, switchMap } from 'rxjs';
-import { CatalogoService } from '../catalogo/catalogo.service';
-import { Peca, Servico } from '../catalogo/catalogo.modelos';
+import { Observable, filter, forkJoin } from 'rxjs';
 import { AuthService } from '../core/auth.service';
 import { MensagemService } from '../core/mensagem.service';
 import { confirmar } from '../shared/confirmacao.component';
 import { formatarTelefone } from '../shared/validadores';
 import {
-  Acao, Rascunho, acoesDisponiveis, alterado, alterarQuantidade, avisoDeDesconto, edicaoCriaNovaVersao, incluirPeca,
-  incluirServico, rascunhoDe, removerPeca, removerServico, requisicaoDe, resumir, subtotalDaPeca,
+  Acao, Rascunho, acoesDisponiveis, alterado, avisoDeDesconto, edicaoCriaNovaVersao, rascunhoDe, requisicaoDe, resumir,
 } from './orcamento';
+import { OrcamentoItensComponent } from './orcamento-itens.component';
 import { HistoricoStatus, OrdemServico, ROTULO_STATUS, StatusOS } from './ordens.modelos';
 import { OrdensService } from './ordens.service';
 import { quando } from './quadro';
@@ -34,15 +31,14 @@ const VAZIO: Rascunho = { servicos: [], pecas: [], desconto: 0 };
   selector: 'app-ordem-detalhe',
   standalone: true,
   imports: [
-    ReactiveFormsModule, RouterLink, CurrencyPipe, DecimalPipe, MatAutocompleteModule, MatButtonModule, MatFormFieldModule,
-    MatIconModule, MatInputModule, MatProgressBarModule, MatSelectModule,
+    ReactiveFormsModule, RouterLink, CurrencyPipe, DecimalPipe, MatButtonModule, MatFormFieldModule, MatIconModule,
+    MatInputModule, MatProgressBarModule, MatSelectModule, OrcamentoItensComponent,
   ],
   templateUrl: './ordem-detalhe.component.html',
   styleUrl: './ordem-detalhe.component.scss',
 })
 export class OrdemDetalheComponent implements OnInit {
   private readonly api = inject(OrdensService);
-  private readonly catalogo = inject(CatalogoService);
   private readonly auth = inject(AuthService);
   private readonly mensagens = inject(MensagemService);
   private readonly dialogo = inject(MatDialog);
@@ -58,12 +54,7 @@ export class OrdemDetalheComponent implements OnInit {
   /** RN07: o usuário confirmou que vai alterar um orçamento aprovado (nova versão ao salvar). */
   readonly editandoAprovado = signal(false);
   readonly mecanicos = signal<{ id: number; nome: string }[]>([]);
-  readonly servicosEncontrados = signal<Servico[]>([]);
-  readonly pecasEncontradas = signal<Peca[]>([]);
 
-  readonly buscaServico = new FormControl<string | Servico>('', { nonNullable: true });
-  readonly buscaPeca = new FormControl<string | Peca>('', { nonNullable: true });
-  readonly quantidadePeca = new FormControl(1, { nonNullable: true, validators: [Validators.min(1), Validators.max(9999)] });
   readonly desconto = new FormControl(0, { nonNullable: true, validators: [Validators.min(0)] });
   readonly mecanicoEscolhido = new FormControl<number | null>(null);
 
@@ -92,17 +83,11 @@ export class OrdemDetalheComponent implements OnInit {
   /** Histórico do mais recente para o mais antigo. */
   readonly historico = computed(() => [...(this.os()?.historico ?? [])].reverse());
 
-  readonly subtotalDaPeca = subtotalDaPeca;
-  readonly nomeServico = (s: Servico | string | null) => (typeof s === 'string' ? s : s?.descricao ?? '');
-  readonly nomePeca = (p: Peca | string | null) => (typeof p === 'string' ? p : p?.descricao ?? '');
-
   ngOnInit(): void {
     this.carregar();
     if (this.auth.perfil() === 'ADMINISTRADOR') {
       this.api.mecanicosAtivos().subscribe({ next: (lista) => this.mecanicos.set(lista), error: () => this.mecanicos.set([]) });
     }
-    this.autocompletar(this.buscaServico, (t) => this.catalogo.buscarServicos(t), (itens) => this.servicosEncontrados.set(itens));
-    this.autocompletar(this.buscaPeca, (t) => this.catalogo.buscarPecas(t), (itens) => this.pecasEncontradas.set(itens));
     this.desconto.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((valor) => this.rascunho.update((r) => ({ ...r, desconto: Number(valor) || 0 })));
@@ -139,46 +124,6 @@ export class OrdemDetalheComponent implements OnInit {
   }
 
   // Orçamento ---------------------------------------------------------------------------------
-
-  adicionarServico(): void {
-    const escolhido = this.buscaServico.value;
-    if (typeof escolhido === 'string') {
-      this.mensagens.aviso('Escolha um serviço da lista do catálogo.');
-      return;
-    }
-    this.rascunho.update((r) => incluirServico(r, escolhido));
-    this.buscaServico.setValue('');
-  }
-
-  adicionarPeca(): void {
-    const escolhida = this.buscaPeca.value;
-    if (typeof escolhida === 'string') {
-      this.mensagens.aviso('Escolha uma peça da lista do catálogo.');
-      return;
-    }
-    if (this.quantidadePeca.invalid) {
-      this.mensagens.aviso('A quantidade deve ser de 1 a 9999.');
-      return;
-    }
-    this.rascunho.update((r) => incluirPeca(r, escolhida, this.quantidadePeca.value));
-    this.buscaPeca.setValue('');
-    this.quantidadePeca.setValue(1);
-  }
-
-  removerServico(indice: number): void {
-    this.rascunho.update((r) => removerServico(r, indice));
-  }
-
-  removerPeca(indice: number): void {
-    this.rascunho.update((r) => removerPeca(r, indice));
-  }
-
-  mudarQuantidade(indice: number, valor: string): void {
-    const quantidade = Math.trunc(Number(valor));
-    if (quantidade >= 1 && quantidade <= 9999) {
-      this.rascunho.update((r) => alterarQuantidade(r, indice, quantidade));
-    }
-  }
 
   /** RN07: avisa antes de liberar a edição de um orçamento já aprovado. */
   alterarOrcamentoAprovado(): void {
@@ -345,19 +290,5 @@ export class OrdemDetalheComponent implements OnInit {
     this.desconto.setValue(os.orcamento.desconto, { emitEvent: false });
     this.editandoAprovado.set(false);
     this.mecanicoEscolhido.setValue(os.mecanico?.id ?? null);
-  }
-
-  private autocompletar<T>(controle: FormControl<string | T>, buscar: (texto: string) => Observable<{ content: T[] }>,
-                           guardar: (itens: T[]) => void): void {
-    controle.valueChanges
-      .pipe(
-        filter((valor): valor is string => typeof valor === 'string'),
-        debounceTime(250),
-        switchMap((texto) =>
-          texto.trim().length >= 2 ? buscar(texto).pipe(catchError(() => of({ content: [] as T[] }))) : of({ content: [] as T[] }),
-        ),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((pagina) => guardar(pagina.content));
   }
 }
