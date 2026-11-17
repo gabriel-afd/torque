@@ -58,6 +58,23 @@ cd torque-api && ./mvnw spring-boot:run
 
 No log aparece `Administrador inicial criado: admin@...`. Abra http://localhost:4200, entre com esse e-mail e senha e cadastre os demais usuários em **Usuários**. Opcional: `OFICINA_NOME` define o nome impresso no PDF e na mensagem do WhatsApp.
 
+### Dados de demonstração (perfil `demo`)
+
+Para teste manual e apresentação, o perfil `demo` carrega dados fictícios **num banco sem clientes**: 1 atendente, 2 mecânicos, catálogo, 10 clientes, 15 veículos e OS em todos os status (com histórico e uma OS com orçamento na versão 2). Se não houver administrador, cria `admin.demo@oficina.teste`.
+
+```bash
+export SPRING_PROFILES_ACTIVE=demo   # além de JWT_SECRET e das variáveis do banco
+cd torque-api && ./mvnw spring-boot:run
+```
+
+| Usuário | Perfil | Senha |
+| --- | --- | --- |
+| ana.demo@oficina.teste | Atendente | `demo12345` (ou `TORQUE_DEMO_SENHA`) |
+| raimundo.demo@oficina.teste, tiago.demo@oficina.teste | Mecânico | idem |
+| admin.demo@oficina.teste (só se não houver admin) | Administrador | idem |
+
+Nunca ative o perfil `demo` em produção.
+
 ## Testes
 
 ```bash

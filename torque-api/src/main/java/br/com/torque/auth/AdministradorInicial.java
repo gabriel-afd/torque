@@ -6,14 +6,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Na subida, se não houver nenhum usuário, cria o primeiro administrador a partir de
- * ADMIN_EMAIL e ADMIN_SENHA. Sem as variáveis, não cria nada e registra aviso.
+ * ADMIN_EMAIL e ADMIN_SENHA. Sem as variáveis, não cria nada e registra aviso. Roda antes dos dados do
+ * perfil demo ({@code @Order(1)}), que reaproveitam esse administrador.
  */
 @Component
+@Order(1)
 public class AdministradorInicial implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(AdministradorInicial.class);

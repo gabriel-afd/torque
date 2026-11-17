@@ -135,7 +135,7 @@ Status: Não executado · Aprovado · Reprovado · Bloqueado.
 | CT53 | Todas as HUs | Fluxo completo | Login → cadastrar cliente e veículo → abrir OS → orçar → compartilhar → aprovar → atribuir → executar → aguardar peça → concluir → entregar | Todas as etapas sem erro; OS aparece no histórico do veículo | Alta | M | Não executado | |
 | CT54 | RNF01 | Uso no celular | Abrir login, quadro e histórico com largura de 360 px | Telas legíveis e utilizáveis, sem rolagem horizontal | Média | M | Não executado | |
 | CT55 | RNF02 | Abrir OS rapidamente | Contar telas até abrir OS de veículo cadastrado | No máximo 3 telas | Média | M | Não executado | |
-| CT56 | RNF05 | Desempenho da listagem | Banco com 10 mil OS; GET /api/ordens | Resposta em até 2 segundos | Média | M | Não executado | |
+| CT56 | RNF05 | Desempenho da listagem | Banco com 10 mil OS; GET /api/ordens | Resposta em até 2 segundos | Média | M | Aprovado | scripts/ct56/gerar-10mil-os.sql + medir-listagem.sh, 10.017 OS, 10 chamadas por consulta: padrão 0,023 s (máx. 0,031 s), quadro com 6 status/100 por página 0,024 s, busca 0,022 s, página 150 0,022 s (2026-11-16; API jar + PostgreSQL 17 local) |
 | CT57 | RNF06 | Dados pessoais | Revisar respostas e logs da API | Sem senha, token ou dado desnecessário exposto | Alta | M | Não executado | |
 
 ## 6. Execuções
@@ -161,6 +161,9 @@ Cada execução registrada com data, comando, resultado e commit testado.
 | 2026-11-16 | feature/13-web-historico-admin | `npm run build && npm test -- --watch=false --browsers=ChromeHeadless` (web) | 157 | 6 → 0 | Histórico do veículo (HU09, complementa CT44 no frontend: ordem da API, data, km, serviços, valor, total de OS, última km, "+ Nova OS" com o veículo já escolhido), CRUD do catálogo (lista, busca, inativos, 409 de código, 400 de preço), CRUD de usuários (perfil, senha opcional na edição, 409 de e-mail, 422 do último admin) e painel do mês (complementa CT47: números e seletor de mês). 6 falhas intermediárias por teste mal escrito no spec do catálogo (`TestBed.inject` antes de `overrideProvider`). Nenhum defeito de código. |
 | 2026-11-16 | feature/14-refatoracao | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 377 | 0 | Refatoração sem mudança de comportamento (B1 `Orcamento.alterar` dividido em validação/aplicação, B2 itens mantidos extraídos de `montarAlteracao`, B3 `UsuarioRepository.buscarOuFalhar`). Antes e depois: 377 testes, 0 falhas. JaCoCo total 96,0% linhas / 85,5% ramos antes e depois; ordens 97,5% → 97,6% linhas, 87,0% ramos. |
 | 2026-11-16 | feature/14-refatoracao | `npm run build && npm test -- --watch=false --browsers=ChromeHeadless` (web) | 157 | 0 | Refatoração do frontend (F1 `OrcamentoItensComponent`, F2 operador `comCarregamento`, F3 `ListaPaginada`, F4 ações por status em tabela, F5 cadastro rápido, F6 helpers de teste). 157 testes verdes antes e depois de cada item. Cobertura (karma-coverage) 88,3% → 89,5% linhas, 82,7% → 82,7% ramos. |
+| 2026-11-16 | feature/15-testes-finais | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 383 | 0 | Suíte completa da API. Novos: perfil demo (DadosDemoTest, DadosDemoIntegracaoTest, DadosDemoForaDoPerfilIntegracaoTest). Conferido por script que toda evidência citada no plano (classe#método e nome de spec) existe. JaCoCo total 96,4% linhas / 86,2% ramos; ordens 97,6% / 87,0%. |
+| 2026-11-16 | feature/15-testes-finais | `npm run build && npm test -- --watch=false --browsers=ChromeHeadless` (web) | 157 | 0 | Suíte completa do frontend; cobertura 89,5% linhas / 82,7% ramos. |
+| 2026-11-16 | feature/15-testes-finais | `scripts/ct56/medir-listagem.sh` (API jar, perfil demo, 10.017 OS) | 4 consultas × 10 | 0 | CT56: todas as médias entre 0,022 s e 0,024 s (meta 2 s). Subida com perfil demo carregou 4 usuários, 10 clientes, 15 veículos e 17 OS no banco real. Log da subida sem senha ou token (apoio ao CT57). |
 
 ## 7. Defeitos
 
@@ -186,8 +189,9 @@ Preenchido ao fim da Macro Entrega 3.
 | Indicador | Valor |
 | --- | --- |
 | Casos planejados | 57 |
-| Casos executados | |
-| Aprovados | |
-| Reprovados / bloqueados | |
-| Defeitos encontrados / corrigidos | |
-| Cobertura do pacote `ordens` (JaCoCo) | 97,0% linhas / 84,7% ramos (parcial, feature/06, 2026-11-12) |
+| Casos executados | 53 (52 automatizados + CT56); CT53, CT54, CT55 e CT57 aguardam execução manual (roteiro em docs/roteiro-testes-manuais.md) |
+| Aprovados | 53 |
+| Reprovados / bloqueados | 0 / 0 |
+| Defeitos encontrados / corrigidos | 10 / 10 (D01–D10) |
+| Testes automatizados | API 383 (unitários + integração com PostgreSQL real), frontend 157 (Jasmine/Karma), 0 falhas (2026-11-16) |
+| Cobertura do pacote `ordens` (JaCoCo) | 97,6% linhas / 87,0% ramos (total da API 96,4% / 86,2%; frontend 89,5% linhas), feature/15, 2026-11-16 |
