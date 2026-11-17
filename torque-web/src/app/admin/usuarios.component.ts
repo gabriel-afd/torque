@@ -12,6 +12,7 @@ import { Usuario } from './admin.modelos';
 import { AdminService } from './admin.service';
 import { UsuarioFormComponent } from './usuario-form.component';
 import { comCarregamento } from '../shared/carregamento';
+import { ListaPaginada } from '../shared/lista-paginada';
 
 /** Usuários do sistema: cadastro, edição (perfil, senha) e inativação (só ADMINISTRADOR). */
 @Component({
@@ -30,7 +31,7 @@ import { comCarregamento } from '../shared/carregamento';
       <div class="rolagem">
         <table class="tabela-simples">
           <tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Situação</th><th></th></tr>
-          @for (u of usuarios(); track u.id) {
+          @for (u of lista.itens(); track u.id) {
             <tr data-testid="usuario" [class.inativo]="!u.ativo">
               <td>{{ u.nome }}</td>
               <td>{{ u.email }}</td>
@@ -50,7 +51,7 @@ import { comCarregamento } from '../shared/carregamento';
           }
         </table>
       </div>
-      <mat-paginator [length]="total()" [pageIndex]="pagina()" [pageSize]="tamanho()" [pageSizeOptions]="[10, 20, 50]"
+      <mat-paginator [length]="lista.total()" [pageIndex]="lista.pagina()" [pageSize]="lista.tamanho()" [pageSizeOptions]="[10, 20, 50]"
                      (page)="mudarPagina($event)" aria-label="Páginas de usuários" />
     </div>
   `,
@@ -65,10 +66,7 @@ export class UsuariosComponent implements OnInit {
   private readonly mensagens = inject(MensagemService);
   private readonly dialogo = inject(MatDialog);
 
-  readonly usuarios = signal<Usuario[]>([]);
-  readonly total = signal(0);
-  readonly pagina = signal(0);
-  readonly tamanho = signal(20);
+  readonly lista = new ListaPaginada<Usuario>();
   readonly carregando = signal(false);
   readonly rotuloPerfil = ROTULO_PERFIL;
 
@@ -77,18 +75,14 @@ export class UsuariosComponent implements OnInit {
   }
 
   carregar(): void {
-    this.api.usuarios(this.pagina(), this.tamanho()).pipe(comCarregamento(this.carregando)).subscribe({
-      next: (resposta) => {
-        this.usuarios.set(resposta.content);
-        this.total.set(resposta.page.totalElements);
-      },
+    this.api.usuarios(this.lista.pagina(), this.lista.tamanho()).pipe(comCarregamento(this.carregando)).subscribe({
+      next: (resposta) => this.lista.receber(resposta),
       error: (erro) => this.mensagens.erro(erro),
     });
   }
 
   mudarPagina(evento: PageEvent): void {
-    this.pagina.set(evento.pageIndex);
-    this.tamanho.set(evento.pageSize);
+    this.lista.mudarPagina(evento);
     this.carregar();
   }
 

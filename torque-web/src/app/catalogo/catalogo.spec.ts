@@ -83,7 +83,7 @@ describe('Catálogo (admin)', () => {
       montar('servicos');
       api.expectOne((r) => r.url === '/api/servicos').flush(pagina(servicos));
 
-      fixture.componentInstance.pagina.set(2);
+      fixture.componentInstance.lista.pagina.set(2);
       fixture.componentInstance.incluirInativos.setValue(true);
       const comInativos = api.expectOne((r) => r.url === '/api/servicos');
       expect(comInativos.request.params.get('incluirInativos')).toBe('true');
