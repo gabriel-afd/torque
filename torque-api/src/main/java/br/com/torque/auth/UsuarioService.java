@@ -4,7 +4,6 @@ import br.com.torque.auth.dto.UsuarioAtualizacaoRequest;
 import br.com.torque.auth.dto.UsuarioRequest;
 import br.com.torque.auth.dto.UsuarioResponse;
 import br.com.torque.shared.excecao.ConflitoException;
-import br.com.torque.shared.excecao.RecursoNaoEncontradoException;
 import br.com.torque.shared.excecao.RegraDeNegocioException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -80,7 +79,6 @@ public class UsuarioService {
     }
 
     private Usuario carregar(Long id) {
-        return usuarios.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado: " + id));
+        return usuarios.buscarOuFalhar(id);
     }
 }

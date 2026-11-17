@@ -178,9 +178,7 @@ public class OrdemServicoService {
 
     public OrdemServicoResponse atribuirMecanico(Long id, MecanicoRequest request, UsuarioAutenticado autenticado) {
         return alterar(id, request.versaoOs(), autenticado, (os, usuario) -> {
-            Usuario mecanico = usuarios.findById(request.mecanicoId())
-                    .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado: " + request.mecanicoId()));
-            os.atribuirMecanico(mecanico, usuario);
+            os.atribuirMecanico(usuarios.buscarOuFalhar(request.mecanicoId()), usuario);
         });
     }
 
@@ -252,8 +250,7 @@ public class OrdemServicoService {
     }
 
     private Usuario usuario(UsuarioAutenticado autenticado) {
-        return usuarios.findById(autenticado.id())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado: " + autenticado.id()));
+        return usuarios.buscarOuFalhar(autenticado.id());
     }
 
     private static RecursoNaoEncontradoException naoEncontrada(Long id) {
