@@ -16,7 +16,7 @@
     <mat-progress-bar mode="indeterminate" />
   }
 
-  @for (cliente of clientes(); track cliente.id) {
+  @for (cliente of lista.itens(); track cliente.id) {
     <a class="linha" [routerLink]="[cliente.id]" data-testid="linha-cliente">
       <div class="principal">
         <strong>{{ cliente.nome }}</strong>
@@ -36,9 +36,9 @@
   }
 
   <mat-paginator
-    [length]="total()"
-    [pageIndex]="pagina()"
-    [pageSize]="tamanho()"
+    [length]="lista.total()"
+    [pageIndex]="lista.pagina()"
+    [pageSize]="lista.tamanho()"
     [pageSizeOptions]="[10, 20, 50]"
     (page)="mudarPagina($event)"
     aria-label="Páginas de clientes"

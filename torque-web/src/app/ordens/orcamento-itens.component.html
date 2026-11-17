@@ -1,0 +1,87 @@
+<section class="card secao">
+  <h2>Serviços <span class="muted versao">Orçamento versão {{ versao() }}</span></h2>
+  <div class="tabela">
+    <table class="tabela-simples" data-testid="servicos">
+      <tr><th>Serviço</th><th class="r">Mão de obra</th><th></th></tr>
+      @for (s of rascunho().servicos; track $index; let i = $index) {
+        <tr>
+          <td>{{ s.descricao }}</td>
+          <td class="r">{{ s.preco | currency: 'BRL' }}</td>
+          <td class="r">
+            @if (editavel()) {
+              <button mat-icon-button class="remover" type="button" (click)="removerServico(i)"
+                      [attr.aria-label]="'Remover ' + s.descricao" data-testid="remover-servico"><mat-icon>close</mat-icon></button>
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr><td colspan="3" class="muted">Nenhum serviço no orçamento.</td></tr>
+      }
+    </table>
+  </div>
+  @if (editavel()) {
+    <div class="incluir">
+      <mat-form-field class="busca">
+        <mat-label>Buscar serviço no catálogo</mat-label>
+        <input matInput [formControl]="buscaServico" [matAutocomplete]="autoServico" data-testid="busca-servico" />
+        <mat-autocomplete #autoServico="matAutocomplete" [displayWith]="nomeServico">
+          @for (s of servicosEncontrados(); track s.id) {
+            <mat-option [value]="s">{{ s.descricao }} · {{ s.precoMaoDeObra | currency: 'BRL' }}</mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+      <button mat-stroked-button type="button" (click)="adicionarServico()" data-testid="adicionar-servico">Adicionar</button>
+    </div>
+  }
+</section>
+
+<section class="card secao">
+  <h2>Peças</h2>
+  <div class="tabela">
+    <table class="tabela-simples" data-testid="pecas">
+      <tr><th>Peça</th><th class="r">Qtd.</th><th class="r">Preço unit.</th><th class="r">Subtotal</th><th></th></tr>
+      @for (p of rascunho().pecas; track $index; let i = $index) {
+        <tr>
+          <td>{{ p.descricao }}</td>
+          <td class="r">
+            @if (editavel()) {
+              <input class="qtd" type="number" min="1" max="9999" [value]="p.quantidade"
+                     (change)="mudarQuantidade(i, $any($event.target).value)" [attr.aria-label]="'Quantidade de ' + p.descricao"
+                     data-testid="quantidade" />
+            } @else {
+              {{ p.quantidade }}
+            }
+          </td>
+          <td class="r">{{ p.precoUnitario | currency: 'BRL' }}</td>
+          <td class="r">{{ subtotalDaPeca(p) | currency: 'BRL' }}</td>
+          <td class="r">
+            @if (editavel()) {
+              <button mat-icon-button class="remover" type="button" (click)="removerPeca(i)"
+                      [attr.aria-label]="'Remover ' + p.descricao" data-testid="remover-peca"><mat-icon>close</mat-icon></button>
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr><td colspan="5" class="muted">Nenhuma peça no orçamento.</td></tr>
+      }
+    </table>
+  </div>
+  @if (editavel()) {
+    <div class="incluir">
+      <mat-form-field class="busca">
+        <mat-label>Buscar peça no catálogo</mat-label>
+        <input matInput [formControl]="buscaPeca" [matAutocomplete]="autoPeca" data-testid="busca-peca" />
+        <mat-autocomplete #autoPeca="matAutocomplete" [displayWith]="nomePeca">
+          @for (p of pecasEncontradas(); track p.id) {
+            <mat-option [value]="p">{{ p.descricao }} · {{ p.precoVenda | currency: 'BRL' }}</mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+      <mat-form-field class="qtd-nova">
+        <mat-label>Qtd.</mat-label>
+        <input matInput type="number" min="1" max="9999" [formControl]="quantidadePeca" />
+      </mat-form-field>
+      <button mat-stroked-button type="button" (click)="adicionarPeca()" data-testid="adicionar-peca">Adicionar</button>
+    </div>
+  }
+</section>

@@ -13,6 +13,8 @@ import { MensagemService } from '../core/mensagem.service';
 import { formatarDocumento, formatarTelefone } from '../shared/validadores';
 import { Cliente } from './clientes.modelos';
 import { ClientesService } from './clientes.service';
+import { comCarregamento } from '../shared/carregamento';
+import { ListaPaginada } from '../shared/lista-paginada';
 
 @Component({
   selector: 'app-cliente-lista',
@@ -30,10 +32,7 @@ export class ClienteListaComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly busca = new FormControl('', { nonNullable: true });
-  readonly clientes = signal<Cliente[]>([]);
-  readonly total = signal(0);
-  readonly pagina = signal(0);
-  readonly tamanho = signal(20);
+  readonly lista = new ListaPaginada<Cliente>();
   readonly carregando = signal(false);
 
   readonly documento = formatarDocumento;
@@ -44,29 +43,20 @@ export class ClienteListaComponent implements OnInit {
     this.busca.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
-        this.pagina.set(0);
+        this.lista.recomecar();
         this.carregar();
       });
   }
 
   mudarPagina(evento: PageEvent): void {
-    this.pagina.set(evento.pageIndex);
-    this.tamanho.set(evento.pageSize);
+    this.lista.mudarPagina(evento);
     this.carregar();
   }
 
   carregar(): void {
-    this.carregando.set(true);
-    this.api.listar(this.busca.value, this.pagina(), this.tamanho()).subscribe({
-      next: (resposta) => {
-        this.clientes.set(resposta.content);
-        this.total.set(resposta.page.totalElements);
-        this.carregando.set(false);
-      },
-      error: (erro) => {
-        this.carregando.set(false);
-        this.mensagens.erro(erro);
-      },
+    this.api.listar(this.busca.value, this.lista.pagina(), this.lista.tamanho()).pipe(comCarregamento(this.carregando)).subscribe({
+      next: (resposta) => this.lista.receber(resposta),
+      error: (erro) => this.mensagens.erro(erro),
     });
   }
 }

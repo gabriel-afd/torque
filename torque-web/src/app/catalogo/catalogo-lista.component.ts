@@ -16,6 +16,8 @@ import { confirmar } from '../shared/confirmacao.component';
 import { CatalogoFormComponent, DadosCatalogoForm } from './catalogo-form.component';
 import { ItemCatalogo, ROTULO_TIPO, TipoCatalogo } from './catalogo.modelos';
 import { CatalogoService } from './catalogo.service';
+import { comCarregamento } from '../shared/carregamento';
+import { ListaPaginada } from '../shared/lista-paginada';
 
 /** Lista paginada de serviços ou de peças com busca, inclusão, edição e inativação (só ADMINISTRADOR). */
 @Component({
@@ -46,7 +48,7 @@ import { CatalogoService } from './catalogo.service';
             @if (tipo() === 'pecas') { <th>Código</th> }
             <th>Descrição</th><th class="r">{{ tipo() === 'pecas' ? 'Preço de venda' : 'Mão de obra' }}</th><th>Situação</th><th></th>
           </tr>
-          @for (item of itens(); track item.id) {
+          @for (item of lista.itens(); track item.id) {
             <tr data-testid="item" [class.inativo]="!item.ativo">
               @if (tipo() === 'pecas') { <td>{{ item.codigo }}</td> }
               <td>{{ item.descricao }}</td>
@@ -68,7 +70,7 @@ import { CatalogoService } from './catalogo.service';
           }
         </table>
       </div>
-      <mat-paginator [length]="total()" [pageIndex]="pagina()" [pageSize]="tamanho()" [pageSizeOptions]="[10, 20, 50]"
+      <mat-paginator [length]="lista.total()" [pageIndex]="lista.pagina()" [pageSize]="lista.tamanho()" [pageSizeOptions]="[10, 20, 50]"
                      (page)="mudarPagina($event)" [attr.aria-label]="'Páginas de ' + rotulo().plural" />
     </div>
   `,
@@ -90,10 +92,7 @@ export class CatalogoListaComponent implements OnInit {
 
   readonly busca = new FormControl('', { nonNullable: true });
   readonly incluirInativos = new FormControl(false, { nonNullable: true });
-  readonly itens = signal<ItemCatalogo[]>([]);
-  readonly total = signal(0);
-  readonly pagina = signal(0);
-  readonly tamanho = signal(20);
+  readonly lista = new ListaPaginada<ItemCatalogo>();
   readonly carregando = signal(false);
   readonly rotulo = () => ROTULO_TIPO[this.tipo()];
 
@@ -106,23 +105,14 @@ export class CatalogoListaComponent implements OnInit {
   }
 
   carregar(): void {
-    this.carregando.set(true);
-    this.api.listar(this.tipo(), this.busca.value, this.incluirInativos.value, this.pagina(), this.tamanho()).subscribe({
-      next: (resposta) => {
-        this.carregando.set(false);
-        this.itens.set(resposta.content);
-        this.total.set(resposta.page.totalElements);
-      },
-      error: (erro) => {
-        this.carregando.set(false);
-        this.mensagens.erro(erro);
-      },
+    this.api.listar(this.tipo(), this.busca.value, this.incluirInativos.value, this.lista.pagina(), this.lista.tamanho()).pipe(comCarregamento(this.carregando)).subscribe({
+      next: (resposta) => this.lista.receber(resposta),
+      error: (erro) => this.mensagens.erro(erro),
     });
   }
 
   mudarPagina(evento: PageEvent): void {
-    this.pagina.set(evento.pageIndex);
-    this.tamanho.set(evento.pageSize);
+    this.lista.mudarPagina(evento);
     this.carregar();
   }
 
@@ -153,7 +143,7 @@ export class CatalogoListaComponent implements OnInit {
   }
 
   private recomecar(): void {
-    this.pagina.set(0);
+    this.lista.recomecar();
     this.carregar();
   }
 }

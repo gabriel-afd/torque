@@ -157,8 +157,6 @@ export type Acao =
   | 'cancelar'
   | 'atribuirMecanico';
 
-const FINAIS: StatusOS[] = ['ENTREGUE', 'RECUSADA', 'CANCELADA'];
-
 /** Quem é "balcão" (ATENDENTE ou ADMINISTRADOR) e quem executa (mecânico atribuído ou ADMINISTRADOR — RN09). */
 export interface Contexto {
   perfil: Perfil | null;
@@ -166,45 +164,43 @@ export interface Contexto {
   atribuidaAoUsuario: boolean;
 }
 
-/**
- * Espelho da tabela de transições do CLAUDE.md, só para decidir quais botões mostrar. A API valida de
- * novo cada ação.
- */
-export function acoesDisponiveis(status: StatusOS, ctx: Contexto): Set<Acao> {
-  const acoes = new Set<Acao>();
-  if (FINAIS.includes(status)) {
-    return acoes;
-  }
-  const balcao = ctx.perfil === 'ATENDENTE' || ctx.perfil === 'ADMINISTRADOR';
-  const executor = ctx.perfil === 'ADMINISTRADOR' || (ctx.perfil === 'MECANICO' && ctx.atribuidaAoUsuario);
+/** Quem pode cada ação: balcão (ATENDENTE/ADMINISTRADOR), executor (mecânico atribuído/ADMINISTRADOR) ou só admin. */
+type Executor = 'balcao' | 'executor' | 'admin';
 
-  if (balcao) {
-    acoes.add('compartilhar').add('cancelar');
-    if (['ABERTA', 'AGUARDANDO_APROVACAO', 'APROVADA', 'EM_EXECUCAO'].includes(status)) {
-      acoes.add('editarOrcamento');
-    }
-    if (status === 'ABERTA') {
-      acoes.add('enviarParaAprovacao');
-    }
-    if (status === 'AGUARDANDO_APROVACAO') {
-      acoes.add('aprovar').add('recusar');
-    }
-    if (status === 'CONCLUIDA') {
-      acoes.add('entregar');
-    }
+/**
+ * Espelho da tabela de transições do CLAUDE.md, só para decidir quais botões mostrar (a API valida de novo
+ * cada ação). Status finais (RN08) não aparecem: não têm ações.
+ */
+const ACOES_POR_STATUS: Partial<Record<StatusOS, [Acao, Executor][]>> = {
+  ABERTA: [['editarOrcamento', 'balcao'], ['enviarParaAprovacao', 'balcao']],
+  AGUARDANDO_APROVACAO: [['editarOrcamento', 'balcao'], ['aprovar', 'balcao'], ['recusar', 'balcao']],
+  APROVADA: [['editarOrcamento', 'balcao'], ['iniciar', 'executor']],
+  EM_EXECUCAO: [['editarOrcamento', 'balcao'], ['aguardarPeca', 'executor'], ['concluir', 'executor']],
+  AGUARDANDO_PECA: [['iniciar', 'executor']],
+  CONCLUIDA: [['entregar', 'balcao']],
+};
+
+/** Ações de todo status não final. */
+const ACOES_EM_ANDAMENTO: [Acao, Executor][] = [['compartilhar', 'balcao'], ['cancelar', 'balcao'], ['atribuirMecanico', 'admin']];
+
+function pode(executor: Executor, ctx: Contexto): boolean {
+  const admin = ctx.perfil === 'ADMINISTRADOR';
+  switch (executor) {
+    case 'balcao':
+      return admin || ctx.perfil === 'ATENDENTE';
+    case 'executor':
+      return admin || (ctx.perfil === 'MECANICO' && ctx.atribuidaAoUsuario);
+    case 'admin':
+      return admin;
   }
-  if (executor) {
-    if (status === 'APROVADA' || status === 'AGUARDANDO_PECA') {
-      acoes.add('iniciar');
-    }
-    if (status === 'EM_EXECUCAO') {
-      acoes.add('aguardarPeca').add('concluir');
-    }
+}
+
+export function acoesDisponiveis(status: StatusOS, ctx: Contexto): Set<Acao> {
+  const doStatus = ACOES_POR_STATUS[status];
+  if (!doStatus) {
+    return new Set();
   }
-  if (ctx.perfil === 'ADMINISTRADOR') {
-    acoes.add('atribuirMecanico');
-  }
-  return acoes;
+  return new Set([...doStatus, ...ACOES_EM_ANDAMENTO].filter(([, executor]) => pode(executor, ctx)).map(([acao]) => acao));
 }
 
 /** RN07: editar com a OS APROVADA ou EM_EXECUCAO cria nova versão e devolve a OS para aprovação. */

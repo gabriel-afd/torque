@@ -16,6 +16,7 @@ import { NovaOsComponent } from './nova-os.component';
 import { COLUNAS_QUADRO, OrdemCriada, OrdemResumo } from './ordens.modelos';
 import { OrdensService } from './ordens.service';
 import { agruparPorStatus, emAlerta, infoDoCartao, situacaoDoCartao } from './quadro';
+import { comCarregamento } from '../shared/carregamento';
 
 interface Mecanico {
   id: number;
@@ -69,7 +70,6 @@ export class QuadroComponent implements OnInit {
   }
 
   carregar(): void {
-    this.carregando.set(true);
     this.api
       .quadro({
         status: this.colunas.map((c) => c.status),
@@ -77,18 +77,14 @@ export class QuadroComponent implements OnInit {
         mecanico: this.ehMecanico() ? null : this.mecanico.value,
         busca: this.busca.value,
       })
-      .subscribe({
+      .pipe(comCarregamento(this.carregando)).subscribe({
         next: (pagina) => {
           this.agora.set(new Date());
           this.ordens.set(pagina.content);
           this.totalNaApi.set(pagina.page.totalElements);
           this.lembrarMecanicos(pagina.content);
-          this.carregando.set(false);
         },
-        error: (erro) => {
-          this.carregando.set(false);
-          this.mensagens.erro(erro);
-        },
+        error: (erro) => this.mensagens.erro(erro),
       });
   }
 

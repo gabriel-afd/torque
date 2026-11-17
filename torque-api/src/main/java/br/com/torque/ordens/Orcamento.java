@@ -172,7 +172,12 @@ public class Orcamento {
     public void alterar(Alteracao alteracao, Usuario usuario) {
         exigirPendente();
         validarIdsExistentes(alteracao);
+        BigDecimal novoDesconto = validarDesconto(alteracao.desconto(), subtotalApos(alteracao), usuario);
+        aplicar(alteracao, novoDesconto);
+    }
 
+    /** Valida os itens que ficam e os novos e devolve o subtotal que o orçamento terá depois da alteração. */
+    private BigDecimal subtotalApos(Alteracao alteracao) {
         BigDecimal subtotalFinal = Dinheiro.ZERO;
         for (OrcamentoItemServico item : itensServico) {
             if (mantido(item, alteracao)) {
@@ -195,9 +200,11 @@ public class Orcamento {
             exigirQuantidadePositiva(nova.quantidade());
             subtotalFinal = subtotalFinal.add(nova.peca().getPrecoVenda().multiply(BigDecimal.valueOf(nova.quantidade())));
         }
-        BigDecimal novoDesconto = validarDesconto(alteracao.desconto(), Dinheiro.de(subtotalFinal), usuario);
+        return Dinheiro.de(subtotalFinal);
+    }
 
-        // Validado: aplica.
+    /** Aplica uma alteração já validada por {@link #subtotalApos(Alteracao)}. */
+    private void aplicar(Alteracao alteracao, BigDecimal novoDesconto) {
         itensServico.removeIf(item -> !mantido(item, alteracao));
         itensPeca.removeIf(item -> !mantida(item, alteracao));
         itensPeca.forEach(item -> item.alterarQuantidade(alteracao.pecasMantidas().get(item.chave())));

@@ -8,6 +8,7 @@ import { normalizarPlaca, placaValidator } from '../shared/validadores';
 import { CONFLITOS_VEICULO, Veiculo, VeiculoRequest } from './clientes.modelos';
 import { ClientesService } from './clientes.service';
 import { VeiculoCamposComponent } from './veiculo-campos.component';
+import { comCarregamento } from '../shared/carregamento';
 
 export interface DadosVeiculoForm {
   clienteId: number;
@@ -65,19 +66,16 @@ export class VeiculoFormComponent {
       this.form.markAllAsTouched();
       return;
     }
-    this.salvando.set(true);
     const requisicao = paraVeiculoRequest(this.form);
     const chamada = this.dados.veiculo
       ? this.api.atualizarVeiculo(this.dados.veiculo.id, requisicao)
       : this.api.cadastrarVeiculo(this.dados.clienteId, requisicao);
-    chamada.subscribe({
+    chamada.pipe(comCarregamento(this.salvando)).subscribe({
       next: (veiculo) => {
-        this.salvando.set(false);
         this.mensagens.sucesso(this.dados.veiculo ? 'Veículo atualizado.' : 'Veículo cadastrado.');
         this.dialogo.close(veiculo);
       },
       error: (erro) => {
-        this.salvando.set(false);
         if (!aplicarErrosDaApi(this.form, erro, CONFLITOS_VEICULO)) {
           this.mensagens.erro(erro);
         }

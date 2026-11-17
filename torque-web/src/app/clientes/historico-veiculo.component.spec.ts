@@ -1,11 +1,7 @@
-import { registerLocaleData } from '@angular/common';
-import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import localePt from '@angular/common/locales/pt';
-import { LOCALE_ID } from '@angular/core';
+import { authFalso, mensagensFalsas, provideTesteBase } from '../core/testes';
+import { HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { Router, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { AuthService } from '../core/auth.service';
@@ -16,7 +12,6 @@ import { pagina } from '../ordens/testes-ordens';
 import { OsDoVeiculo, VeiculoComDono } from './clientes.modelos';
 import { HistoricoVeiculoComponent } from './historico-veiculo.component';
 
-registerLocaleData(localePt);
 
 const veiculo: VeiculoComDono = {
   id: 9, placa: 'MZK2310', marca: 'VW', modelo: 'Gol 1.0', ano: 2014, cor: 'branco',
@@ -38,14 +33,13 @@ describe('HistoricoVeiculoComponent', () => {
 
   function montar(perfil: Perfil, placa = 'mzk2310') {
     dialogo = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
-    mensagens = jasmine.createSpyObj<MensagemService>('MensagemService', ['sucesso', 'aviso', 'erro']);
+    mensagens = mensagensFalsas();
     TestBed.configureTestingModule({
       imports: [HistoricoVeiculoComponent],
       providers: [
-        provideRouter([]), provideHttpClient(), provideHttpClientTesting(), provideNoopAnimations(),
-        { provide: AuthService, useValue: { perfil: () => perfil, temPerfil: (...p: Perfil[]) => p.includes(perfil) } },
+        provideRouter([]), ...provideTesteBase(),
+        { provide: AuthService, useValue: authFalso(perfil) },
         { provide: MensagemService, useValue: mensagens },
-        { provide: LOCALE_ID, useValue: 'pt-BR' },
       ],
     });
     TestBed.overrideProvider(MatDialog, { useValue: dialogo });

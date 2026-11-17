@@ -10,6 +10,7 @@ import { VeiculoComDono } from '../clientes/clientes.modelos';
 import { aplicarErrosDaApi } from '../shared/erros-formulario';
 import { OrdemCriada } from './ordens.modelos';
 import { OrdensService } from './ordens.service';
+import { comCarregamento } from '../shared/carregamento';
 
 /**
  * "+ Nova OS": usa o veículo recebido em `data.veiculo` ou busca a placa (ou cadastra veículo/cliente na hora) e abre a OS com o problema relatado.
@@ -88,18 +89,15 @@ export class NovaOsComponent {
       this.form.markAllAsTouched();
       return;
     }
-    this.salvando.set(true);
     const { problemaRelatado, quilometragem } = this.form.getRawValue();
     this.api
       .abrir({ veiculoId: veiculo.id, problemaRelatado: (problemaRelatado ?? '').trim(), quilometragem: quilometragem ?? null })
-      .subscribe({
+      .pipe(comCarregamento(this.salvando)).subscribe({
         next: (os) => {
-          this.salvando.set(false);
           this.mensagens.sucesso(`OS #${os.numero} aberta.`);
           this.dialogo.close(os);
         },
         error: (erro) => {
-          this.salvando.set(false);
           if (!aplicarErrosDaApi(this.form, erro)) {
             this.mensagens.erro(erro);
           }

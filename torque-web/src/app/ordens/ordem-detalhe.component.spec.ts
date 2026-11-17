@@ -1,21 +1,19 @@
-import { registerLocaleData } from '@angular/common';
-import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
-import localePt from '@angular/common/locales/pt';
-import { LOCALE_ID } from '@angular/core';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { authFalso, mensagensFalsas, provideTesteBase } from '../core/testes';
+import { HttpErrorResponse } from '@angular/common/http';
+import { HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { AuthService } from '../core/auth.service';
 import { MensagemService, textoDoErro } from '../core/mensagem.service';
 import { Perfil } from '../core/modelos';
+import { By } from '@angular/platform-browser';
+import { OrcamentoItensComponent } from './orcamento-itens.component';
 import { OrdemDetalheComponent } from './ordem-detalhe.component';
 import { OrdemServico, StatusOS } from './ordens.modelos';
 import { ordemServico, pagina } from './testes-ordens';
 
-registerLocaleData(localePt);
 
 describe('OrdemDetalheComponent', () => {
   let fixture: ComponentFixture<OrdemDetalheComponent>;
@@ -28,14 +26,13 @@ describe('OrdemDetalheComponent', () => {
   function montar(perfil: Perfil, os: OrdemServico, usuarioId = 2, confirma = true) {
     dialogo = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
     dialogo.open.and.returnValue({ afterClosed: () => of(confirma) } as never);
-    mensagens = jasmine.createSpyObj<MensagemService>('MensagemService', ['sucesso', 'aviso', 'erro']);
+    mensagens = mensagensFalsas();
     TestBed.configureTestingModule({
       imports: [OrdemDetalheComponent],
       providers: [
-        provideRouter([]), provideHttpClient(), provideHttpClientTesting(), provideNoopAnimations(),
-        { provide: AuthService, useValue: { perfil: () => perfil, usuarioId: () => usuarioId, temPerfil: (...p: Perfil[]) => p.includes(perfil) } },
+        provideRouter([]), ...provideTesteBase(),
+        { provide: AuthService, useValue: authFalso(perfil, usuarioId) },
         { provide: MensagemService, useValue: mensagens },
-        { provide: LOCALE_ID, useValue: 'pt-BR' },
       ],
     });
     TestBed.overrideProvider(MatDialog, { useValue: dialogo });
@@ -55,6 +52,8 @@ describe('OrdemDetalheComponent', () => {
     fixture.detectChanges();
   }
 
+  const itens = (): OrcamentoItensComponent =>
+    fixture.debugElement.query(By.directive(OrcamentoItensComponent)).componentInstance;
   const el = (testid: string): HTMLElement | null => fixture.nativeElement.querySelector(`[data-testid="${testid}"]`);
   const texto = (testid: string): string => el(testid)?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
   const clicar = (testid: string) => {
@@ -103,8 +102,8 @@ describe('OrdemDetalheComponent', () => {
       expect(texto('subtotal-servicos')).toContain('80,00');
       expect(texto('total')).toContain('250,50');
 
-      componente.buscaPeca.setValue({ id: 23, codigo: 'FLT-01', descricao: 'Filtro de óleo', precoVenda: 35, ativo: true });
-      componente.quantidadePeca.setValue(2);
+      itens().buscaPeca.setValue({ id: 23, codigo: 'FLT-01', descricao: 'Filtro de óleo', precoVenda: 35, ativo: true });
+      itens().quantidadePeca.setValue(2);
       clicar('adicionar-peca');
       expect(texto('subtotal-pecas')).toContain('260,00');
       expect(texto('total')).toContain('320,50');
@@ -125,18 +124,18 @@ describe('OrdemDetalheComponent', () => {
     it('deve buscar serviços no catálogo enquanto o usuário digita', fakeAsync(() => {
       montar('ATENDENTE', ordemServico('ABERTA'));
 
-      componente.buscaServico.setValue('alin');
+      itens().buscaServico.setValue('alin');
       tick(250);
 
       const req = api.expectOne((r) => r.url === '/api/servicos');
       expect(req.request.params.get('busca')).toBe('alin');
       req.flush(pagina([{ id: 13, descricao: 'Alinhamento', precoMaoDeObra: 60, ativo: true }]));
-      expect(componente.servicosEncontrados().map((s) => s.descricao)).toEqual(['Alinhamento']);
+      expect(itens().servicosEncontrados().map((s) => s.descricao)).toEqual(['Alinhamento']);
     }));
 
     it('deve salvar o orçamento com itens existentes por itemId, novos pelo catálogo e a versão da OS', () => {
       montar('ATENDENTE', ordemServico('ABERTA'));
-      componente.buscaServico.setValue({ id: 13, descricao: 'Alinhamento', precoMaoDeObra: 60, ativo: true });
+      itens().buscaServico.setValue({ id: 13, descricao: 'Alinhamento', precoMaoDeObra: 60, ativo: true });
       clicar('adicionar-servico');
       expect(el('acao-compartilhar')).toBeNull();
 

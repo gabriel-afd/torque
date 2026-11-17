@@ -1,8 +1,7 @@
-import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, TestRequest, provideHttpClientTesting } from '@angular/common/http/testing';
+import { authFalso, provideTesteBase } from '../core/testes';
+import { HttpTestingController, TestRequest } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { Router, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { AuthService } from '../core/auth.service';
@@ -22,8 +21,8 @@ describe('QuadroComponent', () => {
     TestBed.configureTestingModule({
       imports: [QuadroComponent],
       providers: [
-        provideRouter([]), provideHttpClient(), provideHttpClientTesting(), provideNoopAnimations(),
-        { provide: AuthService, useValue: { perfil: () => perfil, temPerfil: (...p: Perfil[]) => p.includes(perfil) } },
+        provideRouter([]), ...provideTesteBase(),
+        { provide: AuthService, useValue: authFalso(perfil) },
       ],
     });
     TestBed.overrideProvider(MatDialog, { useValue: dialogo });

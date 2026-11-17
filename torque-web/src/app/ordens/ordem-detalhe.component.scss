@@ -6,10 +6,6 @@
 }
 .problema { max-width: 320px; }
 .grade { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 14px; }
-.versao { font-size: 12px; font-weight: 500; }
-.tabela { overflow-x: auto; }
-.remover { color: var(--torque-perigo); }
-.qtd { width: 64px; padding: 4px; text-align: right; }
 .incluir { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; .busca { flex: 1; min-width: 180px; } .qtd-nova { width: 90px; } }
 .aviso-versao {
   padding: 10px 14px; margin-bottom: 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between;
