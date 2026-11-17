@@ -1,0 +1,239 @@
+<nav class="crumb"><a routerLink="/quadro">Quadro de OS</a> › OS #{{ os()?.numero ?? id() }}</nav>
+
+@if (carregando() || processando()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (os(); as os) {
+  <header class="card cabecalho" data-testid="cabecalho">
+    <div><div class="kv">OS #{{ os.numero }}</div><div class="placa grande">{{ os.veiculo.placa }}</div></div>
+    <div class="kv">Veículo<b>{{ veiculo(os) }}</b></div>
+    <div class="kv">Cliente<b>{{ cliente(os) }}</b></div>
+    <div class="kv">Quilometragem<b>{{ os.quilometragem !== null ? (os.quilometragem | number: '1.0-0') + ' km' : '—' }}</b></div>
+    <div class="kv problema">Problema relatado<b>{{ os.problemaRelatado }}</b></div>
+    <div class="kv">Mecânico<b data-testid="mecanico">{{ os.mecanico?.nome ?? 'Não atribuído' }}</b></div>
+    <span class="chip st-{{ os.status }}" data-testid="status">{{ rotuloStatus[os.status] }}</span>
+  </header>
+
+  <div class="grade">
+    <div>
+      @if (criaNovaVersao() && tem('editarOrcamento') && !editandoAprovado()) {
+        <div class="aviso-versao card">
+          <span>Orçamento versão {{ os.orcamento.versao }} aprovado: para alterar, é criada uma nova versão (RN07).</span>
+          <button mat-stroked-button type="button" (click)="alterarOrcamentoAprovado()" data-testid="alterar-aprovado">
+            Alterar orçamento
+          </button>
+        </div>
+      }
+      @if (editandoAprovado()) {
+        <div class="aviso-versao card ativo" data-testid="aviso-nova-versao">
+          Ao salvar, será criada a versão {{ os.orcamento.versao + 1 }} e a OS volta para aguardando aprovação.
+        </div>
+      }
+
+      <section class="card secao">
+        <h2>Serviços <span class="muted versao">Orçamento versão {{ os.orcamento.versao }}</span></h2>
+        <div class="tabela">
+          <table class="tabela-simples" data-testid="servicos">
+            <tr><th>Serviço</th><th class="r">Mão de obra</th><th></th></tr>
+            @for (s of rascunho().servicos; track $index; let i = $index) {
+              <tr>
+                <td>{{ s.descricao }}</td>
+                <td class="r">{{ s.preco | currency: 'BRL' }}</td>
+                <td class="r">
+                  @if (editavel()) {
+                    <button mat-icon-button class="remover" type="button" (click)="removerServico(i)"
+                            [attr.aria-label]="'Remover ' + s.descricao" data-testid="remover-servico"><mat-icon>close</mat-icon></button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="3" class="muted">Nenhum serviço no orçamento.</td></tr>
+            }
+          </table>
+        </div>
+        @if (editavel()) {
+          <div class="incluir">
+            <mat-form-field class="busca">
+              <mat-label>Buscar serviço no catálogo</mat-label>
+              <input matInput [formControl]="buscaServico" [matAutocomplete]="autoServico" data-testid="busca-servico" />
+              <mat-autocomplete #autoServico="matAutocomplete" [displayWith]="nomeServico">
+                @for (s of servicosEncontrados(); track s.id) {
+                  <mat-option [value]="s">{{ s.descricao }} · {{ s.precoMaoDeObra | currency: 'BRL' }}</mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+            <button mat-stroked-button type="button" (click)="adicionarServico()" data-testid="adicionar-servico">Adicionar</button>
+          </div>
+        }
+      </section>
+
+      <section class="card secao">
+        <h2>Peças</h2>
+        <div class="tabela">
+          <table class="tabela-simples" data-testid="pecas">
+            <tr><th>Peça</th><th class="r">Qtd.</th><th class="r">Preço unit.</th><th class="r">Subtotal</th><th></th></tr>
+            @for (p of rascunho().pecas; track $index; let i = $index) {
+              <tr>
+                <td>{{ p.descricao }}</td>
+                <td class="r">
+                  @if (editavel()) {
+                    <input class="qtd" type="number" min="1" max="9999" [value]="p.quantidade"
+                           (change)="mudarQuantidade(i, $any($event.target).value)" [attr.aria-label]="'Quantidade de ' + p.descricao"
+                           data-testid="quantidade" />
+                  } @else {
+                    {{ p.quantidade }}
+                  }
+                </td>
+                <td class="r">{{ p.precoUnitario | currency: 'BRL' }}</td>
+                <td class="r">{{ subtotalDaPeca(p) | currency: 'BRL' }}</td>
+                <td class="r">
+                  @if (editavel()) {
+                    <button mat-icon-button class="remover" type="button" (click)="removerPeca(i)"
+                            [attr.aria-label]="'Remover ' + p.descricao" data-testid="remover-peca"><mat-icon>close</mat-icon></button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="muted">Nenhuma peça no orçamento.</td></tr>
+            }
+          </table>
+        </div>
+        @if (editavel()) {
+          <div class="incluir">
+            <mat-form-field class="busca">
+              <mat-label>Buscar peça no catálogo</mat-label>
+              <input matInput [formControl]="buscaPeca" [matAutocomplete]="autoPeca" data-testid="busca-peca" />
+              <mat-autocomplete #autoPeca="matAutocomplete" [displayWith]="nomePeca">
+                @for (p of pecasEncontradas(); track p.id) {
+                  <mat-option [value]="p">{{ p.descricao }} · {{ p.precoVenda | currency: 'BRL' }}</mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+            <mat-form-field class="qtd-nova">
+              <mat-label>Qtd.</mat-label>
+              <input matInput type="number" min="1" max="9999" [formControl]="quantidadePeca" />
+            </mat-form-field>
+            <button mat-stroked-button type="button" (click)="adicionarPeca()" data-testid="adicionar-peca">Adicionar</button>
+          </div>
+        }
+      </section>
+    </div>
+
+    <aside>
+      <section class="card secao resumo" data-testid="resumo">
+        <h2>Resumo</h2>
+        <div class="linha"><span>Serviços</span><span data-testid="subtotal-servicos">{{ resumo().subtotalServicos | currency: 'BRL' }}</span></div>
+        <div class="linha"><span>Peças</span><span data-testid="subtotal-pecas">{{ resumo().subtotalPecas | currency: 'BRL' }}</span></div>
+        @if (editavel()) {
+          <mat-form-field class="desconto">
+            <mat-label>Desconto (R$)</mat-label>
+            <input matInput type="number" min="0" step="0.01" [formControl]="desconto" data-testid="desconto" />
+            <mat-hint>{{ resumo().percentualDesconto | number: '1.0-1' }}% do valor dos itens</mat-hint>
+          </mat-form-field>
+        } @else {
+          <div class="linha">
+            <span>Desconto ({{ resumo().percentualDesconto | number: '1.0-1' }}%)</span>
+            <span>− {{ resumo().desconto | currency: 'BRL' }}</span>
+          </div>
+        }
+        @if (perfil() === 'ATENDENTE' && editavel()) {
+          <div class="dica">Atendente pode dar até 10% (RN05)</div>
+        }
+        @if (editavel() && avisoDesconto(); as aviso) {
+          <div class="alerta" data-testid="aviso-desconto">{{ aviso }}</div>
+        }
+        <div class="linha total"><span>Total</span><span data-testid="total">{{ resumo().total | currency: 'BRL' }}</span></div>
+
+        <div class="acoes">
+          @if (editavel() && alterado()) {
+            <button mat-flat-button class="acao-principal" type="button" (click)="salvarOrcamento()" [disabled]="processando()"
+                    data-testid="salvar-orcamento">
+              {{ criaNovaVersao() ? 'Salvar como versão ' + (os.orcamento.versao + 1) : 'Salvar orçamento' }}
+            </button>
+            <button mat-stroked-button type="button" (click)="descartar()" data-testid="descartar">Descartar alterações</button>
+            <div class="dica">Salve o orçamento antes de compartilhar ou mudar o status.</div>
+          }
+          @if (editandoAprovado() && !alterado()) {
+            <button mat-stroked-button type="button" (click)="descartar()">Desistir da alteração</button>
+          }
+
+          @if (!alterado()) {
+            @if (tem('enviarParaAprovacao')) {
+              <button mat-flat-button class="acao-principal" type="button" (click)="enviarParaAprovacao()" [disabled]="processando()"
+                      data-testid="acao-enviarParaAprovacao">Enviar para aprovação</button>
+            }
+            @if (tem('compartilhar')) {
+              <button mat-flat-button color="primary" type="button" (click)="compartilhar()" [disabled]="processando()"
+                      data-testid="acao-compartilhar">Compartilhar (PDF / WhatsApp)</button>
+            }
+            @if (tem('aprovar')) {
+              <button mat-flat-button class="verde" type="button" (click)="aprovar()" [disabled]="processando()"
+                      data-testid="acao-aprovar">Registrar aprovação</button>
+            }
+            @if (tem('recusar')) {
+              <button mat-stroked-button class="perigo" type="button" (click)="recusar()" [disabled]="processando()"
+                      data-testid="acao-recusar">Registrar recusa</button>
+            }
+            @if (tem('iniciar')) {
+              <button mat-flat-button class="acao-principal" type="button" (click)="iniciar()" [disabled]="processando()"
+                      data-testid="acao-iniciar">{{ os.status === 'AGUARDANDO_PECA' ? 'Retomar serviço' : 'Iniciar serviço' }}</button>
+            }
+            @if (tem('aguardarPeca')) {
+              <button mat-stroked-button type="button" (click)="aguardarPeca()" [disabled]="processando()"
+                      data-testid="acao-aguardarPeca">Aguardando peça</button>
+            }
+            @if (tem('concluir')) {
+              <button mat-flat-button class="verde" type="button" (click)="concluir()" [disabled]="processando()"
+                      data-testid="acao-concluir">Concluir</button>
+            }
+            @if (tem('entregar')) {
+              <button mat-flat-button class="acao-principal" type="button" (click)="entregar()" [disabled]="processando()"
+                      data-testid="acao-entregar">Entregar</button>
+            }
+            @if (tem('cancelar')) {
+              <button mat-stroked-button class="perigo" type="button" (click)="cancelar()" [disabled]="processando()"
+                      data-testid="acao-cancelar">Cancelar OS</button>
+            }
+          }
+        </div>
+      </section>
+
+      @if (tem('atribuirMecanico')) {
+        <section class="card secao" data-testid="atribuir">
+          <h2>Mecânico</h2>
+          <div class="incluir">
+            <mat-form-field class="busca">
+              <mat-label>Mecânico responsável</mat-label>
+              <mat-select [formControl]="mecanicoEscolhido" data-testid="select-mecanico">
+                @for (m of mecanicos(); track m.id) {
+                  <mat-option [value]="m.id">{{ m.nome }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <button mat-stroked-button type="button" (click)="atribuirMecanico()"
+                    [disabled]="processando() || mecanicoEscolhido.value === null || mecanicoEscolhido.value === os.mecanico?.id"
+                    data-testid="acao-atribuirMecanico">Atribuir</button>
+          </div>
+        </section>
+      }
+
+      <section class="card secao">
+        <h2>Histórico</h2>
+        <ol class="linha-tempo" data-testid="historico">
+          @for (h of historico(); track $index) {
+            <li><b>{{ rotuloHistorico(h) }}</b> · {{ h.usuario }} · {{ quando(h.dataHora) }}</li>
+          }
+        </ol>
+        @if (os.versoes.length > 1) {
+          <h3 class="muted">Versões do orçamento</h3>
+          <ul class="versoes">
+            @for (v of os.versoes; track v.versao) {
+              <li>Versão {{ v.versao }} · {{ v.situacao.toLowerCase() }} · {{ v.total | currency: 'BRL' }}</li>
+            }
+          </ul>
+        }
+      </section>
+    </aside>
+  </div>
+}
