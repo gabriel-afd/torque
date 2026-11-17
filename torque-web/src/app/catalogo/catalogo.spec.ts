@@ -1,11 +1,7 @@
-import { registerLocaleData } from '@angular/common';
-import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import localePt from '@angular/common/locales/pt';
-import { LOCALE_ID } from '@angular/core';
+import { mensagensFalsas, provideTesteBase } from '../core/testes';
+import { HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { MensagemService } from '../core/mensagem.service';
 import { pagina } from '../ordens/testes-ordens';
@@ -13,7 +9,6 @@ import { CatalogoFormComponent, DadosCatalogoForm } from './catalogo-form.compon
 import { CatalogoListaComponent } from './catalogo-lista.component';
 import { TipoCatalogo } from './catalogo.modelos';
 
-registerLocaleData(localePt);
 
 const servicos = [
   { id: 11, descricao: 'Alinhamento', precoMaoDeObra: 60, ativo: true },
@@ -26,12 +21,11 @@ describe('Catálogo (admin)', () => {
   let mensagens: jasmine.SpyObj<MensagemService>;
 
   function configurar(extras: unknown[] = []) {
-    mensagens = jasmine.createSpyObj<MensagemService>('MensagemService', ['sucesso', 'aviso', 'erro']);
+    mensagens = mensagensFalsas();
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(), provideHttpClientTesting(), provideNoopAnimations(),
+        ...provideTesteBase(),
         { provide: MensagemService, useValue: mensagens },
-        { provide: LOCALE_ID, useValue: 'pt-BR' },
         ...(extras as never[]),
       ],
     });

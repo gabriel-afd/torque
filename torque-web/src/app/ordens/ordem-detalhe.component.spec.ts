@@ -1,11 +1,8 @@
-import { registerLocaleData } from '@angular/common';
-import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
-import localePt from '@angular/common/locales/pt';
-import { LOCALE_ID } from '@angular/core';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { authFalso, mensagensFalsas, provideTesteBase } from '../core/testes';
+import { HttpErrorResponse } from '@angular/common/http';
+import { HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { AuthService } from '../core/auth.service';
@@ -17,7 +14,6 @@ import { OrdemDetalheComponent } from './ordem-detalhe.component';
 import { OrdemServico, StatusOS } from './ordens.modelos';
 import { ordemServico, pagina } from './testes-ordens';
 
-registerLocaleData(localePt);
 
 describe('OrdemDetalheComponent', () => {
   let fixture: ComponentFixture<OrdemDetalheComponent>;
@@ -30,14 +26,13 @@ describe('OrdemDetalheComponent', () => {
   function montar(perfil: Perfil, os: OrdemServico, usuarioId = 2, confirma = true) {
     dialogo = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
     dialogo.open.and.returnValue({ afterClosed: () => of(confirma) } as never);
-    mensagens = jasmine.createSpyObj<MensagemService>('MensagemService', ['sucesso', 'aviso', 'erro']);
+    mensagens = mensagensFalsas();
     TestBed.configureTestingModule({
       imports: [OrdemDetalheComponent],
       providers: [
-        provideRouter([]), provideHttpClient(), provideHttpClientTesting(), provideNoopAnimations(),
-        { provide: AuthService, useValue: { perfil: () => perfil, usuarioId: () => usuarioId, temPerfil: (...p: Perfil[]) => p.includes(perfil) } },
+        provideRouter([]), ...provideTesteBase(),
+        { provide: AuthService, useValue: authFalso(perfil, usuarioId) },
         { provide: MensagemService, useValue: mensagens },
-        { provide: LOCALE_ID, useValue: 'pt-BR' },
       ],
     });
     TestBed.overrideProvider(MatDialog, { useValue: dialogo });

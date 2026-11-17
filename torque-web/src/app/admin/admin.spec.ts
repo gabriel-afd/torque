@@ -1,11 +1,7 @@
-import { registerLocaleData } from '@angular/common';
-import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import localePt from '@angular/common/locales/pt';
-import { LOCALE_ID } from '@angular/core';
+import { mensagensFalsas, provideTesteBase } from '../core/testes';
+import { HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { MensagemService } from '../core/mensagem.service';
 import { pagina } from '../ordens/testes-ordens';
@@ -14,7 +10,6 @@ import { PainelComponent } from './painel.component';
 import { UsuarioFormComponent } from './usuario-form.component';
 import { UsuariosComponent } from './usuarios.component';
 
-registerLocaleData(localePt);
 
 const usuarios: Usuario[] = [
   { id: 1, nome: 'Admin Fictício', email: 'admin@oficina.teste', perfil: 'ADMINISTRADOR', ativo: true },
@@ -27,12 +22,11 @@ describe('Administração', () => {
   let mensagens: jasmine.SpyObj<MensagemService>;
 
   function configurar(extras: unknown[] = []) {
-    mensagens = jasmine.createSpyObj<MensagemService>('MensagemService', ['sucesso', 'aviso', 'erro']);
+    mensagens = mensagensFalsas();
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(), provideHttpClientTesting(), provideNoopAnimations(),
+        ...provideTesteBase(),
         { provide: MensagemService, useValue: mensagens },
-        { provide: LOCALE_ID, useValue: 'pt-BR' },
         ...(extras as never[]),
       ],
     });
