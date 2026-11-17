@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { AuthService } from '../core/auth.service';
@@ -56,5 +56,35 @@ describe('NovaOsComponent', () => {
 
     api.expectNone('/api/ordens');
     expect(fixture.nativeElement.querySelector('[data-testid="abrir-os"]').disabled).toBeTrue();
+  });
+
+  describe('com o veículo já escolhido (histórico do veículo)', () => {
+    it('não deve pedir a placa e deve abrir a OS para o veículo recebido', () => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [NovaOsComponent],
+        providers: [
+          provideRouter([]), provideHttpClient(), provideHttpClientTesting(), provideNoopAnimations(),
+          { provide: MatDialogRef, useValue: dialogo },
+          { provide: MAT_DIALOG_DATA, useValue: { veiculo: {
+            id: 9, placa: 'MZK2310', marca: 'VW', modelo: 'Gol', ano: 2014, cor: null, dono: { id: 4, nome: 'Pedro Fictício', ativo: true },
+          } } },
+          { provide: AuthService, useValue: { temPerfil: () => true } },
+          { provide: MensagemService, useValue: jasmine.createSpyObj('MensagemService', ['sucesso', 'erro', 'aviso']) },
+        ],
+      });
+      const comVeiculo = TestBed.createComponent(NovaOsComponent);
+      const http = TestBed.inject(HttpTestingController);
+      comVeiculo.detectChanges();
+
+      expect(comVeiculo.nativeElement.querySelector('[data-testid="busca-placa"]')).toBeNull();
+      expect(comVeiculo.nativeElement.querySelector('[data-testid="veiculo-escolhido"]').textContent).toContain('MZK2310');
+
+      comVeiculo.componentInstance.form.setValue({ problemaRelatado: 'Revisão', quilometragem: null });
+      comVeiculo.componentInstance.abrir();
+      http.expectOne('/api/ordens').flush({ id: 78, numero: 1078 });
+      http.verify();
+      expect(dialogo.close).toHaveBeenCalledWith({ id: 78, numero: 1078 });
+    });
   });
 });

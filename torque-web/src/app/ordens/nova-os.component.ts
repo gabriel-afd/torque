@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MensagemService } from '../core/mensagem.service';
@@ -12,7 +12,7 @@ import { OrdemCriada } from './ordens.modelos';
 import { OrdensService } from './ordens.service';
 
 /**
- * "+ Nova OS": busca a placa (ou cadastra veículo/cliente na hora) e abre a OS com o problema relatado.
+ * "+ Nova OS": usa o veículo recebido em `data.veiculo` ou busca a placa (ou cadastra veículo/cliente na hora) e abre a OS com o problema relatado.
  * Fecha devolvendo a OS criada.
  */
 @Component({
@@ -22,7 +22,13 @@ import { OrdensService } from './ordens.service';
   template: `
     <h2 mat-dialog-title>Nova OS</h2>
     <mat-dialog-content>
-      <app-busca-placa (encontrado)="veiculo.set($event)" />
+      @if (veiculoInicial) {
+        <p class="escolhido" data-testid="veiculo-escolhido">
+          <span class="placa">{{ veiculoInicial.placa }}</span> {{ veiculoInicial.marca }} {{ veiculoInicial.modelo }} · {{ veiculoInicial.dono.nome }}
+        </p>
+      } @else {
+        <app-busca-placa (encontrado)="veiculo.set($event)" />
+      }
 
       @if (veiculo(); as v) {
         <form [formGroup]="form" (ngSubmit)="abrir()" id="form-nova-os" class="dados-os" novalidate>
@@ -56,6 +62,7 @@ import { OrdensService } from './ordens.service';
   `,
   styles: `
     .dados-os { display: grid; grid-template-columns: 1fr; margin-top: 16px; }
+    .escolhido { margin: 4px 0 0; }
   `,
 })
 export class NovaOsComponent {
@@ -63,7 +70,9 @@ export class NovaOsComponent {
   private readonly mensagens = inject(MensagemService);
   private readonly dialogo = inject(MatDialogRef<NovaOsComponent, OrdemCriada>);
 
-  readonly veiculo = signal<VeiculoComDono | null>(null);
+  /** Veículo já escolhido por quem abriu o diálogo (ex.: histórico do veículo); sem ele, busca pela placa. */
+  readonly veiculoInicial = inject<{ veiculo?: VeiculoComDono } | null>(MAT_DIALOG_DATA, { optional: true })?.veiculo ?? null;
+  readonly veiculo = signal<VeiculoComDono | null>(this.veiculoInicial);
   readonly salvando = signal(false);
   readonly form = inject(FormBuilder).group({
     problemaRelatado: ['', [Validators.required, Validators.maxLength(2000)]],
