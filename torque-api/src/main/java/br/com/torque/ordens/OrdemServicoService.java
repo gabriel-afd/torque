@@ -198,18 +198,8 @@ public class OrdemServicoService {
 
     /** Converte o request em {@link Orcamento.Alteracao}, buscando no catálogo só os itens novos. */
     private Orcamento.Alteracao montarAlteracao(OrcamentoRequest request) {
-        Set<Long> servicosMantidos = new HashSet<>();
-        Map<Long, Integer> pecasMantidas = new HashMap<>();
-        for (OrcamentoRequest.ItemServico item : request.servicos()) {
-            if (item.itemId() != null && !servicosMantidos.add(item.itemId())) {
-                throw new RegraDeNegocioException("Item de serviço repetido: " + item.itemId());
-            }
-        }
-        for (OrcamentoRequest.ItemPeca item : request.pecas()) {
-            if (item.itemId() != null && pecasMantidas.put(item.itemId(), item.quantidade()) != null) {
-                throw new RegraDeNegocioException("Item de peça repetido: " + item.itemId());
-            }
-        }
+        Set<Long> servicosMantidos = servicosMantidos(request);
+        Map<Long, Integer> pecasMantidas = pecasMantidas(request);
         Map<Long, Servico> catalogoServicos = carregar(servicos::findAllById,
                 request.servicos().stream().map(OrcamentoRequest.ItemServico::servicoId), Servico::getId, "Serviço");
         Map<Long, Peca> catalogoPecas = carregar(pecas::findAllById,
@@ -224,6 +214,28 @@ public class OrdemServicoService {
                 .map(i -> new Orcamento.PecaNova(catalogoPecas.get(i.pecaId()), i.quantidade()))
                 .toList();
         return new Orcamento.Alteracao(servicosMantidos, pecasMantidas, servicosNovos, pecasNovas, request.desconto());
+    }
+
+    /** Ids dos itens de serviço que continuam no orçamento; item repetido → 422. */
+    private static Set<Long> servicosMantidos(OrcamentoRequest request) {
+        Set<Long> mantidos = new HashSet<>();
+        for (OrcamentoRequest.ItemServico item : request.servicos()) {
+            if (item.itemId() != null && !mantidos.add(item.itemId())) {
+                throw new RegraDeNegocioException("Item de serviço repetido: " + item.itemId());
+            }
+        }
+        return mantidos;
+    }
+
+    /** Item de peça que continua → nova quantidade; item repetido → 422. */
+    private static Map<Long, Integer> pecasMantidas(OrcamentoRequest request) {
+        Map<Long, Integer> mantidas = new HashMap<>();
+        for (OrcamentoRequest.ItemPeca item : request.pecas()) {
+            if (item.itemId() != null && mantidas.put(item.itemId(), item.quantidade()) != null) {
+                throw new RegraDeNegocioException("Item de peça repetido: " + item.itemId());
+            }
+        }
+        return mantidas;
     }
 
     private static <T> Map<Long, T> carregar(Function<Set<Long>, List<T>> busca, Stream<Long> ids,
