@@ -17,6 +17,11 @@ export class AuthService {
   readonly usuario = this.sessao.asReadonly();
   readonly autenticado = computed(() => this.sessao() !== null);
   readonly perfil = computed<Perfil | null>(() => this.sessao()?.perfil ?? null);
+  /** Id do usuário logado (claim `sub` do JWT); a tela usa para saber se a OS é do mecânico logado. */
+  readonly usuarioId = computed<number | null>(() => {
+    const atual = this.sessao();
+    return atual ? lerUsuarioId(atual.token) : null;
+  });
 
   login(email: string, senha: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>('/api/auth/login', { email, senha }).pipe(
@@ -88,14 +93,24 @@ function expirada(sessao: Sessao): boolean {
   return sessao.expiraEm !== null && sessao.expiraEm <= Date.now();
 }
 
-/** Lê a claim `exp` do JWT (sem validar a assinatura: isso é papel da API). */
-export function lerExpiracao(token: string): number | null {
+/** Claims do JWT, sem validar a assinatura (isso é papel da API). */
+function lerClaims(token: string): Record<string, unknown> | null {
   try {
     const payload = token.split('.')[1];
-    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
-    const exp = JSON.parse(json).exp;
-    return typeof exp === 'number' ? exp * 1000 : null;
+    return JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
   } catch {
     return null;
   }
+}
+
+/** Lê a claim `exp` do JWT (epoch em ms). */
+export function lerExpiracao(token: string): number | null {
+  const exp = lerClaims(token)?.['exp'];
+  return typeof exp === 'number' ? exp * 1000 : null;
+}
+
+/** Lê a claim `sub` do JWT (id do usuário na API). */
+export function lerUsuarioId(token: string): number | null {
+  const sub = Number(lerClaims(token)?.['sub']);
+  return Number.isInteger(sub) && sub > 0 ? sub : null;
 }
