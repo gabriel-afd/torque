@@ -1,3 +1,5 @@
+import { StatusOS } from '../ordens/ordens.modelos';
+
 export interface Cliente {
   id: number;
   nome: string;
@@ -50,3 +52,16 @@ export interface VeiculoRequest {
 /** 409 da API → campo do formulário. */
 export const CONFLITOS_CLIENTE = { documento: /CPF|CNPJ/i };
 export const CONFLITOS_VEICULO = { placa: /placa/i };
+
+/** Uma OS no histórico do veículo (GET /api/veiculos/{id}/ordens). `servicos` e `total` são do orçamento vigente. */
+export interface OsDoVeiculo {
+  id: number;
+  numero: number;
+  status: StatusOS;
+  dataAbertura: string;
+  dataEntrega: string | null;
+  quilometragem: number | null;
+  problemaRelatado: string;
+  servicos: string[];
+  total: number | null;
+}

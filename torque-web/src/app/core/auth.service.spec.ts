@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { AuthService, CHAVE_SESSAO, lerExpiracao } from './auth.service';
+import { AuthService, CHAVE_SESSAO, lerExpiracao, lerUsuarioId } from './auth.service';
 import { respostaLogin, tokenFicticio } from './testes';
 
 describe('AuthService', () => {
@@ -79,5 +79,20 @@ describe('AuthService', () => {
 
     expect(exp).toBeGreaterThan(Date.now());
     expect(lerExpiracao('sem-pontos')).toBeNull();
+  });
+
+  it('deve expor o id do usuário logado lido da claim sub do token', () => {
+    const auth = criar();
+    expect(auth.usuarioId()).toBeNull();
+
+    auth.login('rai@oficina.teste', 'senha-ficticia').subscribe();
+    http.expectOne('/api/auth/login').flush({ token: tokenFicticio(3600, 7), nome: 'Raimundo', perfil: 'MECANICO' });
+
+    expect(auth.usuarioId()).toBe(7);
+  });
+
+  it('deve devolver id nulo para token sem sub numérico', () => {
+    expect(lerUsuarioId('token-invalido')).toBeNull();
+    expect(lerUsuarioId(`${btoa('{}')}.${btoa(JSON.stringify({ sub: 'abc' }))}.x`)).toBeNull();
   });
 });
