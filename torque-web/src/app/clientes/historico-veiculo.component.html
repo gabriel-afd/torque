@@ -1,0 +1,61 @@
+<div class="topo">
+  <a mat-icon-button routerLink="/veiculos" aria-label="Voltar para a busca de veículos"><mat-icon>arrow_back</mat-icon></a>
+  <h1>Histórico do veículo</h1>
+</div>
+
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (naoEncontrado()) {
+  <div class="card vazio" data-testid="nao-encontrado">Veículo {{ placa() }} não encontrado.</div>
+}
+
+@if (veiculo(); as v) {
+  <div class="conteudo">
+    <section class="card veiculo" data-testid="veiculo">
+      <div class="placa grande">{{ v.placa }}</div>
+      <div class="info">{{ descricaoVeiculo(v) }}</div>
+      <div class="dono">
+        <span>
+          {{ v.dono.nome }}
+          @if (v.dono.telefone) {
+            <br /><span class="muted">{{ telefone(v.dono.telefone) }}</span>
+          }
+        </span>
+        @if (balcao()) {
+          <a [routerLink]="['/clientes', v.dono.id]">Ver cliente</a>
+        }
+      </div>
+    </section>
+
+    <div class="numeros">
+      <div class="card numero"><b data-testid="total-os">{{ totalOs() }}</b><span>OS registradas</span></div>
+      <div class="card numero">
+        <b data-testid="ultima-km">{{ ultimaKm() !== null ? (ultimaKm() | number: '1.0-0') + ' km' : '—' }}</b>
+        <span>última quilometragem</span>
+      </div>
+    </div>
+
+    <h2>Ordens de serviço</h2>
+    @for (os of ordens(); track os.id) {
+      <a class="card os" [routerLink]="['/ordens', os.id]" data-testid="os">
+        <div class="linha muted">
+          <span>OS #{{ os.numero }} · {{ data(os) }}{{ os.quilometragem !== null ? ' · ' + (os.quilometragem | number: '1.0-0') + ' km' : '' }}</span>
+          <span class="chip st-{{ os.status }}">{{ rotuloStatus[os.status] }}</span>
+        </div>
+        <div class="titulo">{{ os.problemaRelatado }}</div>
+        <div class="detalhe">{{ detalhe(os) }}</div>
+        @if (os.total !== null && os.status !== 'RECUSADA') {
+          <div class="valor"><b>{{ os.total | currency: 'BRL' }}</b></div>
+        }
+      </a>
+    } @empty {
+      <p class="muted">Nenhuma OS para este veículo.</p>
+    }
+  </div>
+
+  @if (balcao()) {
+    <button mat-flat-button class="acao-principal fab" (click)="novaOs()" data-testid="fab-nova-os">+ Nova OS</button>
+  }
+}

@@ -6,7 +6,7 @@
 
 @if (os(); as os) {
   <header class="card cabecalho" data-testid="cabecalho">
-    <div><div class="kv">OS #{{ os.numero }}</div><div class="placa grande">{{ os.veiculo.placa }}</div></div>
+    <div><div class="kv">OS #{{ os.numero }}</div><a class="placa grande" [routerLink]="['/veiculos', os.veiculo.placa]" title="Histórico do veículo">{{ os.veiculo.placa }}</a></div>
     <div class="kv">Veículo<b>{{ veiculo(os) }}</b></div>
     <div class="kv">Cliente<b>{{ cliente(os) }}</b></div>
     <div class="kv">Quilometragem<b>{{ os.quilometragem !== null ? (os.quilometragem | number: '1.0-0') + ' km' : '—' }}</b></div>

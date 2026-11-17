@@ -38,6 +38,9 @@
           <strong>{{ v.marca }} {{ v.modelo }}</strong>
           <span class="muted">{{ v.ano || 'ano não informado' }}{{ v.cor ? ' · ' + v.cor : '' }}</span>
         </div>
+        <a mat-icon-button [routerLink]="['/veiculos', v.placa]" [attr.aria-label]="'Histórico do veículo ' + v.placa">
+          <mat-icon>history</mat-icon>
+        </a>
         <button mat-icon-button (click)="abrirVeiculo(v)" [attr.aria-label]="'Editar veículo ' + v.placa">
           <mat-icon>edit</mat-icon>
         </button>

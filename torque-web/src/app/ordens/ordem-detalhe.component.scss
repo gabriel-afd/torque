@@ -1,7 +1,7 @@
 .cabecalho {
   padding: 16px 18px; margin-bottom: 14px;
   display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center;
-  .grande { font-size: 22px; }
+  .grande { font-size: 22px; display: block; color: inherit; text-decoration: none; }
   .chip { margin-left: auto; }
 }
 .problema { max-width: 320px; }

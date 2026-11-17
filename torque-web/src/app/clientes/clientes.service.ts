@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Pagina } from '../core/modelos';
-import { Cliente, ClienteDetalhe, ClienteRequest, Veiculo, VeiculoComDono, VeiculoRequest } from './clientes.modelos';
+import { Cliente, ClienteDetalhe, ClienteRequest, OsDoVeiculo, Veiculo, VeiculoComDono, VeiculoRequest } from './clientes.modelos';
 
 /** Chamadas à API de clientes e veículos. */
 @Injectable({ providedIn: 'root' })
@@ -44,5 +44,12 @@ export class ClientesService {
   /** 404 quando a placa não está cadastrada. */
   buscarPorPlaca(placa: string): Observable<VeiculoComDono> {
     return this.http.get<VeiculoComDono>('/api/veiculos', { params: { placa } });
+  }
+
+  /** HU09: OS do veículo, da mais recente para a mais antiga. */
+  historico(veiculoId: number, tamanho = 50): Observable<Pagina<OsDoVeiculo>> {
+    // sem sort: a API já ordena por data de abertura e id, do mais recente para o mais antigo
+    const params = new HttpParams().set('size', tamanho);
+    return this.http.get<Pagina<OsDoVeiculo>>(`/api/veiculos/${veiculoId}/ordens`, { params });
   }
 }

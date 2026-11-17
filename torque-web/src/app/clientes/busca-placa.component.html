@@ -42,6 +42,7 @@
         {{ v.dono.nome }}{{ v.dono.telefone ? ' · ' + telefone(v.dono.telefone) : '' }}
       </span>
     </div>
+    <a mat-stroked-button [routerLink]="['/veiculos', v.placa]" data-testid="ver-historico">Histórico</a>
     @if (podeCadastrar()) {
       <a mat-stroked-button [routerLink]="['/clientes', v.dono.id]">Ver cliente</a>
     }
