@@ -74,43 +74,51 @@ export class CadastroRapidoComponent {
   }
 
   salvar(): void {
-    const novo = this.modo() === 'novo';
-    if (novo && this.formCliente.invalid) {
-      this.formCliente.markAllAsTouched();
-    }
-    if (this.formVeiculo.invalid) {
-      this.formVeiculo.markAllAsTouched();
-    }
-    if ((novo && this.formCliente.invalid) || this.formVeiculo.invalid) {
+    if (!this.formulariosValidos()) {
       return;
     }
-    if (!novo && !this.selecionado()) {
-      this.mensagens.aviso('Escolha o cliente dono do veículo ou cadastre um cliente novo.');
-      return;
-    }
-
-    this.salvando.set(true);
-    if (novo) {
-      this.api.cadastrar(paraClienteRequest(this.formCliente)).subscribe({
-        next: (cliente) => {
-          // a partir daqui o cliente existe: se o veículo falhar, não cadastra o cliente de novo
-          this.selecionado.set(cliente);
-          this.modo.set('existente');
-          this.cadastrarVeiculo(cliente);
-        },
-        error: (erro) => {
-          this.salvando.set(false);
-          if (!aplicarErrosDaApi(this.formCliente, erro, CONFLITOS_CLIENTE)) {
-            this.mensagens.erro(erro);
-          }
-        },
-      });
+    if (this.modo() === 'novo') {
+      this.cadastrarCliente();
     } else {
       this.cadastrarVeiculo(this.selecionado()!);
     }
   }
 
+  /** Marca os erros dos formulários em uso e confere se há dono escolhido (cliente existente). */
+  private formulariosValidos(): boolean {
+    const novo = this.modo() === 'novo';
+    const formularios = novo ? [this.formCliente, this.formVeiculo] : [this.formVeiculo];
+    formularios.filter((f) => f.invalid).forEach((f) => f.markAllAsTouched());
+    if (formularios.some((f) => f.invalid)) {
+      return false;
+    }
+    if (!novo && !this.selecionado()) {
+      this.mensagens.aviso('Escolha o cliente dono do veículo ou cadastre um cliente novo.');
+      return false;
+    }
+    return true;
+  }
+
+  private cadastrarCliente(): void {
+    this.salvando.set(true);
+    this.api.cadastrar(paraClienteRequest(this.formCliente)).subscribe({
+      next: (cliente) => {
+        // a partir daqui o cliente existe: se o veículo falhar, não cadastra o cliente de novo
+        this.selecionado.set(cliente);
+        this.modo.set('existente');
+        this.cadastrarVeiculo(cliente);
+      },
+      error: (erro) => {
+        this.salvando.set(false);
+        if (!aplicarErrosDaApi(this.formCliente, erro, CONFLITOS_CLIENTE)) {
+          this.mensagens.erro(erro);
+        }
+      },
+    });
+  }
+
   private cadastrarVeiculo(cliente: Cliente): void {
+    this.salvando.set(true);
     this.api.cadastrarVeiculo(cliente.id, paraVeiculoRequest(this.formVeiculo)).subscribe({
       next: (veiculo: Veiculo) => {
         this.salvando.set(false);
