@@ -164,3 +164,42 @@ p {
   --mdc-snackbar-container-color: #1f3a5f;
   --mat-snack-bar-button-color: #f9c694;
 }
+
+// Chip de status da OS (cores do protótipo, base.css).
+.chip {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: #edeff2;
+  color: #4a5565;
+
+  &.st-ABERTA { background: #e8eef7; color: #1f3a5f; }
+  &.st-AGUARDANDO_APROVACAO { background: #fff1de; color: #a35b00; }
+  &.st-APROVADA { background: #e2f4e6; color: #1e7a34; }
+  &.st-EM_EXECUCAO { background: #e3eefb; color: #1f5faf; }
+  &.st-AGUARDANDO_PECA, &.st-RECUSADA, &.st-CANCELADA { background: #fde7e7; color: #b42318; }
+  &.st-CONCLUIDA { background: #eae7fb; color: #4b3baf; }
+}
+
+// Peças de tela compartilhadas (OS, histórico do veículo, admin).
+.crumb { font-size: 12.5px; color: var(--torque-texto-suave); margin-bottom: 8px; a { color: inherit; } }
+.kv { font-size: 12px; color: var(--torque-texto-suave); b { display: block; color: var(--torque-texto); font-size: 13.5px; margin-top: 2px; } }
+.secao {
+  padding: 14px 16px; margin-bottom: 14px;
+  h2 { font-size: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+  h3 { font-size: 12px; margin: 12px 0 4px; }
+}
+.tabela-simples { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tabela-simples th { text-align: left; font-size: 11.5px; color: var(--torque-texto-suave); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--torque-borda); }
+.tabela-simples td { padding: 6px 8px; border-bottom: 1px solid #f0f2f5; }
+.r { text-align: right; }
+.linha-tempo {
+  list-style: none; margin: 0; padding: 0; font-size: 12.5px;
+  li { padding: 6px 0 6px 14px; border-left: 2px solid #d5dce6; position: relative; }
+  li::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--torque-azul); position: absolute; left: -5px; top: 10px; }
+}
+.dica { font-size: 11.5px; color: var(--torque-texto-suave); margin-top: 4px; }
