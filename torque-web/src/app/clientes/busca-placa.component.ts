@@ -14,6 +14,7 @@ import { formatarTelefone, normalizarPlaca, placaValidator } from '../shared/val
 import { CadastroRapidoComponent, DadosCadastroRapido } from './cadastro-rapido.component';
 import { VeiculoComDono } from './clientes.modelos';
 import { ClientesService } from './clientes.service';
+import { comCarregamento } from '../shared/carregamento';
 
 /**
  * Busca rápida por placa. Achou: emite `encontrado`. Não achou: oferece cadastrar o veículo (e o cliente,
@@ -54,16 +55,11 @@ export class BuscaPlacaComponent {
       return;
     }
     const placa = normalizarPlaca(this.placa.value);
-    this.buscando.set(true);
     this.veiculo.set(null);
     this.naoEncontrada.set(null);
-    this.api.buscarPorPlaca(placa).subscribe({
-      next: (veiculo) => {
-        this.buscando.set(false);
-        this.selecionar(veiculo);
-      },
+    this.api.buscarPorPlaca(placa).pipe(comCarregamento(this.buscando)).subscribe({
+      next: (veiculo) => this.selecionar(veiculo),
       error: (erro: unknown) => {
-        this.buscando.set(false);
         if (erro instanceof HttpErrorResponse && erro.status === 404) {
           this.naoEncontrada.set(placa);
         } else {

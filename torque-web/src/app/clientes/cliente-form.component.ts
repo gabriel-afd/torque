@@ -8,6 +8,7 @@ import { aplicarErrosDaApi } from '../shared/erros-formulario';
 import { ClienteCamposComponent, criarFormCliente, paraClienteRequest } from './cliente-campos.component';
 import { CONFLITOS_CLIENTE, Cliente } from './clientes.modelos';
 import { ClientesService } from './clientes.service';
+import { comCarregamento } from '../shared/carregamento';
 
 /** Cadastro (/clientes/novo) e edição (/clientes/:id/editar) de cliente. */
 @Component({
@@ -49,16 +50,9 @@ export class ClienteFormComponent implements OnInit {
   ngOnInit(): void {
     const id = this.id();
     if (id) {
-      this.carregando.set(true);
-      this.api.buscar(Number(id)).subscribe({
-        next: (cliente) => {
-          this.form.reset(criarFormCliente(new FormBuilder(), cliente).getRawValue());
-          this.carregando.set(false);
-        },
-        error: (erro) => {
-          this.carregando.set(false);
-          this.mensagens.erro(erro);
-        },
+      this.api.buscar(Number(id)).pipe(comCarregamento(this.carregando)).subscribe({
+        next: (cliente) => this.form.reset(criarFormCliente(new FormBuilder(), cliente).getRawValue()),
+        error: (erro) => this.mensagens.erro(erro),
       });
     }
   }
@@ -68,18 +62,15 @@ export class ClienteFormComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    this.salvando.set(true);
     const id = this.id();
     const requisicao = paraClienteRequest(this.form);
     const chamada = id ? this.api.atualizar(Number(id), requisicao) : this.api.cadastrar(requisicao);
-    chamada.subscribe({
+    chamada.pipe(comCarregamento(this.salvando)).subscribe({
       next: (cliente: Cliente) => {
-        this.salvando.set(false);
         this.mensagens.sucesso(id ? 'Cliente atualizado.' : 'Cliente cadastrado.');
         this.router.navigate(['/clientes', cliente.id]);
       },
       error: (erro) => {
-        this.salvando.set(false);
         if (!aplicarErrosDaApi(this.form, erro, CONFLITOS_CLIENTE)) {
           this.mensagens.erro(erro);
         }

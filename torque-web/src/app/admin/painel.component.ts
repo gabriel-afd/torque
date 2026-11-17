@@ -6,6 +6,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MensagemService } from '../core/mensagem.service';
 import { PainelMes } from './admin.modelos';
 import { AdminService } from './admin.service';
+import { comCarregamento } from '../shared/carregamento';
 
 /** Painel do mês (RF16): OS abertas, concluídas, entregues e faturamento, com seletor de mês. */
 @Component({
@@ -64,16 +65,9 @@ export class PainelComponent implements OnInit {
 
   private carregar(): void {
     const ref = this.referencia();
-    this.carregando.set(true);
-    this.api.painel(ref.getFullYear(), ref.getMonth() + 1).subscribe({
-      next: (painel) => {
-        this.carregando.set(false);
-        this.painel.set(painel);
-      },
-      error: (erro) => {
-        this.carregando.set(false);
-        this.mensagens.erro(erro);
-      },
+    this.api.painel(ref.getFullYear(), ref.getMonth() + 1).pipe(comCarregamento(this.carregando)).subscribe({
+      next: (painel) => this.painel.set(painel),
+      error: (erro) => this.mensagens.erro(erro),
     });
   }
 }

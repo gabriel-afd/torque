@@ -25,6 +25,7 @@ import {
 import { HistoricoStatus, OrdemServico, ROTULO_STATUS, StatusOS } from './ordens.modelos';
 import { OrdensService } from './ordens.service';
 import { quando } from './quadro';
+import { comCarregamento } from '../shared/carregamento';
 
 const VAZIO: Rascunho = { servicos: [], pecas: [], desconto: 0 };
 
@@ -108,16 +109,9 @@ export class OrdemDetalheComponent implements OnInit {
   }
 
   carregar(): void {
-    this.carregando.set(true);
-    this.api.detalhar(Number(this.id())).subscribe({
-      next: (os) => {
-        this.carregando.set(false);
-        this.mostrar(os);
-      },
-      error: (erro) => {
-        this.carregando.set(false);
-        this.mensagens.erro(erro);
-      },
+    this.api.detalhar(Number(this.id())).pipe(comCarregamento(this.carregando)).subscribe({
+      next: (os) => this.mostrar(os),
+      error: (erro) => this.mensagens.erro(erro),
     });
   }
 
@@ -228,19 +222,16 @@ export class OrdemDetalheComponent implements OnInit {
     if (!os) {
       return;
     }
-    this.processando.set(true);
-    forkJoin({ pdf: this.api.pdf(os.id, os.orcamento.versao), link: this.api.compartilhamento(os.id) }).subscribe({
+    forkJoin({ pdf: this.api.pdf(os.id, os.orcamento.versao), link: this.api.compartilhamento(os.id) })
+      .pipe(comCarregamento(this.processando))
+      .subscribe({
       next: ({ pdf, link }) => {
-        this.processando.set(false);
         this.salvarArquivo(pdf, `orcamento-os-${os.numero}-v${os.orcamento.versao}.pdf`);
         if (!this.abrirLink(link.linkWhatsapp)) {
           this.mensagens.aviso('PDF baixado. O navegador bloqueou a janela do WhatsApp: permita pop-ups e tente de novo.');
         }
       },
-      error: (erro) => {
-        this.processando.set(false);
-        this.mensagens.erro(erro);
-      },
+      error: (erro) => this.mensagens.erro(erro),
     });
   }
 
@@ -339,17 +330,12 @@ export class OrdemDetalheComponent implements OnInit {
 
   /** Envia a ação à API: sucesso atualiza a tela; erro (422, 409, 403…) mostra a mensagem da API. */
   private executar(acao: Observable<OrdemServico>, sucesso: string): void {
-    this.processando.set(true);
-    acao.subscribe({
+    acao.pipe(comCarregamento(this.processando)).subscribe({
       next: (os) => {
-        this.processando.set(false);
         this.mostrar(os);
         this.mensagens.sucesso(sucesso);
       },
-      error: (erro) => {
-        this.processando.set(false);
-        this.mensagens.erro(erro);
-      },
+      error: (erro) => this.mensagens.erro(erro),
     });
   }
 

@@ -10,6 +10,7 @@ import { Perfil, ROTULO_PERFIL } from '../core/modelos';
 import { aplicarErrosDaApi } from '../shared/erros-formulario';
 import { Usuario } from './admin.modelos';
 import { AdminService } from './admin.service';
+import { comCarregamento } from '../shared/carregamento';
 
 /** Senha de 8 a 72 caracteres (a API também confere o limite de 72 bytes do BCrypt). */
 const VALIDADORES_SENHA = [Validators.minLength(8), Validators.maxLength(72)];
@@ -85,15 +86,12 @@ export class UsuarioFormComponent {
     }
     const { nome, email, perfil, senha } = this.form.getRawValue();
     const requisicao = { nome: nome.trim(), email: email.trim(), perfil, senha: senha || null };
-    this.salvando.set(true);
-    (this.usuario ? this.api.atualizarUsuario(this.usuario.id, requisicao) : this.api.cadastrarUsuario(requisicao)).subscribe({
+    (this.usuario ? this.api.atualizarUsuario(this.usuario.id, requisicao) : this.api.cadastrarUsuario(requisicao)).pipe(comCarregamento(this.salvando)).subscribe({
       next: (salvo) => {
-        this.salvando.set(false);
         this.mensagens.sucesso('Usuário salvo.');
         this.dialogo.close(salvo);
       },
       error: (erro) => {
-        this.salvando.set(false);
         if (!aplicarErrosDaApi(this.form, erro, { email: /e-mail/i })) {
           this.mensagens.erro(erro);
         }

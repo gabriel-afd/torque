@@ -9,6 +9,7 @@ import { formatarDocumento, formatarTelefone } from '../shared/validadores';
 import { ClienteDetalhe, Veiculo } from './clientes.modelos';
 import { ClientesService } from './clientes.service';
 import { DadosVeiculoForm, VeiculoFormComponent } from './veiculo-form.component';
+import { comCarregamento } from '../shared/carregamento';
 
 /** Dados do cliente e seus veículos (/clientes/:id). */
 @Component({
@@ -35,16 +36,9 @@ export class ClienteDetalheComponent implements OnInit {
   }
 
   carregar(): void {
-    this.carregando.set(true);
-    this.api.buscar(Number(this.id())).subscribe({
-      next: (cliente) => {
-        this.cliente.set(cliente);
-        this.carregando.set(false);
-      },
-      error: (erro) => {
-        this.carregando.set(false);
-        this.mensagens.erro(erro);
-      },
+    this.api.buscar(Number(this.id())).pipe(comCarregamento(this.carregando)).subscribe({
+      next: (cliente) => this.cliente.set(cliente),
+      error: (erro) => this.mensagens.erro(erro),
     });
   }
 

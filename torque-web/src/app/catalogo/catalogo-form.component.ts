@@ -8,6 +8,7 @@ import { errosDeCampo, MensagemService } from '../core/mensagem.service';
 import { aplicarErrosDaApi } from '../shared/erros-formulario';
 import { ItemCatalogo, ROTULO_TIPO, TipoCatalogo } from './catalogo.modelos';
 import { CatalogoService } from './catalogo.service';
+import { comCarregamento } from '../shared/carregamento';
 
 export interface DadosCatalogoForm {
   tipo: TipoCatalogo;
@@ -77,15 +78,12 @@ export class CatalogoFormComponent {
     const { codigo, descricao, preco } = this.form.getRawValue();
     const requisicao = { codigo: codigo || null, descricao: descricao ?? '', preco: Number(preco) };
     const { tipo, item } = this.dados;
-    this.salvando.set(true);
-    (item ? this.api.atualizar(tipo, item.id, requisicao) : this.api.cadastrar(tipo, requisicao)).subscribe({
+    (item ? this.api.atualizar(tipo, item.id, requisicao) : this.api.cadastrar(tipo, requisicao)).pipe(comCarregamento(this.salvando)).subscribe({
       next: (salvo) => {
-        this.salvando.set(false);
         this.mensagens.sucesso(`${this.rotulo[0].toUpperCase()}${this.rotulo.slice(1)} salvo.`);
         this.dialogo.close(salvo);
       },
       error: (erro) => {
-        this.salvando.set(false);
         if (!this.aplicarErros(erro)) {
           this.mensagens.erro(erro);
         }

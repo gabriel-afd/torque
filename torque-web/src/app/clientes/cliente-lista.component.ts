@@ -13,6 +13,7 @@ import { MensagemService } from '../core/mensagem.service';
 import { formatarDocumento, formatarTelefone } from '../shared/validadores';
 import { Cliente } from './clientes.modelos';
 import { ClientesService } from './clientes.service';
+import { comCarregamento } from '../shared/carregamento';
 
 @Component({
   selector: 'app-cliente-lista',
@@ -56,17 +57,12 @@ export class ClienteListaComponent implements OnInit {
   }
 
   carregar(): void {
-    this.carregando.set(true);
-    this.api.listar(this.busca.value, this.pagina(), this.tamanho()).subscribe({
+    this.api.listar(this.busca.value, this.pagina(), this.tamanho()).pipe(comCarregamento(this.carregando)).subscribe({
       next: (resposta) => {
         this.clientes.set(resposta.content);
         this.total.set(resposta.page.totalElements);
-        this.carregando.set(false);
       },
-      error: (erro) => {
-        this.carregando.set(false);
-        this.mensagens.erro(erro);
-      },
+      error: (erro) => this.mensagens.erro(erro),
     });
   }
 }

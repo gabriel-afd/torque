@@ -15,6 +15,7 @@ import { diasDesde } from '../ordens/quadro';
 import { formatarTelefone, normalizarPlaca } from '../shared/validadores';
 import { OsDoVeiculo, VeiculoComDono } from './clientes.modelos';
 import { ClientesService } from './clientes.service';
+import { comCarregamento } from '../shared/carregamento';
 
 /** Histórico do veículo (HU09), pensado para celular: docs/prototipos/historico.html. */
 @Component({
@@ -47,21 +48,19 @@ export class HistoricoVeiculoComponent implements OnInit {
   readonly telefone = formatarTelefone;
 
   ngOnInit(): void {
-    this.carregando.set(true);
     this.api
       .buscarPorPlaca(normalizarPlaca(this.placa()))
       .pipe(
         tap((veiculo) => this.veiculo.set(veiculo)),
         switchMap((veiculo) => this.api.historico(veiculo.id)),
+        comCarregamento(this.carregando),
       )
       .subscribe({
         next: (pagina) => {
-          this.carregando.set(false);
           this.ordens.set(pagina.content);
           this.totalOs.set(pagina.page.totalElements);
         },
         error: (erro: unknown) => {
-          this.carregando.set(false);
           if (erro instanceof HttpErrorResponse && erro.status === 404 && !this.veiculo()) {
             this.naoEncontrado.set(true);
           } else {

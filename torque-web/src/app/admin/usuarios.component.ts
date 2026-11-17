@@ -11,6 +11,7 @@ import { confirmar } from '../shared/confirmacao.component';
 import { Usuario } from './admin.modelos';
 import { AdminService } from './admin.service';
 import { UsuarioFormComponent } from './usuario-form.component';
+import { comCarregamento } from '../shared/carregamento';
 
 /** Usuários do sistema: cadastro, edição (perfil, senha) e inativação (só ADMINISTRADOR). */
 @Component({
@@ -76,17 +77,12 @@ export class UsuariosComponent implements OnInit {
   }
 
   carregar(): void {
-    this.carregando.set(true);
-    this.api.usuarios(this.pagina(), this.tamanho()).subscribe({
+    this.api.usuarios(this.pagina(), this.tamanho()).pipe(comCarregamento(this.carregando)).subscribe({
       next: (resposta) => {
-        this.carregando.set(false);
         this.usuarios.set(resposta.content);
         this.total.set(resposta.page.totalElements);
       },
-      error: (erro) => {
-        this.carregando.set(false);
-        this.mensagens.erro(erro);
-      },
+      error: (erro) => this.mensagens.erro(erro),
     });
   }
 

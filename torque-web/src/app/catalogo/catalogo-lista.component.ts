@@ -16,6 +16,7 @@ import { confirmar } from '../shared/confirmacao.component';
 import { CatalogoFormComponent, DadosCatalogoForm } from './catalogo-form.component';
 import { ItemCatalogo, ROTULO_TIPO, TipoCatalogo } from './catalogo.modelos';
 import { CatalogoService } from './catalogo.service';
+import { comCarregamento } from '../shared/carregamento';
 
 /** Lista paginada de serviços ou de peças com busca, inclusão, edição e inativação (só ADMINISTRADOR). */
 @Component({
@@ -106,17 +107,12 @@ export class CatalogoListaComponent implements OnInit {
   }
 
   carregar(): void {
-    this.carregando.set(true);
-    this.api.listar(this.tipo(), this.busca.value, this.incluirInativos.value, this.pagina(), this.tamanho()).subscribe({
+    this.api.listar(this.tipo(), this.busca.value, this.incluirInativos.value, this.pagina(), this.tamanho()).pipe(comCarregamento(this.carregando)).subscribe({
       next: (resposta) => {
-        this.carregando.set(false);
         this.itens.set(resposta.content);
         this.total.set(resposta.page.totalElements);
       },
-      error: (erro) => {
-        this.carregando.set(false);
-        this.mensagens.erro(erro);
-      },
+      error: (erro) => this.mensagens.erro(erro),
     });
   }
 
