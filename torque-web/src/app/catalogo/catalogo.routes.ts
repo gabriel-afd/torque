@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { PaginaVaziaComponent } from '../shared/pagina-vazia.component';
+import { CatalogoComponent } from './catalogo.component';
 
 export const CATALOGO_ROUTES: Routes = [
-  { path: '', component: PaginaVaziaComponent, title: 'Catálogo · Torque', data: { titulo: 'Catálogo' } },
+  { path: '', component: CatalogoComponent, title: 'Catálogo · Torque' },
 ];
