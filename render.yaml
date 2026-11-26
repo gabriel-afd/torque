@@ -6,6 +6,7 @@ services:
     name: torque
     runtime: docker
     plan: free
+    region: virginia       # mesma região do banco no Neon (AWS us-east-1)
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /index.html
