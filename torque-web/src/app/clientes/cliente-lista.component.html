@@ -1,19 +1,27 @@
 <div class="page-head">
-  <h1>Clientes</h1>
+  <div class="titulo">
+    <h1>Clientes <span class="contagem" data-testid="contagem-clientes">{{ lista.total() }}</span></h1>
+    <p class="subtitulo">Informações organizadas para um atendimento mais próximo.</p>
+  </div>
   <button mat-flat-button class="acao-principal novo" type="button" (click)="novoCliente()" data-testid="novo-cliente">
     <mat-icon>add</mat-icon> Novo cliente
   </button>
 </div>
 
+<div class="filtros">
 <mat-form-field class="busca" subscriptSizing="dynamic">
   <mat-icon matPrefix>search</mat-icon>
   <input matInput [formControl]="busca" placeholder="Buscar por nome ou CPF/CNPJ" aria-label="Buscar por nome ou CPF/CNPJ" data-testid="busca-cliente" />
 </mat-form-field>
+<span class="muted">{{ lista.total() }} {{ lista.total() === 1 ? 'cliente cadastrado' : 'clientes cadastrados' }}</span>
+</div>
 
 <div class="card lista">
   @if (carregando()) {
     <mat-progress-bar mode="indeterminate" />
   }
+
+  <div class="linha cabecalho" aria-hidden="true"><span>Nome do cliente</span><span>CPF / CNPJ</span><span>Telefone</span><span></span></div>
 
   @for (cliente of lista.itens(); track cliente.id) {
     <a class="linha" [routerLink]="[cliente.id]" data-testid="linha-cliente">
@@ -25,6 +33,7 @@
       </div>
       <span class="muted">{{ documento(cliente.documento) }}</span>
       <span class="muted">{{ telefone(cliente.telefone) }}</span>
+      <mat-icon class="seta">chevron_right</mat-icon>
     </a>
   } @empty {
     @if (!carregando()) {
