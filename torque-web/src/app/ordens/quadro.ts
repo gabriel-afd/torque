@@ -91,6 +91,50 @@ export function situacaoDoCartao(os: OrdemResumo, agora: Date): string | null {
   return null;
 }
 
+/** Valor do orçamento no canto do cartão; vazio nas colunas em que o tempo importa mais (visual Grafite e Lima). */
+export function valorDoCartao(os: OrdemResumo): string {
+  return os.status === 'ABERTA' || os.status === 'EM_EXECUCAO' || os.status === 'AGUARDANDO_PECA' ? '' : moeda(os.total);
+}
+
+/** Tempo no rodapé do cartão (com relógio): abertura, envio do orçamento, início da execução ou espera da peça. */
+export function tempoDoCartao(os: OrdemResumo, agora: Date): string | null {
+  switch (os.status) {
+    case 'ABERTA':
+      return quando(new Date(os.dataAbertura), agora);
+    case 'AGUARDANDO_APROVACAO':
+      return situacaoDoCartao(os, agora);
+    case 'EM_EXECUCAO':
+      return infoDoCartao(os, agora);
+    case 'AGUARDANDO_PECA':
+      return haQuantoTempo(inicioDoStatus(os), agora);
+    default:
+      return null;
+  }
+}
+
+export interface ResumoDoQuadro {
+  total: number;
+  aguardandoAprovacao: number;
+  emExecucao: number;
+  concluidas: number;
+}
+
+/** Números do topo do quadro. */
+export function resumoDoQuadro(ordens: OrdemResumo[]): ResumoDoQuadro {
+  const contar = (status: StatusOS) => ordens.filter((os) => os.status === status).length;
+  return {
+    total: ordens.length,
+    aguardandoAprovacao: contar('AGUARDANDO_APROVACAO'),
+    emExecucao: contar('EM_EXECUCAO'),
+    concluidas: contar('CONCLUIDA'),
+  };
+}
+
+/** "04", "11": números do resumo com dois dígitos, como no mockup. */
+export function doisDigitos(numero: number): string {
+  return String(numero).padStart(2, '0');
+}
+
 // Arrastar cartões entre colunas ------------------------------------------------------------------
 
 /** Ações que o quadro executa ao soltar um cartão em outra coluna. */

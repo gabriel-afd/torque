@@ -79,7 +79,18 @@ describe('QuadroComponent', () => {
     expect(coluna('ABERTA').textContent).toContain('MZK2310');
     expect(coluna('EM_EXECUCAO').textContent).toContain('LKJ9087');
     expect(coluna('APROVADA').textContent).toContain('Nenhuma OS');
-    expect(fixture.nativeElement.querySelector('[data-testid="total-andamento"]').textContent).toContain('4 OS');
+    expect(fixture.nativeElement.querySelector('[data-testid="total-andamento"]').textContent).toContain('4 ordens de serviço');
+  });
+
+  it('deve mostrar o resumo do topo com os números do quadro', () => {
+    montar('ATENDENTE');
+    requisicaoDoQuadro().flush(pagina([
+      ordem('ABERTA'), ordem('AGUARDANDO_APROVACAO'), ordem('AGUARDANDO_APROVACAO'), ordem('EM_EXECUCAO'), ordem('CONCLUIDA'),
+    ]));
+    fixture.detectChanges();
+
+    const numeros = todos('[data-testid="resumo-quadro"] b').map((b) => b.textContent!.trim());
+    expect(numeros).toEqual(['05', '02', '01', '01']);
   });
 
   it('deve mostrar número da OS, placa, veículo, cliente e mecânico no cartão', () => {

@@ -1,5 +1,6 @@
 import {
-  agruparPorStatus, diasDesde, emAlerta, haQuantoTempo, infoDoCartao, moeda, movimentoNoQuadro, situacaoDoCartao,
+  agruparPorStatus, diasDesde, doisDigitos, emAlerta, haQuantoTempo, infoDoCartao, moeda, movimentoNoQuadro, resumoDoQuadro,
+  situacaoDoCartao, tempoDoCartao, valorDoCartao,
 } from './quadro';
 import { Contexto } from './orcamento';
 import { COLUNAS_QUADRO, StatusOS } from './ordens.modelos';
@@ -60,6 +61,36 @@ describe('regras do quadro', () => {
   it('deve formatar moeda em reais com espaço comum', () => {
     expect(moeda(370.5)).toBe('R$ 370,50');
     expect(moeda(null)).toBe('');
+  });
+});
+
+describe('cartão e resumo do quadro (visual Grafite e Lima)', () => {
+  const agora = new Date(2026, 10, 15, 14, 0);
+
+  it('deve mostrar o valor só nas colunas em que o tempo não é o principal', () => {
+    expect(valorDoCartao(ordem('AGUARDANDO_APROVACAO', { total: 525 }))).toBe('R$ 525,00');
+    expect(valorDoCartao(ordem('CONCLUIDA', { total: 458.9 }))).toBe('R$ 458,90');
+    expect(valorDoCartao(ordem('ABERTA'))).toBe('');
+    expect(valorDoCartao(ordem('EM_EXECUCAO'))).toBe('');
+    expect(valorDoCartao(ordem('AGUARDANDO_PECA'))).toBe('');
+  });
+
+  it('deve mostrar no rodapé o tempo que importa em cada coluna', () => {
+    expect(tempoDoCartao(ordem('ABERTA', { dataAbertura: '2026-11-15T08:15:00' }), agora)).toBe('hoje 08:15');
+    expect(tempoDoCartao(ordem('AGUARDANDO_APROVACAO', { dataStatus: '2026-11-13T09:00:00' }), agora)).toBe('Enviado há 2 dias');
+    expect(tempoDoCartao(ordem('EM_EXECUCAO', { dataStatus: '2026-11-14T10:00:00' }), agora)).toBe('desde ontem');
+    expect(tempoDoCartao(ordem('AGUARDANDO_PECA', { dataStatus: '2026-11-12T10:00:00' }), agora)).toBe('há 3 dias');
+    expect(tempoDoCartao(ordem('APROVADA'), agora)).toBeNull();
+  });
+
+  it('deve contar o resumo do topo e formatar com dois dígitos', () => {
+    const resumo = resumoDoQuadro([
+      ordem('ABERTA'), ordem('AGUARDANDO_APROVACAO'), ordem('AGUARDANDO_APROVACAO'), ordem('EM_EXECUCAO'), ordem('CONCLUIDA'),
+    ]);
+
+    expect(resumo).toEqual({ total: 5, aguardandoAprovacao: 2, emExecucao: 1, concluidas: 1 });
+    expect(doisDigitos(4)).toBe('04');
+    expect(doisDigitos(11)).toBe('11');
   });
 });
 
