@@ -138,6 +138,14 @@ Status: Não executado · Aprovado · Reprovado · Bloqueado.
 | CT56 | RNF05 | Desempenho da listagem | Banco com 10 mil OS; GET /api/ordens | Resposta em até 2 segundos | Média | M | Aprovado | scripts/ct56/gerar-10mil-os.sql + medir-listagem.sh, 10.017 OS, 10 chamadas por consulta: padrão 0,023 s (máx. 0,031 s), quadro com 6 status/100 por página 0,024 s, busca 0,022 s, página 150 0,022 s (2026-11-16; API jar + PostgreSQL 17 local) |
 | CT57 | RNF06 | Dados pessoais | Revisar respostas e logs da API | Sem senha, token ou dado desnecessário exposto | Alta | M | Aprovado | scripts/testes-manuais/ct53-ct57-api.mjs: login e GET /api/usuarios sem senha ou hash; MECANICO recebe o cliente só com id e nome; CPF duplicado 409 no formato padrão, sem stack trace; sem token 401. Log da API após o fluxo (47 linhas) sem senha, token `eyJ`, hash BCrypt nem o CPF usado (2026-11-25) |
 
+### 5.8 Implantação (Macro Entrega 4)
+
+| ID | Origem | Cenário | Entrada / passos | Resultado esperado | Prioridade | Nível | Status | Evidência |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| CT58 | Implantação | Imagem única serve frontend e API | GET `/`, `/index.html` e rotas do Angular sem token; GET de arquivo `.js` inexistente; GET `/api/...` sem e com token; POST fora de `/api` sem token | `index.html` nas rotas do SPA (forward na raiz); 404 JSON para arquivo e rota `/api` inexistentes; 401 na API sem token; escrita fora de `/api` continua exigindo login | Alta | I | Aprovado | FrontendIntegracaoTest#deveServirIndexHtmlSemLogin, #deveServirIndexHtmlNaRaiz, #deveEncaminharRotaDoAngularParaIndexHtml, #deveResponder404ParaArquivoEstaticoInexistente, #deveManterApiProtegidaSemToken, #naoDeveEncaminharRotaApiInexistenteParaIndexHtml, #naoDeveLiberarEscritaForaDaApiSemToken (2026-11-26) |
+| CT59 | Implantação | Jar com o build do Angular em 512 MB | Reproduzir os estágios do Dockerfile sem Docker (`ng build` → `static/` → `mvn package`); subir o jar com as flags de memória da imagem (`-Xmx307m`, SerialGC, porta via `PORT`) contra PostgreSQL local | Sobe sem erro; `/`, `/quadro`, `/ordens/17` e o `main-*.js` com 200; login 200 e `/api/ordens` 200 com token; memória abaixo de 512 MB | Alta | M | Aprovado | Subida em 7,4 s; rotas do SPA 200 `text/html`; `main-6XPHJAN3.js` 200; `/main-inexistente.js` 404 JSON; `/api/ordens` 401 sem token e 200 com token; Swagger 200; RSS do processo 329 MB (2026-11-26; Docker indisponível na máquina) |
+| CT60 | Implantação | Deploy no Render + Neon | Blueprint `render.yaml`, banco no Neon; acessar a URL pública, logar como admin e abrir o quadro | Build da imagem ok, Flyway aplica as migrações, login e quadro funcionam por HTTPS | Alta | M | Não executado | Depende das contas do Render e do Neon (feito pelo autor) |
+
 ## 6. Execuções
 
 Cada execução registrada com data, comando, resultado e commit testado.
@@ -166,6 +174,9 @@ Cada execução registrada com data, comando, resultado e commit testado.
 | 2026-11-16 | feature/15-testes-finais | `scripts/ct56/medir-listagem.sh` (API jar, perfil demo, 10.017 OS) | 4 consultas × 10 | 0 | CT56: todas as médias entre 0,022 s e 0,024 s (meta 2 s). Subida com perfil demo carregou 4 usuários, 10 clientes, 15 veículos e 17 OS no banco real. Log da subida sem senha ou token (apoio ao CT57). |
 | 2026-11-25 | feature/16-testes-manuais | `node scripts/testes-manuais/ct53-ct57-api.mjs` (API jar, perfil demo, frontend `ng serve`) | 27 verificações | 0 | CT53 e CT57 pela API através do proxy do frontend. Antes: suíte completa já verde na main (API 383, web 157). |
 | 2026-11-25 | feature/16-testes-manuais | `node scripts/testes-manuais/ct54-ct55-navegador.mjs` (Chrome headless, 360 px) | 5 verificações | 0 | CT54 (4 telas sem rolagem horizontal) e CT55 (3 telas até abrir a OS). Prints conferidos visualmente. |
+| 2026-11-26 | feature/18-deploy | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 388 | 4 → 0 | CT58 (FrontendIntegracaoTest, 7 testes). 3 falhas esperadas antes da implementação (teste escrito primeiro: 401 nas rotas do frontend). 1 falha por teste mal escrito (`/` é welcome page com forward para index.html, que o MockMvc não segue; asserção trocada por `forwardedUrl`). Nenhum defeito de código. |
+| 2026-11-26 | feature/18-deploy | `npm run build && npm test -- --watch=false --browsers=ChromeHeadless` (web) | 157 | 0 | Sem mudança no frontend; o build de produção é o que entra na imagem. |
+| 2026-11-26 | feature/18-deploy | Estágios do Dockerfile à mão + `java -Xmx307m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Xss512k -jar` (PORT=8089) + curl | 12 verificações | 0 | CT59. Docker indisponível na máquina: a imagem em si só vai ser construída no primeiro deploy do Render (CT60). |
 
 ## 7. Defeitos
 
@@ -186,7 +197,7 @@ Defeitos encontrados durante o desenvolvimento e os testes, com causa e correç�
 
 ## 8. Resumo final
 
-Preenchido ao fim da Macro Entrega 3.
+Preenchido ao fim da Macro Entrega 3. Os casos de implantação da Macro Entrega 4 (CT58–CT60, seção 5.8) ficam fora deste resumo.
 
 | Indicador | Valor |
 | --- | --- |
