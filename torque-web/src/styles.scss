@@ -102,12 +102,15 @@ p {
   gap: 8px;
 }
 
-.ponto {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--torque-laranja);
+// Engrenagem da marca: o SVG da aba (favicon.svg) usado como máscara, pintado com o laranja da marca.
+.marca-icone {
+  width: 1.1em;
+  height: 1.1em;
+  flex: none;
   display: inline-block;
+  background: var(--torque-laranja);
+  -webkit-mask: url('/favicon.svg') center / contain no-repeat;
+  mask: url('/favicon.svg') center / contain no-repeat;
 }
 
 .page-head {

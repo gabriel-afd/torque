@@ -39,6 +39,15 @@ describe('LoginComponent', () => {
     localStorage.removeItem(CHAVE_SESSAO);
   });
 
+  it('deve mostrar a engrenagem da marca ao lado do nome', () => {
+    montar();
+    const icone: HTMLElement = fixture.nativeElement.querySelector('.logo .marca-icone');
+
+    expect(icone).not.toBeNull();
+    expect(getComputedStyle(icone).maskImage).toContain('favicon.svg');
+    expect(fixture.nativeElement.querySelector('.ponto')).toBeNull();
+  });
+
   it('deve mostrar "E-mail ou senha inválidos" quando a API recusar o login', () => {
     montar();
     preencher('ana@oficina.teste', 'errada');
