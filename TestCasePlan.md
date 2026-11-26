@@ -132,11 +132,11 @@ Status: Não executado · Aprovado · Reprovado · Bloqueado.
 
 | ID | Origem | Cenário | Entrada / passos | Resultado esperado | Prioridade | Nível | Status | Evidência |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| CT53 | Todas as HUs | Fluxo completo | Login → cadastrar cliente e veículo → abrir OS → orçar → compartilhar → aprovar → atribuir → executar → aguardar peça → concluir → entregar | Todas as etapas sem erro; OS aparece no histórico do veículo | Alta | M | Não executado | |
-| CT54 | RNF01 | Uso no celular | Abrir login, quadro e histórico com largura de 360 px | Telas legíveis e utilizáveis, sem rolagem horizontal | Média | M | Não executado | |
-| CT55 | RNF02 | Abrir OS rapidamente | Contar telas até abrir OS de veículo cadastrado | No máximo 3 telas | Média | M | Não executado | |
+| CT53 | Todas as HUs | Fluxo completo | Login → cadastrar cliente e veículo → abrir OS → orçar → compartilhar → aprovar → atribuir → executar → aguardar peça → concluir → entregar | Todas as etapas sem erro; OS aparece no histórico do veículo | Alta | M | Aprovado | scripts/testes-manuais/ct53-ct57-api.mjs: 15 passos do roteiro pela API (via proxy do frontend), OS nº 1017 de ABERTA a ENTREGUE com 8 registros de histórico e no topo do histórico do veículo; extras: RN05 (422), RN08 (422), RN09 (403); saída em docs/evidencias/ct53-ct57-saida.txt; tela final em docs/evidencias/ct54-ct55/ct54-3-ordem.png (2026-11-25) |
+| CT54 | RNF01 | Uso no celular | Abrir login, quadro e histórico com largura de 360 px | Telas legíveis e utilizáveis, sem rolagem horizontal | Média | M | Aprovado | scripts/testes-manuais/ct54-ct55-navegador.mjs (Chrome headless, 360 × 780, modo móvel): login, quadro, tela da OS e histórico com scrollWidth = 360 (sem rolagem horizontal); colunas do quadro rolam dentro do contêiner; menu ☰; resumo abaixo dos itens; botão "+ Nova OS" fixo sem cobrir o último cartão; prints em docs/evidencias/ct54-ct55/ (2026-11-25) |
+| CT55 | RNF02 | Abrir OS rapidamente | Contar telas até abrir OS de veículo cadastrado | No máximo 3 telas | Média | M | Aprovado | scripts/testes-manuais/ct54-ct55-navegador.mjs: quadro → diálogo Nova OS (placa + problema) → /ordens/19 com status Aberta = 3 telas; prints ct55-1 a ct55-3 em docs/evidencias/ct54-ct55/ (2026-11-25) |
 | CT56 | RNF05 | Desempenho da listagem | Banco com 10 mil OS; GET /api/ordens | Resposta em até 2 segundos | Média | M | Aprovado | scripts/ct56/gerar-10mil-os.sql + medir-listagem.sh, 10.017 OS, 10 chamadas por consulta: padrão 0,023 s (máx. 0,031 s), quadro com 6 status/100 por página 0,024 s, busca 0,022 s, página 150 0,022 s (2026-11-16; API jar + PostgreSQL 17 local) |
-| CT57 | RNF06 | Dados pessoais | Revisar respostas e logs da API | Sem senha, token ou dado desnecessário exposto | Alta | M | Não executado | |
+| CT57 | RNF06 | Dados pessoais | Revisar respostas e logs da API | Sem senha, token ou dado desnecessário exposto | Alta | M | Aprovado | scripts/testes-manuais/ct53-ct57-api.mjs: login e GET /api/usuarios sem senha ou hash; MECANICO recebe o cliente só com id e nome; CPF duplicado 409 no formato padrão, sem stack trace; sem token 401. Log da API após o fluxo (47 linhas) sem senha, token `eyJ`, hash BCrypt nem o CPF usado (2026-11-25) |
 
 ## 6. Execuções
 
@@ -164,6 +164,8 @@ Cada execução registrada com data, comando, resultado e commit testado.
 | 2026-11-16 | feature/15-testes-finais | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 383 | 0 | Suíte completa da API. Novos: perfil demo (DadosDemoTest, DadosDemoIntegracaoTest, DadosDemoForaDoPerfilIntegracaoTest). Conferido por script que toda evidência citada no plano (classe#método e nome de spec) existe. JaCoCo total 96,4% linhas / 86,2% ramos; ordens 97,6% / 87,0%. |
 | 2026-11-16 | feature/15-testes-finais | `npm run build && npm test -- --watch=false --browsers=ChromeHeadless` (web) | 157 | 0 | Suíte completa do frontend; cobertura 89,5% linhas / 82,7% ramos. |
 | 2026-11-16 | feature/15-testes-finais | `scripts/ct56/medir-listagem.sh` (API jar, perfil demo, 10.017 OS) | 4 consultas × 10 | 0 | CT56: todas as médias entre 0,022 s e 0,024 s (meta 2 s). Subida com perfil demo carregou 4 usuários, 10 clientes, 15 veículos e 17 OS no banco real. Log da subida sem senha ou token (apoio ao CT57). |
+| 2026-11-25 | feature/16-testes-manuais | `node scripts/testes-manuais/ct53-ct57-api.mjs` (API jar, perfil demo, frontend `ng serve`) | 27 verificações | 0 | CT53 e CT57 pela API através do proxy do frontend. Antes: suíte completa já verde na main (API 383, web 157). |
+| 2026-11-25 | feature/16-testes-manuais | `node scripts/testes-manuais/ct54-ct55-navegador.mjs` (Chrome headless, 360 px) | 5 verificações | 0 | CT54 (4 telas sem rolagem horizontal) e CT55 (3 telas até abrir a OS). Prints conferidos visualmente. |
 
 ## 7. Defeitos
 
@@ -189,8 +191,8 @@ Preenchido ao fim da Macro Entrega 3.
 | Indicador | Valor |
 | --- | --- |
 | Casos planejados | 57 |
-| Casos executados | 53 (52 automatizados + CT56); CT53, CT54, CT55 e CT57 aguardam execução manual (roteiro em docs/roteiro-testes-manuais.md) |
-| Aprovados | 53 |
+| Casos executados | 57 (52 automatizados + CT56 + CT53, CT54, CT55 e CT57 pelo roteiro em docs/roteiro-testes-manuais.md, 2026-11-25) |
+| Aprovados | 57 |
 | Reprovados / bloqueados | 0 / 0 |
 | Defeitos encontrados / corrigidos | 10 / 10 (D01–D10) |
 | Testes automatizados | API 383 (unitários + integração com PostgreSQL real), frontend 157 (Jasmine/Karma), 0 falhas (2026-11-16) |
