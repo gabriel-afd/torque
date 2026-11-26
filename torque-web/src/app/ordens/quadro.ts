@@ -1,3 +1,4 @@
+import { Acao, Contexto, acoesDisponiveis } from './orcamento';
 import { COLUNAS_QUADRO, OrdemResumo, StatusOS } from './ordens.modelos';
 
 const UM_DIA_MS = 24 * 60 * 60 * 1000;
@@ -88,4 +89,83 @@ export function situacaoDoCartao(os: OrdemResumo, agora: Date): string | null {
     return 'Aguardando peça';
   }
   return null;
+}
+
+// Arrastar cartões entre colunas ------------------------------------------------------------------
+
+/** Ações que o quadro executa ao soltar um cartão em outra coluna. */
+export type AcaoDoQuadro = Extract<Acao, 'enviarParaAprovacao' | 'aprovar' | 'iniciar' | 'aguardarPeca' | 'concluir'>;
+
+export type MovimentoNoQuadro =
+  | { permitido: true; acao: AcaoDoQuadro; destino: StatusOS; sucesso: string }
+  | { permitido: false; motivo: string };
+
+/**
+ * Movimentos de coluna que viram ação na OS (espelho da tabela de transições do CLAUDE.md). A API valida
+ * tudo de novo; aqui é só para responder na hora, com uma mensagem clara, o que não pode.
+ */
+const MOVIMENTOS: Partial<Record<StatusOS, Partial<Record<StatusOS, [AcaoDoQuadro, string]>>>> = {
+  ABERTA: { AGUARDANDO_APROVACAO: ['enviarParaAprovacao', 'Orçamento enviado para aprovação do cliente.'] },
+  AGUARDANDO_APROVACAO: { APROVADA: ['aprovar', 'Aprovação do cliente registrada.'] },
+  APROVADA: { EM_EXECUCAO: ['iniciar', 'Serviço em execução.'] },
+  EM_EXECUCAO: {
+    AGUARDANDO_PECA: ['aguardarPeca', 'OS aguardando peça.'],
+    CONCLUIDA: ['concluir', 'Serviço concluído.'],
+  },
+  AGUARDANDO_PECA: { EM_EXECUCAO: ['iniciar', 'Serviço retomado.'] },
+};
+
+const ACOES_DO_EXECUTOR: AcaoDoQuadro[] = ['iniciar', 'aguardarPeca', 'concluir'];
+
+function titulo(status: StatusOS): string {
+  return COLUNAS_QUADRO.find((c) => c.status === status)?.titulo ?? status;
+}
+
+/** Por que o movimento não existe na tabela de transições, em linguagem de balcão. */
+function motivoDoBloqueio(de: StatusOS, para: StatusOS): string {
+  if (para === 'ABERTA') {
+    return 'Uma OS não volta para "Aberta".';
+  }
+  if (para === 'AGUARDANDO_APROVACAO' && (de === 'APROVADA' || de === 'EM_EXECUCAO')) {
+    return 'Para mudar o orçamento, abra a OS e edite os itens: ela volta sozinha para aprovação do cliente.';
+  }
+  if (de === 'CONCLUIDA') {
+    return 'OS concluída só pode ser entregue ou cancelada, pela tela da OS.';
+  }
+  switch (para) {
+    case 'APROVADA':
+      return 'Só OS aguardando aprovação podem ser aprovadas. Envie o orçamento ao cliente primeiro.';
+    case 'EM_EXECUCAO':
+      return 'A OS só entra em execução com o orçamento aprovado pelo cliente.';
+    case 'AGUARDANDO_PECA':
+      return 'Só OS em execução podem ficar aguardando peça.';
+    case 'CONCLUIDA':
+      return 'Só OS em execução podem ser concluídas.';
+    default:
+      return `Não é possível mover a OS de "${titulo(de)}" para "${titulo(para)}".`;
+  }
+}
+
+/**
+ * Decide o que fazer quando um cartão sai da coluna `de` e é solto na coluna `para`. `null` quando o cartão
+ * voltou para a própria coluna (nada a fazer).
+ */
+export function movimentoNoQuadro(de: StatusOS, para: StatusOS, ctx: Contexto): MovimentoNoQuadro | null {
+  if (de === para) {
+    return null;
+  }
+  const movimento = MOVIMENTOS[de]?.[para];
+  if (!movimento) {
+    return { permitido: false, motivo: motivoDoBloqueio(de, para) };
+  }
+  const [acao, sucesso] = movimento;
+  if (!acoesDisponiveis(de, ctx).has(acao)) {
+    return {
+      permitido: false,
+      motivo: ACOES_DO_EXECUTOR.includes(acao)
+        ? 'Só o mecânico atribuído a esta OS ou o administrador pode fazer essa mudança.'
+        : 'Só o atendente ou o administrador pode fazer essa mudança.',
+    };
+  }
+  return { permitido: true, acao, destino: para, sucesso };
 }
