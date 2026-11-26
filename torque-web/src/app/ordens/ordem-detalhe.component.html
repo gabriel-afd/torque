@@ -117,7 +117,7 @@
         <section class="card secao" data-testid="atribuir">
           <h2>Mecânico</h2>
           <div class="incluir">
-            <mat-form-field class="busca">
+            <mat-form-field class="busca" subscriptSizing="dynamic">
               <mat-label>Mecânico responsável</mat-label>
               <mat-select [formControl]="mecanicoEscolhido" data-testid="select-mecanico">
                 @for (m of mecanicos(); track m.id) {

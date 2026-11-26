@@ -3,14 +3,14 @@
   <span class="muted" data-testid="total-andamento">{{ ordens().length }} OS em andamento</span>
 
   <div class="filtros">
-    <mat-form-field class="busca">
+    <mat-form-field class="busca" subscriptSizing="dynamic">
       <mat-icon matPrefix>search</mat-icon>
       <mat-label>Buscar placa ou cliente</mat-label>
       <input matInput [formControl]="busca" data-testid="busca-quadro" />
     </mat-form-field>
 
     @if (!ehMecanico()) {
-      <mat-form-field class="mecanico" data-testid="filtro-mecanico">
+      <mat-form-field class="mecanico" subscriptSizing="dynamic" data-testid="filtro-mecanico">
         <mat-label>Mecânico</mat-label>
         <mat-select [formControl]="mecanico">
           <mat-option [value]="null">Todos os mecânicos</mat-option>
