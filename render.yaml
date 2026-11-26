@@ -26,3 +26,9 @@ services:
         sync: false
       - key: OFICINA_NOME
         value: Oficina Torque
+      # Carga inicial de dados fictícios (shared.demo.DadosDemo): só roda com o banco sem clientes,
+      # então reinícios e novos deploys não duplicam nada. Para começar vazio, remova as duas variáveis.
+      - key: SPRING_PROFILES_ACTIVE
+        value: demo
+      - key: TORQUE_DEMO_SENHA # senha dos usuários demo (ana, raimundo, tiago); nunca a padrão
+        sync: false
