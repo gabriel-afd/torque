@@ -208,6 +208,14 @@ a {
   letter-spacing: 0 !important;
 }
 
+// Campos de uma linha (busca, filtros, quantidade, mecânico): mais baixos e brancos, como nos mockups.
+mat-form-field[subscriptSizing='dynamic'] {
+  @include mat.form-field-density(-3);
+  @include mat.select-density(-3);
+
+  .mat-mdc-text-field-wrapper { background: var(--torque-superficie); border-radius: 8px; }
+}
+
 .mat-mdc-outlined-button:not(:disabled) {
   border-color: var(--torque-borda);
   background: var(--torque-superficie);
