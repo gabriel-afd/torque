@@ -1,31 +1,48 @@
-<header class="topbar">
-  <button mat-icon-button class="so-celular" [matMenuTriggerFor]="menuCelular" aria-label="Abrir menu">
-    <mat-icon>menu</mat-icon>
-  </button>
-  <a class="logo" routerLink="/quadro"><span class="marca-icone" aria-hidden="true"></span>Torque</a>
+<mat-sidenav-container class="casca">
+  <mat-sidenav
+    #menu class="lateral" [mode]="celular() ? 'over' : 'side'" [opened]="!celular()" [fixedInViewport]="celular()"
+    aria-label="Menu lateral"
+  >
+    <a class="logo" routerLink="/quadro"><span class="icone" aria-hidden="true"></span>Torque</a>
 
-  <nav class="nav so-tela-grande" aria-label="Menu principal">
-    @for (item of itens(); track item.rota) {
-      <a [routerLink]="item.rota" routerLinkActive="on" data-testid="item-menu">{{ item.rotulo }}</a>
-    }
-  </nav>
+    <p class="grupo">Gestão da oficina</p>
+    <nav class="nav" aria-label="Menu principal">
+      @for (item of itens(); track item.rota) {
+        <a [routerLink]="item.rota" routerLinkActive="on" (click)="celular() && menu.close()" data-testid="item-menu">
+          <span class="icone" [style.--icone]="icone(item)" aria-hidden="true"></span>{{ item.rotulo }}
+        </a>
+      }
+    </nav>
 
-  <div class="usuario">
-    <div class="nome so-tela-grande">
-      <strong>{{ usuario()?.nome }}</strong>
-      <span>{{ rotuloPerfil() }}</span>
-    </div>
-    <button mat-icon-button class="avatar" [matMenuTriggerFor]="menuUsuario" aria-label="Menu do usuário">
-      {{ iniciais() }}
-    </button>
-  </div>
-</header>
+    <p class="versao">Torque · versão MVP</p>
+  </mat-sidenav>
 
-<mat-menu #menuCelular="matMenu">
-  @for (item of itens(); track item.rota) {
-    <a mat-menu-item [routerLink]="item.rota">{{ item.rotulo }}</a>
-  }
-</mat-menu>
+  <mat-sidenav-content class="conteudo">
+    <header class="topo">
+      @if (celular()) {
+        <button mat-icon-button (click)="menu.toggle()" aria-label="Abrir menu" data-testid="abrir-menu">
+          <mat-icon>menu</mat-icon>
+        </button>
+      }
+      <nav class="trilha" aria-label="Você está em" data-testid="trilha">
+        <span>Oficina</span> / <b>{{ secao() }}</b>
+      </nav>
+
+      <button type="button" class="usuario" [matMenuTriggerFor]="menuUsuario" aria-label="Menu do usuário">
+        <span class="avatar">{{ iniciais() }}</span>
+        <span class="nome so-tela-grande">
+          <strong>{{ usuario()?.nome }}</strong>
+          <small>{{ rotuloPerfil() }}</small>
+        </span>
+        <mat-icon class="so-tela-grande">expand_more</mat-icon>
+      </button>
+    </header>
+
+    <main class="pagina">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>
 
 <mat-menu #menuUsuario="matMenu" xPosition="before">
   <div class="menu-cabecalho" mat-menu-item disabled>
@@ -36,7 +53,3 @@
     <span>Sair</span>
   </button>
 </mat-menu>
-
-<main class="pagina">
-  <router-outlet />
-</main>
