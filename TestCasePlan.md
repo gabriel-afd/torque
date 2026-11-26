@@ -144,7 +144,8 @@ Status: Não executado · Aprovado · Reprovado · Bloqueado.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | CT58 | Implantação | Imagem única serve frontend e API | GET `/`, `/index.html` e rotas do Angular sem token; GET de arquivo `.js` inexistente; GET `/api/...` sem e com token; POST fora de `/api` sem token | `index.html` nas rotas do SPA (forward na raiz); 404 JSON para arquivo e rota `/api` inexistentes; 401 na API sem token; escrita fora de `/api` continua exigindo login | Alta | I | Aprovado | FrontendIntegracaoTest#deveServirIndexHtmlSemLogin, #deveServirIndexHtmlNaRaiz, #deveEncaminharRotaDoAngularParaIndexHtml, #deveResponder404ParaArquivoEstaticoInexistente, #deveManterApiProtegidaSemToken, #naoDeveEncaminharRotaApiInexistenteParaIndexHtml, #naoDeveLiberarEscritaForaDaApiSemToken (2026-11-26) |
 | CT59 | Implantação | Jar com o build do Angular em 512 MB | Reproduzir os estágios do Dockerfile sem Docker (`ng build` → `static/` → `mvn package`); subir o jar com as flags de memória da imagem (`-Xmx307m`, SerialGC, porta via `PORT`) contra PostgreSQL local | Sobe sem erro; `/`, `/quadro`, `/ordens/17` e o `main-*.js` com 200; login 200 e `/api/ordens` 200 com token; memória abaixo de 512 MB | Alta | M | Aprovado | Subida em 7,4 s; rotas do SPA 200 `text/html`; `main-6XPHJAN3.js` 200; `/main-inexistente.js` 404 JSON; `/api/ordens` 401 sem token e 200 com token; Swagger 200; RSS do processo 329 MB (2026-11-26; Docker indisponível na máquina) |
-| CT60 | Implantação | Deploy no Render + Neon | Blueprint `render.yaml`, banco no Neon; acessar a URL pública, logar como admin e abrir o quadro | Build da imagem ok, Flyway aplica as migrações, login e quadro funcionam por HTTPS | Alta | M | Não executado | Depende das contas do Render e do Neon (feito pelo autor) |
+| CT60 | Implantação | Deploy no Render + Neon | Blueprint `render.yaml`, banco no Neon; acessar a URL pública, logar como admin e abrir o quadro | Build da imagem ok, Flyway aplica as migrações, carga demo no banco vazio, login e quadro funcionam por HTTPS | Alta | M | Não executado | Depende das contas do Render e do Neon (feito pelo autor) |
+| CT61 | Implantação | Carga inicial com senha própria | Jar com perfil `demo` e `TORQUE_DEMO_SENHA` num banco vazio, com `ADMIN_EMAIL` definido | Dados fictícios carregados; usuário demo entra só com a senha configurada (a padrão é recusada); sem `admin.demo` extra; senha fora do log | Alta | M | Aprovado | 4 usuários (admin do ADMIN_EMAIL + ana, raimundo, tiago), 17 OS em 9 status; `ana.demo` com `demo12345` 401 e com a senha configurada 200; `admin.demo` inexistente (401); log sem a senha nem token (2026-11-26) |
 
 ## 6. Execuções
 
@@ -177,6 +178,7 @@ Cada execução registrada com data, comando, resultado e commit testado.
 | 2026-11-26 | feature/18-deploy | `./mvnw -B verify` (TORQUE_TEST_DB_URL local) | 388 | 4 → 0 | CT58 (FrontendIntegracaoTest, 7 testes). 3 falhas esperadas antes da implementação (teste escrito primeiro: 401 nas rotas do frontend). 1 falha por teste mal escrito (`/` é welcome page com forward para index.html, que o MockMvc não segue; asserção trocada por `forwardedUrl`). Nenhum defeito de código. |
 | 2026-11-26 | feature/18-deploy | `npm run build && npm test -- --watch=false --browsers=ChromeHeadless` (web) | 157 | 0 | Sem mudança no frontend; o build de produção é o que entra na imagem. |
 | 2026-11-26 | feature/18-deploy | Estágios do Dockerfile à mão + `java -Xmx307m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Xss512k -jar` (PORT=8089) + curl | 12 verificações | 0 | CT59. Docker indisponível na máquina: a imagem em si só vai ser construída no primeiro deploy do Render (CT60). |
+| 2026-11-26 | feature/18-deploy | Jar com `SPRING_PROFILES_ACTIVE=demo` e `TORQUE_DEMO_SENHA` em banco vazio + curl | 6 verificações | 0 | CT61. Observado: o Tomcat atende antes de a carga demo terminar, e um login feito nos primeiros segundos dá 401 até os usuários existirem. Não é defeito (a carga roda uma vez, na primeira subida). |
 
 ## 7. Defeitos
 
@@ -197,7 +199,7 @@ Defeitos encontrados durante o desenvolvimento e os testes, com causa e correç�
 
 ## 8. Resumo final
 
-Preenchido ao fim da Macro Entrega 3. Os casos de implantação da Macro Entrega 4 (CT58–CT60, seção 5.8) ficam fora deste resumo.
+Preenchido ao fim da Macro Entrega 3. Os casos de implantação da Macro Entrega 4 (CT58–CT61, seção 5.8) ficam fora deste resumo.
 
 | Indicador | Valor |
 | --- | --- |
