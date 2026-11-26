@@ -18,6 +18,16 @@ spring:
     web:
       pageable:
         max-page-size: 100
+  web:
+    resources:
+      # O build do Angular é servido por shared.web.FrontendConfig (com fallback para as rotas do SPA).
+      add-mappings: false
+
+server:
+  # O Render (e outras plataformas) informam a porta em PORT.
+  port: ${PORT:8080}
+  # Atrás do proxy HTTPS da plataforma: respeita X-Forwarded-* (links do Swagger em https).
+  forward-headers-strategy: framework
 
 torque:
   oficina:
