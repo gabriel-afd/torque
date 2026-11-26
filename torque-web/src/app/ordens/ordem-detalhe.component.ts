@@ -111,8 +111,8 @@ export class OrdemDetalheComponent implements OnInit {
     return [`${v.marca} ${v.modelo}${v.ano ? ' ' + v.ano : ''}`, v.cor].filter(Boolean).join(' · ');
   }
 
-  cliente(os: OrdemServico): string {
-    return os.cliente.telefone ? `${os.cliente.nome} · ${formatarTelefone(os.cliente.telefone)}` : os.cliente.nome;
+  telefone(os: OrdemServico): string | null {
+    return os.cliente.telefone ? formatarTelefone(os.cliente.telefone) : null;
   }
 
   quando(data: string): string {

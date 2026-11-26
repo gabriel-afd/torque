@@ -72,7 +72,7 @@ describe('OrdemDetalheComponent', () => {
       montar('ATENDENTE', ordemServico('AGUARDANDO_APROVACAO'));
 
       const cabecalho = texto('cabecalho');
-      ['OS #1041', 'NBV8D45', 'Renault Sandero 2017 · prata', 'Rita Fictícia · (83) 99812-4410', '84.320 km',
+      ['Ordem de serviço #1041', 'NBV8D45', 'Renault Sandero 2017 · prata', 'Rita Fictícia', '(83) 99812-4410', '84.320 km',
         'Ruído ao frear e pedal baixo', 'Não atribuído'].forEach((t) => expect(cabecalho).toContain(t));
       expect(texto('status')).toBe('Aguardando aprovação');
     });
