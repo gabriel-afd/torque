@@ -6,6 +6,7 @@ import br.com.torque.auth.jwt.JwtService;
 import br.com.torque.shared.web.ErroResponse;
 import br.com.torque.shared.web.TratadorDeErros;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
@@ -53,6 +54,7 @@ public class SegurancaConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, ROTAS_PUBLICAS_GET).permitAll()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers(SegurancaConfig::leituraDoFrontend).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint((req, resp, ex) ->
@@ -62,6 +64,16 @@ public class SegurancaConfig {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService, usuarios),
                         UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    /**
+     * GET fora de {@code /api}: arquivos do Angular e rotas do frontend (não contêm dados). Toda a API
+     * continua exigindo JWT.
+     */
+    static boolean leituraDoFrontend(HttpServletRequest requisicao) {
+        String caminho = requisicao.getRequestURI().substring(requisicao.getContextPath().length());
+        return HttpMethod.GET.matches(requisicao.getMethod())
+                && !caminho.equals("/api") && !caminho.startsWith("/api/");
     }
 
     @Bean

@@ -1,0 +1,34 @@
+# Blueprint do Render (https://render.com/docs/blueprint-spec).
+# Um único Web Service gratuito com a imagem do Dockerfile (API + frontend).
+# O banco fica fora do Render (ex.: Neon gratuito); os valores secretos são digitados no painel.
+services:
+  - type: web
+    name: torque
+    runtime: docker
+    plan: free
+    region: virginia       # mesma região do banco no Neon (AWS us-east-1)
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /index.html
+    autoDeploy: true
+    envVars:
+      - key: DB_URL          # jdbc:postgresql://<host>/<banco>?sslmode=require
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET      # gerado pelo Render (256 bits)
+        generateValue: true
+      - key: ADMIN_EMAIL     # primeiro administrador (só se não houver usuários)
+        sync: false
+      - key: ADMIN_SENHA
+        sync: false
+      - key: OFICINA_NOME
+        value: Oficina Torque
+      # Carga inicial de dados fictícios (shared.demo.DadosDemo): só roda com o banco sem clientes,
+      # então reinícios e novos deploys não duplicam nada. Para começar vazio, remova as duas variáveis.
+      - key: SPRING_PROFILES_ACTIVE
+        value: demo
+      - key: TORQUE_DEMO_SENHA # senha dos usuários demo (ana, raimundo, tiago); nunca a padrão
+        sync: false
