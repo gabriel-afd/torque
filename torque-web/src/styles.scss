@@ -206,3 +206,10 @@ p {
   li::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--torque-azul); position: absolute; left: -5px; top: 10px; }
 }
 .dica { font-size: 11.5px; color: var(--torque-texto-suave); margin-top: 4px; }
+
+// Quadro, arrastar cartões (CDK): cartão flutuando, origem esmaecida e coluna sob o cursor destacada.
+// Fica no CSS global porque o cartão flutuando é anexado ao body.
+.cartao.cdk-drag-preview { box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35); cursor: grabbing; }
+.cartao.cdk-drag-placeholder { opacity: 0.35; }
+.cartao.cdk-drag-animating { transition: transform 200ms cubic-bezier(0, 0, 0.2, 1); }
+.coluna.cdk-drop-list-dragging { outline: 2px dashed var(--torque-laranja); outline-offset: -2px; }
