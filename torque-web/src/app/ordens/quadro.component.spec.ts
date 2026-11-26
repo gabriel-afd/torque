@@ -57,6 +57,15 @@ describe('QuadroComponent', () => {
     req.flush(pagina([]));
   });
 
+  it('deve mostrar o texto da busca inteiro sem precisar clicar (placeholder, não rótulo flutuante)', () => {
+    montar('ATENDENTE');
+    requisicaoDoQuadro().flush(pagina([]));
+    const campo: HTMLElement = fixture.nativeElement.querySelector('[data-testid="busca-quadro"]').closest('mat-form-field');
+
+    expect(campo.querySelector('mat-label, .mdc-floating-label')).toBeNull();
+    expect(campo.querySelector('input')!.getAttribute('placeholder')).toBe('Buscar placa ou cliente');
+  });
+
   it('deve agrupar os cartões por status com contador em cada coluna', () => {
     montar('ATENDENTE');
     requisicaoDoQuadro().flush(pagina([

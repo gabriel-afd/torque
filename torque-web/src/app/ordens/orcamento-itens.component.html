@@ -22,8 +22,8 @@
   @if (editavel()) {
     <div class="incluir">
       <mat-form-field class="busca" subscriptSizing="dynamic">
-        <mat-label>Buscar serviço no catálogo</mat-label>
-        <input matInput [formControl]="buscaServico" [matAutocomplete]="autoServico" data-testid="busca-servico" />
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput placeholder="Buscar serviço no catálogo" aria-label="Buscar serviço no catálogo" [formControl]="buscaServico" [matAutocomplete]="autoServico" data-testid="busca-servico" />
         <mat-autocomplete #autoServico="matAutocomplete" [displayWith]="nomeServico">
           @for (s of servicosEncontrados(); track s.id) {
             <mat-option [value]="s">{{ s.descricao }} · {{ s.precoMaoDeObra | currency: 'BRL' }}</mat-option>
@@ -69,8 +69,8 @@
   @if (editavel()) {
     <div class="incluir">
       <mat-form-field class="busca" subscriptSizing="dynamic">
-        <mat-label>Buscar peça no catálogo</mat-label>
-        <input matInput [formControl]="buscaPeca" [matAutocomplete]="autoPeca" data-testid="busca-peca" />
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput placeholder="Buscar peça no catálogo" aria-label="Buscar peça no catálogo" [formControl]="buscaPeca" [matAutocomplete]="autoPeca" data-testid="busca-peca" />
         <mat-autocomplete #autoPeca="matAutocomplete" [displayWith]="nomePeca">
           @for (p of pecasEncontradas(); track p.id) {
             <mat-option [value]="p">{{ p.descricao }} · {{ p.precoVenda | currency: 'BRL' }}</mat-option>

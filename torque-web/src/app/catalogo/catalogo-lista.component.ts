@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject, input, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -31,8 +31,7 @@ import { ListaPaginada } from '../shared/lista-paginada';
     <div class="filtros">
       <mat-form-field class="busca" subscriptSizing="dynamic">
         <mat-icon matPrefix>search</mat-icon>
-        <mat-label>Buscar {{ tipo() === 'pecas' ? 'por descrição ou código' : 'por descrição' }}</mat-label>
-        <input matInput [formControl]="busca" data-testid="busca" />
+        <input matInput [formControl]="busca" [placeholder]="textoBusca()" [attr.aria-label]="textoBusca()" data-testid="busca" />
       </mat-form-field>
       <mat-checkbox [formControl]="incluirInativos" data-testid="incluir-inativos">Mostrar inativos</mat-checkbox>
       <button mat-flat-button class="acao-principal" (click)="editar()" data-testid="novo">
@@ -84,6 +83,7 @@ import { ListaPaginada } from '../shared/lista-paginada';
 })
 export class CatalogoListaComponent implements OnInit {
   readonly tipo = input.required<TipoCatalogo>();
+  readonly textoBusca = computed(() => (this.tipo() === 'pecas' ? 'Buscar por descrição ou código' : 'Buscar por descrição'));
 
   private readonly api = inject(CatalogoService);
   private readonly mensagens = inject(MensagemService);

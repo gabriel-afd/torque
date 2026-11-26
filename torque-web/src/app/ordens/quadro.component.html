@@ -5,8 +5,7 @@
   <div class="filtros">
     <mat-form-field class="busca" subscriptSizing="dynamic">
       <mat-icon matPrefix>search</mat-icon>
-      <mat-label>Buscar placa ou cliente</mat-label>
-      <input matInput [formControl]="busca" data-testid="busca-quadro" />
+      <input matInput [formControl]="busca" placeholder="Buscar placa ou cliente" aria-label="Buscar placa ou cliente" data-testid="busca-quadro" />
     </mat-form-field>
 
     @if (!ehMecanico()) {

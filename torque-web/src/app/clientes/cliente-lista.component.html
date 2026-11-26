@@ -7,8 +7,7 @@
 
 <mat-form-field class="busca" subscriptSizing="dynamic">
   <mat-icon matPrefix>search</mat-icon>
-  <mat-label>Buscar por nome ou CPF/CNPJ</mat-label>
-  <input matInput [formControl]="busca" data-testid="busca-cliente" />
+  <input matInput [formControl]="busca" placeholder="Buscar por nome ou CPF/CNPJ" aria-label="Buscar por nome ou CPF/CNPJ" data-testid="busca-cliente" />
 </mat-form-field>
 
 <div class="card lista">
