@@ -7,7 +7,8 @@ import { VeiculosPaginaComponent } from './veiculos-pagina.component';
 
 export const CLIENTES_ROUTES: Routes = [
   { path: '', component: ClienteListaComponent, title: 'Clientes · Torque' },
-  { path: 'novo', component: ClienteFormComponent, title: 'Novo cliente · Torque' },
+  // Cadastro em diálogo sobre a lista; a rota continua existindo para links antigos.
+  { path: 'novo', component: ClienteListaComponent, data: { novo: true }, title: 'Novo cliente · Torque' },
   { path: ':id', component: ClienteDetalheComponent, title: 'Cliente · Torque' },
   { path: ':id/editar', component: ClienteFormComponent, title: 'Editar cliente · Torque' },
 ];

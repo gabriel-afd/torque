@@ -1,8 +1,8 @@
 <div class="page-head">
   <h1>Clientes</h1>
-  <a mat-flat-button class="acao-principal novo" routerLink="novo">
+  <button mat-flat-button class="acao-principal novo" type="button" (click)="novoCliente()" data-testid="novo-cliente">
     <mat-icon>add</mat-icon> Novo cliente
-  </a>
+  </button>
 </div>
 
 <mat-form-field class="busca" subscriptSizing="dynamic">
