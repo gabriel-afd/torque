@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Cadastrar veículo {{ dados.placa }}</h2>
+<h2 mat-dialog-title>{{ dados.placa ? "Cadastrar veículo " + dados.placa : "Novo veículo" }}</h2>
 
 <mat-dialog-content>
   <h3>Dono do veículo</h3>
