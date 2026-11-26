@@ -29,7 +29,7 @@ import { ListaPaginada } from '../shared/lista-paginada';
   ],
   template: `
     <div class="filtros">
-      <mat-form-field class="busca">
+      <mat-form-field class="busca" subscriptSizing="dynamic">
         <mat-icon matPrefix>search</mat-icon>
         <mat-label>Buscar {{ tipo() === 'pecas' ? 'por descrição ou código' : 'por descrição' }}</mat-label>
         <input matInput [formControl]="busca" data-testid="busca" />

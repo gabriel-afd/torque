@@ -18,6 +18,8 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimationsAsync(),
     { provide: LOCALE_ID, useValue: 'pt-BR' },
-    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline', subscriptSizing: 'dynamic' } },
+    // subscriptSizing 'fixed' (padrão): cada campo reserva a linha da mensagem de erro/dica, então campos
+    // empilhados não encostam. Barras de busca/filtro de uma linha usam subscriptSizing="dynamic" no template.
+    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline', subscriptSizing: 'fixed' } },
   ],
 };

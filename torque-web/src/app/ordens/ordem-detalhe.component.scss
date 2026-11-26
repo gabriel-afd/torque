@@ -9,8 +9,8 @@
 .incluir { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; .busca { flex: 1; min-width: 180px; } .qtd-nova { width: 90px; } }
 .aviso-versao {
   padding: 10px 14px; margin-bottom: 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between;
-  background: #fff8ec; border-color: #f5d8a8; color: #7a4500; font-size: 13px;
-  &.ativo { background: #fff1de; }
+  background: rgba(242, 140, 40, 0.12); border-color: rgba(242, 140, 40, 0.45); color: #f9c694; font-size: 13px;
+  &.ativo { background: rgba(242, 140, 40, 0.2); }
 }
 .resumo {
   .linha { display: flex; justify-content: space-between; padding: 7px 0; font-size: 13.5px; }
@@ -20,7 +20,7 @@
 .alerta { font-size: 12px; color: var(--torque-perigo); margin-top: 4px; }
 .acoes { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; button { width: 100%; } }
 .verde:not(:disabled) { background-color: #2e9b4f !important; color: #fff !important; }
-.perigo:not(:disabled) { color: var(--torque-perigo) !important; border-color: #f0b4b4 !important; }
+.perigo:not(:disabled) { color: var(--torque-perigo) !important; border-color: rgba(249, 112, 102, 0.5) !important; }
 .versoes { margin: 0; padding-left: 16px; font-size: 12.5px; }
 @media (max-width: 900px) {
   .grade { grid-template-columns: minmax(0, 1fr); }

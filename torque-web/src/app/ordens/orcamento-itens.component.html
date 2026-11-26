@@ -21,7 +21,7 @@
   </div>
   @if (editavel()) {
     <div class="incluir">
-      <mat-form-field class="busca">
+      <mat-form-field class="busca" subscriptSizing="dynamic">
         <mat-label>Buscar serviço no catálogo</mat-label>
         <input matInput [formControl]="buscaServico" [matAutocomplete]="autoServico" data-testid="busca-servico" />
         <mat-autocomplete #autoServico="matAutocomplete" [displayWith]="nomeServico">
@@ -68,7 +68,7 @@
   </div>
   @if (editavel()) {
     <div class="incluir">
-      <mat-form-field class="busca">
+      <mat-form-field class="busca" subscriptSizing="dynamic">
         <mat-label>Buscar peça no catálogo</mat-label>
         <input matInput [formControl]="buscaPeca" [matAutocomplete]="autoPeca" data-testid="busca-peca" />
         <mat-autocomplete #autoPeca="matAutocomplete" [displayWith]="nomePeca">
@@ -77,7 +77,7 @@
           }
         </mat-autocomplete>
       </mat-form-field>
-      <mat-form-field class="qtd-nova">
+      <mat-form-field class="qtd-nova" subscriptSizing="dynamic">
         <mat-label>Qtd.</mat-label>
         <input matInput type="number" min="1" max="9999" [formControl]="quantidadePeca" />
       </mat-form-field>

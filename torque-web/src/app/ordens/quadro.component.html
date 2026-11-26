@@ -3,14 +3,14 @@
   <span class="muted" data-testid="total-andamento">{{ ordens().length }} OS em andamento</span>
 
   <div class="filtros">
-    <mat-form-field class="busca">
+    <mat-form-field class="busca" subscriptSizing="dynamic">
       <mat-icon matPrefix>search</mat-icon>
       <mat-label>Buscar placa ou cliente</mat-label>
       <input matInput [formControl]="busca" data-testid="busca-quadro" />
     </mat-form-field>
 
     @if (!ehMecanico()) {
-      <mat-form-field class="mecanico" data-testid="filtro-mecanico">
+      <mat-form-field class="mecanico" subscriptSizing="dynamic" data-testid="filtro-mecanico">
         <mat-label>Mecânico</mat-label>
         <mat-select [formControl]="mecanico">
           <mat-option [value]="null">Todos os mecânicos</mat-option>
@@ -36,13 +36,19 @@
   <p class="aviso-limite">Mostrando {{ ordens().length }} de {{ totalNaApi() }} OS. Use a busca para encontrar as demais.</p>
 }
 
-<div class="quadro" role="list">
+<div class="quadro" role="list" cdkDropListGroup>
   @for (coluna of colunas; track coluna.status; let i = $index) {
-    <section class="coluna c{{ i + 1 }}" role="listitem" [attr.data-status]="coluna.status">
+    <section
+      class="coluna c{{ i + 1 }}" role="listitem" [attr.data-status]="coluna.status"
+      cdkDropList [cdkDropListData]="coluna.status" [cdkDropListSortingDisabled]="true" (cdkDropListDropped)="soltar($event)"
+    >
       <h2>{{ coluna.titulo }} <b data-testid="contador">{{ quantidade(coluna.status) }}</b></h2>
 
       @for (os of grupos().get(coluna.status); track os.id) {
-        <button type="button" class="cartao" (click)="abrir(os)" data-testid="cartao" [attr.aria-label]="'Abrir OS ' + os.numero">
+        <button
+          type="button" class="cartao" (click)="abrir(os)" data-testid="cartao" [attr.aria-label]="'Abrir OS ' + os.numero"
+          cdkDrag [cdkDragData]="os" [cdkDragStartDelay]="atrasoDoArraste" (cdkDragEnded)="fimDoArraste()"
+        >
           <div class="topo">
             <span>OS #{{ os.numero }}</span>
             <span>{{ info(os) }}</span>

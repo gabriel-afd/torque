@@ -28,7 +28,7 @@
 .caixa {
   width: 100%;
   max-width: 380px;
-  background: #fff;
+  background: var(--torque-superficie);
   border-radius: 14px;
   padding: 26px 22px 22px;
   display: flex;
@@ -53,8 +53,8 @@
 }
 
 .erro {
-  background: #fde7e7;
-  color: #b42318;
+  background: rgba(214, 69, 69, 0.2);
+  color: #f6a8a8;
   font-size: 13px;
   padding: 9px 12px;
   border-radius: 8px;

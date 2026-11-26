@@ -1,3 +1,4 @@
+import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -9,13 +10,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { Router } from '@angular/router';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { AuthService } from '../core/auth.service';
 import { MensagemService } from '../core/mensagem.service';
 import { NovaOsComponent } from './nova-os.component';
-import { COLUNAS_QUADRO, OrdemCriada, OrdemResumo } from './ordens.modelos';
+import { COLUNAS_QUADRO, OrdemCriada, OrdemResumo, StatusOS } from './ordens.modelos';
 import { OrdensService } from './ordens.service';
-import { agruparPorStatus, emAlerta, infoDoCartao, situacaoDoCartao } from './quadro';
+import { MovimentoNoQuadro, agruparPorStatus, emAlerta, infoDoCartao, movimentoNoQuadro, situacaoDoCartao } from './quadro';
 import { comCarregamento } from '../shared/carregamento';
 
 interface Mecanico {
@@ -23,13 +24,16 @@ interface Mecanico {
   nome: string;
 }
 
-/** Quadro de OS por status (HU08), conforme docs/prototipos/quadro.html. */
+/**
+ * Quadro de OS por status (HU08), conforme docs/prototipos/quadro.html. Os cartões podem ser arrastados entre
+ * colunas quando a tabela de transições permite ({@link movimentoNoQuadro}).
+ */
 @Component({
   selector: 'app-quadro',
   standalone: true,
   imports: [
     ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressBarModule,
-    MatSelectModule,
+    MatSelectModule, CdkDropListGroup, CdkDropList, CdkDrag,
   ],
   templateUrl: './quadro.component.html',
   styleUrl: './quadro.component.scss',
@@ -61,6 +65,11 @@ export class QuadroComponent implements OnInit {
   readonly info = (os: OrdemResumo) => infoDoCartao(os, this.agora());
   readonly situacao = (os: OrdemResumo) => situacaoDoCartao(os, this.agora());
 
+  /** No toque, o arraste só começa após segurar o cartão (o toque rápido continua rolando o quadro). */
+  readonly atrasoDoArraste = { touch: 250, mouse: 0 };
+  /** Quando o último arraste terminou: o clique que o navegador dispara ao soltar não deve abrir a OS. */
+  private fimDoUltimoArraste = 0;
+
   ngOnInit(): void {
     this.carregar();
     this.busca.valueChanges
@@ -89,7 +98,62 @@ export class QuadroComponent implements OnInit {
   }
 
   abrir(os: OrdemResumo): void {
+    if (Date.now() - this.fimDoUltimoArraste < 400) {
+      return;
+    }
     this.router.navigate(['/ordens', os.id]);
+  }
+
+  fimDoArraste(): void {
+    this.fimDoUltimoArraste = Date.now();
+  }
+
+  /**
+   * Cartão solto em outra coluna: movimento proibido só mostra o motivo; permitido move o cartão na hora e
+   * executa a ação na API (com a versão atual da OS). Se a API recusar, o cartão volta e a mensagem dela aparece.
+   */
+  soltar(evento: CdkDragDrop<StatusOS, StatusOS, OrdemResumo>): void {
+    const os = evento.item.data;
+    const movimento = movimentoNoQuadro(evento.previousContainer.data, evento.container.data, {
+      perfil: this.auth.perfil(),
+      atribuidaAoUsuario: os.mecanicoId !== null && os.mecanicoId === this.auth.usuarioId(),
+    });
+    if (!movimento) {
+      return;
+    }
+    if (!movimento.permitido) {
+      this.mensagens.aviso(movimento.motivo);
+      return;
+    }
+    this.moverCartao(os.id, movimento.destino);
+    this.executar(os, movimento);
+  }
+
+  private executar(os: OrdemResumo, movimento: Extract<MovimentoNoQuadro, { permitido: true }>): void {
+    this.api
+      .detalhar(os.id)
+      .pipe(
+        switchMap((atual) =>
+          movimento.acao === 'aprovar'
+            ? this.api.aprovar(atual.id, atual.orcamento.versao)
+            : this.api.alterarStatus(atual.id, movimento.destino, atual.version),
+        ),
+      )
+      .subscribe({
+        next: () => {
+          this.mensagens.sucesso(`OS #${os.numero}: ${movimento.sucesso}`);
+          this.carregar();
+        },
+        error: (erro) => {
+          this.moverCartao(os.id, os.status);
+          this.mensagens.erro(erro);
+          this.carregar();
+        },
+      });
+  }
+
+  private moverCartao(id: number, status: StatusOS): void {
+    this.ordens.update((lista) => lista.map((o) => (o.id === id ? { ...o, status } : o)));
   }
 
   novaOs(): void {

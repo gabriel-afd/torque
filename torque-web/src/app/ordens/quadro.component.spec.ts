@@ -1,28 +1,35 @@
-import { authFalso, provideTesteBase } from '../core/testes';
+import { authFalso, mensagensFalsas, provideTesteBase } from '../core/testes';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { HttpErrorResponse } from '@angular/common/http';
 import { HttpTestingController, TestRequest } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Router, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { AuthService } from '../core/auth.service';
+import { MensagemService } from '../core/mensagem.service';
 import { Perfil } from '../core/modelos';
 import { NovaOsComponent } from './nova-os.component';
 import { QuadroComponent } from './quadro.component';
-import { ordem, pagina } from './testes-ordens';
+import { OrdemResumo, StatusOS } from './ordens.modelos';
+import { ordem, ordemServico, pagina } from './testes-ordens';
 
 describe('QuadroComponent', () => {
   let fixture: ComponentFixture<QuadroComponent>;
   let api: HttpTestingController;
   let router: Router;
   let dialogo: jasmine.SpyObj<MatDialog>;
+  let mensagens: jasmine.SpyObj<MensagemService>;
 
-  function montar(perfil: Perfil) {
+  function montar(perfil: Perfil, usuarioId = 2) {
+    mensagens = mensagensFalsas();
     dialogo = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
     TestBed.configureTestingModule({
       imports: [QuadroComponent],
       providers: [
         provideRouter([]), ...provideTesteBase(),
-        { provide: AuthService, useValue: authFalso(perfil) },
+        { provide: AuthService, useValue: authFalso(perfil, usuarioId) },
+        { provide: MensagemService, useValue: mensagens },
       ],
     });
     TestBed.overrideProvider(MatDialog, { useValue: dialogo });
@@ -142,5 +149,120 @@ describe('QuadroComponent', () => {
 
     expect(dialogo.open).toHaveBeenCalledWith(NovaOsComponent, jasmine.any(Object));
     expect(router.navigate).toHaveBeenCalledWith(['/ordens', 77]);
+  });
+
+  // Arrastar cartões ---------------------------------------------------------------------------
+
+  /** Simula o CDK soltando o cartão da coluna `de` na coluna `para`. */
+  function soltar(os: OrdemResumo, para: StatusOS) {
+    fixture.componentInstance.soltar({
+      item: { data: os }, previousContainer: { data: os.status }, container: { data: para },
+    } as unknown as CdkDragDrop<StatusOS, StatusOS, OrdemResumo>);
+    fixture.detectChanges();
+  }
+
+  function comCartao(perfil: Perfil, os: OrdemResumo, usuarioId = 2) {
+    montar(perfil, usuarioId);
+    requisicaoDoQuadro().flush(pagina([os]));
+    fixture.detectChanges();
+  }
+
+  it('arrastar de Aberta para Aguardando aprovação: deve enviar o orçamento com a versão atual da OS', () => {
+    const os = ordem('ABERTA', { id: 41, numero: 1041 });
+    comCartao('ATENDENTE', os);
+
+    soltar(os, 'AGUARDANDO_APROVACAO');
+    expect(coluna('AGUARDANDO_APROVACAO').textContent).toContain('OS #1041');
+
+    api.expectOne('/api/ordens/41').flush(ordemServico('ABERTA', { version: 7 }));
+    const patch = api.expectOne('/api/ordens/41/status');
+    expect(patch.request.method).toBe('PATCH');
+    expect(patch.request.body).toEqual({ status: 'AGUARDANDO_APROVACAO', versaoOs: 7 });
+    patch.flush(ordemServico('AGUARDANDO_APROVACAO'));
+
+    expect(mensagens.sucesso).toHaveBeenCalledWith('OS #1041: Orçamento enviado para aprovação do cliente.');
+    requisicaoDoQuadro().flush(pagina([{ ...os, status: 'AGUARDANDO_APROVACAO' }]));
+  });
+
+  it('arrastar de Aguardando aprovação para Aprovada: deve registrar a aprovação da versão vigente do orçamento', () => {
+    const os = ordem('AGUARDANDO_APROVACAO', { id: 41 });
+    comCartao('ATENDENTE', os);
+
+    soltar(os, 'APROVADA');
+
+    api.expectOne('/api/ordens/41').flush(ordemServico('AGUARDANDO_APROVACAO', {}, { versao: 2 }));
+    const aprovacao = api.expectOne('/api/ordens/41/orcamentos/2/aprovacao');
+    expect(aprovacao.request.method).toBe('POST');
+    aprovacao.flush(ordemServico('APROVADA'));
+    requisicaoDoQuadro().flush(pagina([]));
+
+    expect(mensagens.sucesso).toHaveBeenCalled();
+  });
+
+  it('arrastar de Aberta direto para Concluída: deve explicar o motivo sem chamar a API', () => {
+    const os = ordem('ABERTA', { numero: 1050 });
+    comCartao('ADMINISTRADOR', os);
+
+    soltar(os, 'CONCLUIDA');
+
+    expect(mensagens.aviso).toHaveBeenCalledWith('Só OS em execução podem ser concluídas.');
+    expect(coluna('ABERTA').textContent).toContain('OS #1050');
+    expect(coluna('CONCLUIDA').textContent).not.toContain('OS #1050');
+  });
+
+  it('MECANICO arrastando a OS de outro mecânico: deve avisar (RN09) sem chamar a API', () => {
+    const os = ordem('APROVADA', { mecanicoId: 8, mecanico: 'Tiago' });
+    comCartao('MECANICO', os, 5);
+
+    soltar(os, 'EM_EXECUCAO');
+
+    expect(mensagens.aviso).toHaveBeenCalledWith('Só o mecânico atribuído a esta OS ou o administrador pode fazer essa mudança.');
+  });
+
+  it('MECANICO atribuído: deve iniciar a execução arrastando para Em execução', () => {
+    const os = ordem('APROVADA', { id: 41, mecanicoId: 5, mecanico: 'Raimundo' });
+    comCartao('MECANICO', os, 5);
+
+    soltar(os, 'EM_EXECUCAO');
+
+    api.expectOne('/api/ordens/41').flush(ordemServico('APROVADA'));
+    expect(api.expectOne('/api/ordens/41/status').request.body.status).toBe('EM_EXECUCAO');
+  });
+
+  it('quando a API recusar o movimento: deve devolver o cartão e mostrar a mensagem da API', () => {
+    const os = ordem('ABERTA', { id: 41, numero: 1041 });
+    comCartao('ATENDENTE', os);
+
+    soltar(os, 'AGUARDANDO_APROVACAO');
+    api.expectOne('/api/ordens/41').flush(ordemServico('ABERTA'));
+    api.expectOne('/api/ordens/41/status').flush(
+      { status: 422, erro: 'Unprocessable Entity', mensagem: 'Inclua ao menos um item no orçamento', campos: {} },
+      { status: 422, statusText: 'Unprocessable Entity' },
+    );
+    fixture.detectChanges();
+
+    expect(coluna('ABERTA').textContent).toContain('OS #1041');
+    expect(coluna('AGUARDANDO_APROVACAO').textContent).not.toContain('OS #1041');
+    expect(mensagens.erro).toHaveBeenCalledWith(jasmine.any(HttpErrorResponse));
+    requisicaoDoQuadro().flush(pagina([os]));
+  });
+
+  it('soltar o cartão na própria coluna: não deve fazer nada', () => {
+    const os = ordem('ABERTA');
+    comCartao('ATENDENTE', os);
+
+    soltar(os, 'ABERTA');
+
+    expect(mensagens.aviso).not.toHaveBeenCalled();
+  });
+
+  it('não deve abrir a OS com o clique que o navegador dispara logo após soltar o cartão', () => {
+    const os = ordem('ABERTA', { id: 42 });
+    comCartao('ATENDENTE', os);
+
+    fixture.componentInstance.fimDoArraste();
+    todos('[data-testid="cartao"]')[0].click();
+
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 });
