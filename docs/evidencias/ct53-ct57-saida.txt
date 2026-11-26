@@ -1,0 +1,30 @@
+OK  | CT53.1 login atendente, admin e mecânico | 
+OK  | CT53.1 quadro de OS | undefined OS
+OK  | CT53.2 cadastrar cliente | HTTP 201 id=11
+OK  | CT53.3 cadastrar veículo (placa normalizada) | HTTP 201 placa=TST1A23
+OK  | CT53.4 abrir OS pela placa | HTTP 201 OS nº 1017 ABERTA
+OK  | CT53.5 orçamento 1 serviço + 2 peças, desconto 5% (RN04) | total=703 esperado=703.00
+OK  | CT53.6 desconto 15% como atendente recusado (RN05) | HTTP 422 "Desconto acima do permitido para atendente: máximo de 10% (R$ 74.00)"
+OK  | CT53.7 enviar para aprovação | AGUARDANDO_APROVACAO, histórico com 2 registro(s)
+OK  | CT53.8 PDF do orçamento | inline; filename="orcamento-os-1017-v1.pdf" 13449 bytes
+OK  | CT53.8 link do WhatsApp | {"linkWhatsapp":"https://wa.me/5583999990000?text=Ol%C3%A1%2C%20Cliente%21%0AOr%C3%A7amento%20da%20OS%20n%C2%BA%201017%20%E2%80%93%20Fiat%20Uno%20%28TST1A23%29%
+OK  | CT53.9 registrar aprovação | APROVADA
+OK  | CT53.10 admin atribui Raimundo | Raimundo Mecânico
+OK  | CT53.11 (extra) outro mecânico não altera a OS (RN09) | HTTP 403
+OK  | CT53.11 Raimundo inicia serviço | EM_EXECUCAO
+OK  | CT53.12 aguardando peça | AGUARDANDO_PECA
+OK  | CT53.12 retomar serviço | EM_EXECUCAO
+OK  | CT53.13 concluir | CONCLUIDA
+OK  | CT53.14 entregar | ENTREGUE em 2026-11-25T22:40:23.385751
+OK  | CT53.14 (extra) ENTREGUE é final (RN08) | HTTP 422
+OK  | CT53.14 histórico de status | 8 registros
+OK  | CT53.15 OS no topo do histórico do veículo | {"id":18,"numero":1017,"status":"ENTREGUE","dataAbertura":"2026-11-25T22:40:22.678829","dataEntrega":"2026-11-25T22:40:23.385751","quilometragem":85000,"problemaRelatado":"Teste manual","servicos":["A
+OK  | CT57.1 resposta do login sem senha/hash | token,nome,perfil
+OK  | CT57.1 GET /usuarios sem senha/hash | 4 usuários, campos: id,nome,email,perfil,ativo
+OK  | CT57.2 mecânico vê cliente sem CPF, telefone e e-mail | {"id":11,"nome":"Cliente Teste Manual"}
+OK  | CT57.2 (controle) atendente vê o documento | 
+OK  | CT57.4 CPF duplicado: 409 sem stack trace | HTTP 409 {"status":409,"erro":"Conflict","mensagem":"Já existe um cliente com este CPF/CNPJ","campos":{}}
+OK  | CT57 (extra) sem token: 401 | HTTP 401 {"status":401,"erro":"Unauthorized","mensagem":"Autenticação necessária.","campos":{}}
+{"osId":18,"numero":1017}
+
+TOTAL 27 verificações, 0 falhas
