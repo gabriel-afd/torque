@@ -39,7 +39,7 @@ import { comCarregamento } from '../shared/carregamento';
     .mes { min-width: 150px; text-align: center; font-weight: 600; text-transform: capitalize; }
     .cartoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
     .cartao { padding: 16px; b { display: block; font-size: 26px; } span { font-size: 12.5px; color: var(--torque-texto-suave); } }
-    .destaque b { color: #1e7a34; }
+    .destaque b { color: var(--torque-sucesso); }
   `,
 })
 export class PainelComponent implements OnInit {

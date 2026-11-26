@@ -15,7 +15,7 @@ mat-button-toggle-group {
   display: block;
   width: 100%;
   text-align: left;
-  background: #fff;
+  background: var(--torque-superficie);
   border: 1px solid var(--torque-borda);
   border-radius: 8px;
   padding: 10px 12px;
@@ -24,7 +24,7 @@ mat-button-toggle-group {
   font: inherit;
 
   &:hover {
-    background: #f7f9fc;
+    background: var(--torque-superficie-baixa);
   }
 }
 
