@@ -75,7 +75,7 @@ cd torque-api && ./mvnw spring-boot:run
 | raimundo.demo@oficina.teste, tiago.demo@oficina.teste | Mecânico | idem |
 | admin.demo@oficina.teste (só se não houver admin) | Administrador | idem |
 
-Nunca ative o perfil `demo` em produção.
+Nunca ative o perfil `demo` numa oficina real. No deploy de demonstração ele é usado de propósito, com `TORQUE_DEMO_SENHA` própria (ver Deploy).
 
 ## Testes
 
@@ -136,13 +136,17 @@ O Flyway cria as tabelas na primeira subida.
 **2. Aplicação no [Render](https://render.com)** (Web Service Free)
 
 1. *New → Blueprint* e escolha este repositório. O Render lê o `render.yaml`.
-2. Preencha `DB_URL`, `DB_USER`, `DB_PASSWORD`, `ADMIN_EMAIL` e `ADMIN_SENHA`. O `JWT_SECRET` é gerado pelo Render.
+2. Preencha `DB_URL`, `DB_USER`, `DB_PASSWORD`, `ADMIN_EMAIL`, `ADMIN_SENHA` e `TORQUE_DEMO_SENHA`. O `JWT_SECRET` é gerado pelo Render.
 3. *Apply*. O build leva alguns minutos. A aplicação fica em `https://torque-xxxx.onrender.com`
    (Swagger em `/api/docs`).
 4. Cada merge na `main` gera um novo deploy (`autoDeploy`).
 
-Para a apresentação, dá para carregar os dados fictícios: adicione `SPRING_PROFILES_ACTIVE=demo` no painel
-do Render (só carrega com o banco sem clientes; senha dos usuários demo: `demo12345`). Depois remova a variável.
+**Carga inicial:** o blueprint ativa o perfil `demo` (`SPRING_PROFILES_ACTIVE=demo`). Assim, a primeira subida
+já preenche o banco com dados fictícios: atendente, 2 mecânicos, catálogo, 10 clientes, 15 veículos e 17 OS em
+todos os status, com histórico. A carga só roda com o banco sem clientes, então reinícios e novos deploys não
+duplicam nada. Os usuários demo (`ana.demo@oficina.teste`, `raimundo.demo@…`, `tiago.demo@…`) usam a senha de
+`TORQUE_DEMO_SENHA`. Como a URL é pública, não use a padrão `demo12345`. O administrador é o de `ADMIN_EMAIL`.
+Para começar com o banco vazio, remova `SPRING_PROFILES_ACTIVE` antes do primeiro deploy.
 
 Limites do plano gratuito:
 - O serviço dorme após cerca de 15 min sem acesso, e o primeiro acesso depois disso leva de 30 a 60 s.
