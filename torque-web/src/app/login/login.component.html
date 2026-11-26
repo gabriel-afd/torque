@@ -1,43 +1,73 @@
 <main class="login">
-  <div class="marca">
-    <div class="logo"><span class="marca-icone" aria-hidden="true"></span>Torque</div>
-    <p>Ordens de serviço da sua oficina</p>
-  </div>
+  <section class="apresentacao" aria-label="Sobre o Torque">
+    <div class="logo"><span class="icone" aria-hidden="true"></span>Torque</div>
 
-  <form class="caixa" [formGroup]="form" (ngSubmit)="entrar()" novalidate>
-    <h1>Entrar</h1>
-    <p class="sub">Use o e-mail cadastrado pelo administrador.</p>
+    <div class="chamada">
+      <p class="sobretitulo">Menos burocracia. Mais oficina.</p>
+      <h1>Sua oficina,<br />no ritmo certo.</h1>
+      <p class="texto">Ordens de serviço organizadas.<br />Do primeiro atendimento à entrega do veículo.</p>
 
-    @if (erro()) {
-      <div class="erro" role="alert" data-testid="erro-login">{{ erro() }}</div>
-    }
+      <div class="etapas">
+        <p class="rotulo">Cada etapa sob controle</p>
+        <ol>
+          @for (etapa of etapas; track etapa; let i = $index) {
+            <li><b>0{{ i + 1 }}</b><span>{{ etapa }}</span></li>
+          }
+        </ol>
+      </div>
+    </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>E-mail</mat-label>
-      <input matInput type="email" formControlName="email" autocomplete="username" inputmode="email" />
-      @if (form.controls.email.hasError('required')) {
-        <mat-error>Informe o e-mail</mat-error>
-      } @else if (form.controls.email.hasError('email')) {
-        <mat-error>E-mail inválido</mat-error>
+    <div class="rodape"><span>Ordens de serviço da sua oficina</span><span>Torque · versão MVP</span></div>
+  </section>
+
+  <section class="acesso">
+    <form class="caixa" [formGroup]="form" (ngSubmit)="entrar()" novalidate>
+      <p class="boas-vindas">Bem-vindo à Torque</p>
+      <h2>Entre na sua conta</h2>
+      <p class="sub">Use o e-mail cadastrado pelo administrador.</p>
+
+      @if (erro()) {
+        <div class="erro" role="alert" data-testid="erro-login">{{ erro() }}</div>
       }
-    </mat-form-field>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Senha</mat-label>
-      <input matInput type="password" formControlName="senha" autocomplete="current-password" />
-      @if (form.controls.senha.hasError('required')) {
-        <mat-error>Informe a senha</mat-error>
-      }
-    </mat-form-field>
+      <mat-form-field>
+        <mat-label>E-mail</mat-label>
+        <input matInput type="email" formControlName="email" autocomplete="username" inputmode="email" />
+        <mat-icon matSuffix>mail_outline</mat-icon>
+        @if (form.controls.email.hasError('required')) {
+          <mat-error>Informe o e-mail</mat-error>
+        } @else if (form.controls.email.hasError('email')) {
+          <mat-error>E-mail inválido</mat-error>
+        }
+      </mat-form-field>
 
-    <button mat-flat-button class="acao-principal" type="submit" [disabled]="enviando()">
-      @if (enviando()) {
-        <mat-spinner diameter="20" />
-      } @else {
-        Entrar
-      }
-    </button>
-  </form>
+      <mat-form-field>
+        <mat-label>Senha</mat-label>
+        <input matInput [type]="mostrarSenha() ? 'text' : 'password'" formControlName="senha" autocomplete="current-password"
+               data-testid="senha" />
+        <button mat-icon-button matSuffix type="button" (click)="mostrarSenha.set(!mostrarSenha())"
+                [attr.aria-label]="mostrarSenha() ? 'Ocultar senha' : 'Mostrar senha'" data-testid="mostrar-senha">
+          <mat-icon>{{ mostrarSenha() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (form.controls.senha.hasError('required')) {
+          <mat-error>Informe a senha</mat-error>
+        }
+      </mat-form-field>
 
-  <p class="rodape">Torque · versão MVP</p>
+      <button mat-flat-button class="acao-principal entrar" type="submit" [disabled]="enviando()">
+        @if (enviando()) {
+          <mat-spinner diameter="20" />
+        } @else {
+          Entrar
+        }
+        @if (!enviando()) {
+          <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        }
+      </button>
+
+      <p class="restrito"><mat-icon>lock_outline</mat-icon> Acesso exclusivo para a sua equipe</p>
+    </form>
+
+    <p class="ajuda">Precisa de acesso? Fale com o administrador da oficina.</p>
+  </section>
 </main>
