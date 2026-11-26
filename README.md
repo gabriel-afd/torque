@@ -19,7 +19,9 @@ Autor: Gabriel Medeiros de Mendonça.
 
 ```
 torque/
-├── docker-compose.yml         # banco de dados (api e web entram na Sprint 4)
+├── Dockerfile                 # imagem única para deploy: Angular + API
+├── render.yaml                # blueprint do Render (deploy gratuito)
+├── docker-compose.yml         # banco de dados e, opcionalmente, a aplicação
 ├── .github/workflows/ci.yml   # build e testes a cada pull request
 ├── docs/                      # entregas da disciplina
 ├── torque-api/                # API REST — Spring Boot
@@ -100,6 +102,8 @@ cd torque-web && npm run build && npm test -- --watch=false --browsers=ChromeHea
 | `JWT_EXPIRACAO_HORAS` | validade do token | `8` |
 | `ADMIN_EMAIL` | e-mail do primeiro administrador (criado só se não houver nenhum usuário) | — |
 | `ADMIN_SENHA` | senha do primeiro administrador (mínimo 8 caracteres) | — |
+| `OFICINA_NOME` | nome impresso no PDF e na mensagem do WhatsApp | `Oficina Torque` |
+| `PORT` | porta HTTP (informada pela plataforma de deploy) | `8080` |
 
 Primeira subida em desenvolvimento (bash):
 
@@ -111,6 +115,46 @@ cd torque-api && ./mvnw spring-boot:run
 
 Depois que o administrador existir, `ADMIN_EMAIL`/`ADMIN_SENHA` podem ser removidas (nada é recriado se já houver usuários).
 
+## Deploy (gratuito: Render + Neon)
+
+Imagem única: o `Dockerfile` da raiz compila o Angular, copia o build para `static/` da API e gera um só
+`.jar`. O Spring Boot serve o frontend e a API na mesma origem (`/api`), sem CORS. Rotas do Angular
+(`/quadro`, `/ordens/17`) recebem o `index.html` (`shared.web.FrontendConfig`). A API continua exigindo JWT.
+
+**1. Banco no [Neon](https://neon.tech)** (plano Free, não expira)
+
+1. Crie o projeto na região **AWS US East (N. Virginia)**.
+2. Em *Connect*, copie a connection string, por exemplo
+   `postgresql://usuario:senha@ep-xxxx.us-east-1.aws.neon.tech/neondb?sslmode=require`.
+3. Separe as partes para a API:
+   - `DB_URL` = `jdbc:postgresql://ep-xxxx.us-east-1.aws.neon.tech/neondb?sslmode=require`
+   - `DB_USER` = `usuario`
+   - `DB_PASSWORD` = `senha`
+
+O Flyway cria as tabelas na primeira subida.
+
+**2. Aplicação no [Render](https://render.com)** (Web Service Free)
+
+1. *New → Blueprint* e escolha este repositório. O Render lê o `render.yaml`.
+2. Preencha `DB_URL`, `DB_USER`, `DB_PASSWORD`, `ADMIN_EMAIL` e `ADMIN_SENHA`. O `JWT_SECRET` é gerado pelo Render.
+3. *Apply*. O build leva alguns minutos. A aplicação fica em `https://torque-xxxx.onrender.com`
+   (Swagger em `/api/docs`).
+4. Cada merge na `main` gera um novo deploy (`autoDeploy`).
+
+Para a apresentação, dá para carregar os dados fictícios: adicione `SPRING_PROFILES_ACTIVE=demo` no painel
+do Render (só carrega com o banco sem clientes; senha dos usuários demo: `demo12345`). Depois remova a variável.
+
+Limites do plano gratuito:
+- O serviço dorme após cerca de 15 min sem acesso, e o primeiro acesso depois disso leva de 30 a 60 s.
+- 512 MB de RAM. A imagem já limita o heap (`JAVA_OPTS` no `Dockerfile`). Medido localmente: cerca de 330 MB após a subida.
+
+**Rodar a imagem localmente** (com Docker):
+
+```bash
+JWT_SECRET="uma-chave-local-com-pelo-menos-32-bytes" ADMIN_EMAIL="admin@oficina.local" ADMIN_SENHA="troque-esta-senha" \
+  docker compose up -d --build      # http://localhost:8080
+```
+
 ## Entregas
 
 | Macro Entrega | Conteúdo | Pasta |
@@ -118,7 +162,7 @@ Depois que o administrador existir, `ADMIN_EMAIL`/`ADMIN_SENHA` podem ser removi
 | 1 — Concepção, Planejamento e Engenharia de Requisitos | Visão, requisitos, histórias, backlog, plano de IA | `docs/entrega-1` |
 | 2 — Arquitetura, Modelagem e Prototipação da Solução | Arquitetura, diagramas, modelo de dados, protótipos | `docs/entrega-2` |
 | 3 — Desenvolvimento, Integração e Garantia da Qualidade | Código, testes e registro de IA | em andamento |
-| 4 — Deployment, Documentação e Apresentação Final | Aplicação implantada e manuais | a fazer |
+| 4 — Deployment, Documentação e Apresentação Final | Aplicação implantada e manuais | em andamento (deploy: ver seção Deploy) |
 
 ## Padrões
 
