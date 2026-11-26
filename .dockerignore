@@ -1,0 +1,17 @@
+.git
+.github
+.claude
+.idea
+.vscode
+docs
+scripts
+*.md
+*.pdf
+*.zip
+.env
+torque-api/target
+torque-api/*.log
+torque-web/node_modules
+torque-web/dist
+torque-web/.angular
+torque-web/coverage
