@@ -47,6 +47,13 @@ describe('LoginComponent', () => {
     expect(getComputedStyle(icone).maskImage).toContain('/icones/marca.svg');
   });
 
+  it('deve mostrar o crédito do autor na tela inicial', () => {
+    montar();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="credito"]').textContent.replace(/\s+/g, ' ').trim())
+      .toBe('Desenvolvido por Gabriel Medeiros de Mendonça');
+  });
+
   it('deve mostrar e ocultar a senha pelo botão do campo', () => {
     montar();
     const senha: HTMLInputElement = fixture.nativeElement.querySelector('[data-testid="senha"]');
