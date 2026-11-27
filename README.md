@@ -5,6 +5,30 @@ Sistema web de ordens de serviço para oficinas mecânicas de pequeno porte: cad
 Projeto da disciplina **Projeto Integrador - EAD** (Análise e Desenvolvimento de Sistemas).
 Autor: Gabriel Medeiros de Mendonça.
 
+## Telas
+
+Visual "Grafite e Lima" (protótipos em `docs/prototipos/grafite-e-lima/`). Prints tirados do sistema rodando com os dados fictícios do perfil `demo`.
+
+**Quadro de OS:** resumo do dia e colunas por status. Os cartões podem ser arrastados entre colunas, e o sistema só aceita os movimentos permitidos pelas regras de negócio.
+
+![Quadro de OS](docs/prints/quadro.png)
+
+**Ordem de serviço:** orçamento com serviços e peças do catálogo, resumo com desconto, ações conforme o status e o perfil, mecânico responsável e histórico.
+
+![Ordem de serviço](docs/prints/ordem-de-servico.png)
+
+| Login | Clientes |
+| --- | --- |
+| ![Login](docs/prints/login.png) | ![Clientes](docs/prints/clientes.png) |
+| **Novo cliente (diálogo)** | **Painel do mês** |
+| ![Novo cliente](docs/prints/novo-cliente.png) | ![Painel do mês](docs/prints/painel.png) |
+
+**No celular:** menu lateral vira gaveta, e o quadro rola de lado dentro da área das colunas.
+
+| Quadro | Menu | Ordem de serviço |
+| --- | --- | --- |
+| ![Quadro no celular](docs/prints/celular-quadro.png) | ![Menu no celular](docs/prints/celular-menu.png) | ![OS no celular](docs/prints/celular-os.png) |
+
 ## Tecnologias
 
 | Camada | Tecnologia |
@@ -23,7 +47,7 @@ torque/
 ├── render.yaml                # blueprint do Render (deploy gratuito)
 ├── docker-compose.yml         # banco de dados e, opcionalmente, a aplicação
 ├── .github/workflows/ci.yml   # build e testes a cada pull request
-├── docs/                      # entregas da disciplina
+├── docs/                      # entregas da disciplina, protótipos e prints das telas
 ├── torque-api/                # API REST — Spring Boot
 └── torque-web/                # frontend — Angular
 ```
