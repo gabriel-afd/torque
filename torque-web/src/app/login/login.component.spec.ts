@@ -39,13 +39,28 @@ describe('LoginComponent', () => {
     localStorage.removeItem(CHAVE_SESSAO);
   });
 
-  it('deve mostrar a engrenagem da marca ao lado do nome', () => {
+  it('deve mostrar as chaves cruzadas da marca ao lado do nome', () => {
     montar();
-    const icone: HTMLElement = fixture.nativeElement.querySelector('.logo .marca-icone');
+    const icone: HTMLElement = fixture.nativeElement.querySelector('.logo .icone');
 
     expect(icone).not.toBeNull();
-    expect(getComputedStyle(icone).maskImage).toContain('favicon.svg');
-    expect(fixture.nativeElement.querySelector('.ponto')).toBeNull();
+    expect(getComputedStyle(icone).maskImage).toContain('/icones/marca.svg');
+  });
+
+  it('deve mostrar e ocultar a senha pelo botão do campo', () => {
+    montar();
+    const senha: HTMLInputElement = fixture.nativeElement.querySelector('[data-testid="senha"]');
+    const botao: HTMLButtonElement = fixture.nativeElement.querySelector('[data-testid="mostrar-senha"]');
+    expect(senha.type).toBe('password');
+
+    botao.click();
+    fixture.detectChanges();
+    expect(senha.type).toBe('text');
+    expect(botao.getAttribute('aria-label')).toBe('Ocultar senha');
+
+    botao.click();
+    fixture.detectChanges();
+    expect(senha.type).toBe('password');
   });
 
   it('deve mostrar "E-mail ou senha inválidos" quando a API recusar o login', () => {

@@ -1,18 +1,28 @@
-<nav class="crumb"><a routerLink="/quadro">Quadro de OS</a> › OS #{{ os()?.numero ?? id() }}</nav>
+<nav class="crumb"><a routerLink="/quadro"><mat-icon>chevron_left</mat-icon>Quadro de OS</a> <span>/</span> <b>OS #{{ os()?.numero ?? id() }}</b></nav>
 
 @if (carregando() || processando()) {
   <mat-progress-bar mode="indeterminate" />
 }
 
 @if (os(); as os) {
-  <header class="card cabecalho" data-testid="cabecalho">
-    <div><div class="kv">OS #{{ os.numero }}</div><a class="placa grande" [routerLink]="['/veiculos', os.veiculo.placa]" title="Histórico do veículo">{{ os.veiculo.placa }}</a></div>
-    <div class="kv">Veículo<b>{{ veiculo(os) }}</b></div>
-    <div class="kv">Cliente<b>{{ cliente(os) }}</b></div>
-    <div class="kv">Quilometragem<b>{{ os.quilometragem !== null ? (os.quilometragem | number: '1.0-0') + ' km' : '—' }}</b></div>
-    <div class="kv problema">Problema relatado<b>{{ os.problemaRelatado }}</b></div>
-    <div class="kv">Mecânico<b data-testid="mecanico">{{ os.mecanico?.nome ?? 'Não atribuído' }}</b></div>
-    <span class="chip st-{{ os.status }}" data-testid="status">{{ rotuloStatus[os.status] }}</span>
+  <header data-testid="cabecalho">
+    <div class="page-head">
+      <div class="titulo">
+        <h1>Ordem de serviço #{{ os.numero }}</h1>
+        <p class="subtitulo">Gerencie o orçamento e acompanhe o atendimento.</p>
+      </div>
+      <span class="chip st-{{ os.status }}" data-testid="status">{{ rotuloStatus[os.status] }}</span>
+    </div>
+    <div class="card dados">
+      <div class="kv">Placa<a class="placa grande" [routerLink]="['/veiculos', os.veiculo.placa]" title="Histórico do veículo">{{ os.veiculo.placa }}</a></div>
+      <div class="kv">Veículo<b>{{ veiculo(os) }}</b></div>
+      <div class="kv">Cliente<b>{{ os.cliente.nome }}</b>@if (telefone(os); as tel) {<small>{{ tel }}</small>}</div>
+      <div class="kv">Quilometragem<b>{{ os.quilometragem !== null ? (os.quilometragem | number: '1.0-0') + ' km' : '—' }}</b></div>
+      <div class="kv problema">
+        Problema relatado<b>{{ os.problemaRelatado }}</b>
+        <small>Mecânico: <span data-testid="mecanico">{{ os.mecanico?.nome ?? 'Não atribuído' }}</span></small>
+      </div>
+    </div>
   </header>
 
   <div class="grade">
@@ -36,7 +46,7 @@
 
     <aside>
       <section class="card secao resumo" data-testid="resumo">
-        <h2>Resumo</h2>
+        <h2>Resumo do orçamento</h2>
         <div class="linha"><span>Serviços</span><span data-testid="subtotal-servicos">{{ resumo().subtotalServicos | currency: 'BRL' }}</span></div>
         <div class="linha"><span>Peças</span><span data-testid="subtotal-pecas">{{ resumo().subtotalPecas | currency: 'BRL' }}</span></div>
         @if (editavel()) {
@@ -78,11 +88,11 @@
                       data-testid="acao-enviarParaAprovacao">Enviar para aprovação</button>
             }
             @if (tem('compartilhar')) {
-              <button mat-flat-button color="primary" type="button" (click)="compartilhar()" [disabled]="processando()"
+              <button mat-stroked-button type="button" (click)="compartilhar()" [disabled]="processando()"
                       data-testid="acao-compartilhar">Compartilhar (PDF / WhatsApp)</button>
             }
             @if (tem('aprovar')) {
-              <button mat-flat-button class="verde" type="button" (click)="aprovar()" [disabled]="processando()"
+              <button mat-flat-button class="acao-principal" type="button" (click)="aprovar()" [disabled]="processando()"
                       data-testid="acao-aprovar">Registrar aprovação</button>
             }
             @if (tem('recusar')) {
@@ -98,7 +108,7 @@
                       data-testid="acao-aguardarPeca">Aguardando peça</button>
             }
             @if (tem('concluir')) {
-              <button mat-flat-button class="verde" type="button" (click)="concluir()" [disabled]="processando()"
+              <button mat-flat-button class="acao-principal" type="button" (click)="concluir()" [disabled]="processando()"
                       data-testid="acao-concluir">Concluir</button>
             }
             @if (tem('entregar')) {
@@ -106,7 +116,7 @@
                       data-testid="acao-entregar">Entregar</button>
             }
             @if (tem('cancelar')) {
-              <button mat-stroked-button class="perigo" type="button" (click)="cancelar()" [disabled]="processando()"
+              <button mat-button class="perigo" type="button" (click)="cancelar()" [disabled]="processando()"
                       data-testid="acao-cancelar">Cancelar OS</button>
             }
           }
@@ -115,11 +125,11 @@
 
       @if (tem('atribuirMecanico')) {
         <section class="card secao" data-testid="atribuir">
-          <h2>Mecânico</h2>
+          <h2>Mecânico responsável</h2>
           <div class="incluir">
             <mat-form-field class="busca" subscriptSizing="dynamic">
-              <mat-label>Mecânico responsável</mat-label>
-              <mat-select [formControl]="mecanicoEscolhido" data-testid="select-mecanico">
+              <mat-select [formControl]="mecanicoEscolhido" placeholder="Selecionar mecânico" aria-label="Mecânico responsável"
+                          data-testid="select-mecanico">
                 @for (m of mecanicos(); track m.id) {
                   <mat-option [value]="m.id">{{ m.nome }}</mat-option>
                 }

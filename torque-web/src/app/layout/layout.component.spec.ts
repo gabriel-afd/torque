@@ -6,7 +6,7 @@ import { Router, provideRouter } from '@angular/router';
 import { AuthService, CHAVE_SESSAO } from '../core/auth.service';
 import { Perfil } from '../core/modelos';
 import { respostaLogin } from '../core/testes';
-import { LayoutComponent } from './layout.component';
+import { LayoutComponent, secaoDaUrl } from './layout.component';
 
 describe('LayoutComponent', () => {
   beforeEach(() => localStorage.removeItem(CHAVE_SESSAO));
@@ -66,5 +66,25 @@ describe('LayoutComponent', () => {
 
     expect(TestBed.inject(AuthService).autenticado()).toBeFalse();
     expect(router.navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('deve mostrar o ícone de cada item do menu', () => {
+    const elemento: HTMLElement = montar('ADMINISTRADOR').nativeElement;
+    const icones = Array.from(elemento.querySelectorAll('[data-testid="item-menu"] .icone')).map(
+      (i) => (i as HTMLElement).style.getPropertyValue('--icone'),
+    );
+
+    expect(icones).toEqual([
+      "url('/icones/quadro.svg')", "url('/icones/clientes.svg')", "url('/icones/veiculos.svg')",
+      "url('/icones/catalogo.svg')", "url('/icones/painel.svg')", "url('/icones/usuarios.svg')",
+    ]);
+  });
+
+  it('deve montar a trilha "Oficina / …" pela URL', () => {
+    expect(secaoDaUrl('/quadro')).toBe('Ordens de serviço');
+    expect(secaoDaUrl('/ordens/1001')).toBe('Ordens de serviço');
+    expect(secaoDaUrl('/clientes/7?aba=veiculos')).toBe('Clientes');
+    expect(secaoDaUrl('/veiculos/ABC1D23')).toBe('Veículos');
+    expect(secaoDaUrl('/admin/usuarios')).toBe('Usuários');
   });
 });

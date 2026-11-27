@@ -10,7 +10,7 @@ import { CONFLITOS_CLIENTE, Cliente } from './clientes.modelos';
 import { ClientesService } from './clientes.service';
 import { comCarregamento } from '../shared/carregamento';
 
-/** Cadastro (/clientes/novo) e edição (/clientes/:id/editar) de cliente. */
+/** Edição de cliente (/clientes/:id/editar). O cadastro é feito em diálogo ({@link NovoClienteComponent}). */
 @Component({
   selector: 'app-cliente-form',
   standalone: true,

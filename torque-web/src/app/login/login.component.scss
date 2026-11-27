@@ -1,72 +1,97 @@
 .login {
   min-height: 100vh;
-  background: var(--torque-azul);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--torque-superficie);
+}
+
+// Metade grafite: apresentação.
+.apresentacao {
+  background: var(--torque-grafite);
+  color: #fff;
+  padding: 40px 48px 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chamada { margin: auto 0; max-width: 520px; }
+
+.sobretitulo, .boas-vindas, .rotulo {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.sobretitulo { color: var(--torque-lima); }
+
+h1 { font-size: 52px; line-height: 1.12; font-weight: 800; letter-spacing: -1.2px; margin: 18px 0 22px; }
+
+.texto { color: #b4b7bd; font-size: 16px; line-height: 1.6; }
+
+.etapas {
+  margin-top: 56px;
+  background: var(--torque-grafite-2);
+  border-radius: 12px;
+  padding: 20px 24px 22px;
+
+  .rotulo { color: #9a9da3; font-size: 10.5px; }
+  ol { list-style: none; margin: 14px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  b { display: block; color: var(--torque-lima); font-size: 26px; font-weight: 500; margin-bottom: 10px; }
+  span { font-size: 13px; font-weight: 600; }
+}
+
+.rodape { display: flex; justify-content: space-between; gap: 12px; font-size: 12.5px; color: #8b8e94; }
+
+// Metade clara: formulário.
+.acesso {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px 16px;
+  padding: 32px 24px;
 }
 
-.marca {
-  color: #fff;
-  text-align: center;
-  margin-bottom: 28px;
+.caixa { width: 100%; max-width: 360px; display: flex; flex-direction: column; }
 
-  .logo {
-    justify-content: center;
-    font-size: 30px;
-  }
+.boas-vindas { color: var(--torque-lima-texto); }
 
-  p {
-    color: #b8c7db;
-    font-size: 13px;
-    margin-top: 6px;
-  }
+h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.4px; margin: 10px 0 6px; }
+
+.sub { font-size: 14px; color: var(--torque-texto-suave); margin-bottom: 26px; }
+
+.entrar {
+  height: 48px;
+  font-size: 15px;
+  margin-top: 4px;
 }
 
-.caixa {
-  width: 100%;
-  max-width: 380px;
-  background: var(--torque-superficie);
-  border-radius: 14px;
-  padding: 26px 22px 22px;
+.restrito {
   display: flex;
-  flex-direction: column;
-
-  h1 {
-    font-size: 18px;
-    margin-bottom: 4px;
-  }
-
-  .sub {
-    font-size: 13px;
-    color: var(--torque-texto-suave);
-    margin-bottom: 18px;
-  }
-
-  button {
-    height: 46px;
-    font-size: 15px;
-    margin-top: 6px;
-  }
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 28px;
+  font-size: 13px;
+  color: var(--torque-texto-suave);
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
 }
 
 .erro {
-  background: rgba(214, 69, 69, 0.2);
-  color: #f6a8a8;
+  background: #fdecea;
+  color: #8a1f17;
   font-size: 13px;
-  padding: 9px 12px;
+  padding: 10px 12px;
   border-radius: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
-mat-spinner {
-  margin: 0 auto;
-}
+.ajuda { margin-top: 48px; font-size: 13px; color: var(--torque-texto-suave); }
 
-.rodape {
-  color: #8fa3bf;
-  font-size: 11.5px;
-  margin-top: 22px;
+@media (max-width: 900px) {
+  .login { grid-template-columns: 1fr; }
+  .apresentacao { padding: 24px 20px; }
+  .chamada { margin: 28px 0 8px; }
+  h1 { font-size: 34px; margin: 12px 0 14px; }
+  .etapas, .rodape { display: none; }
 }

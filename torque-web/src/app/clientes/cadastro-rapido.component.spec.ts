@@ -40,6 +40,7 @@ describe('CadastroRapidoComponent', () => {
 
   it('deve vir com a placa buscada já preenchida', () => {
     expect(fixture.componentInstance.formVeiculo.controls.placa.value).toBe('XYZ9A87');
+    expect(fixture.nativeElement.querySelector('[mat-dialog-title]').textContent).toContain('Cadastrar veículo XYZ9A87');
   });
 
   it('cliente novo: deve cadastrar o cliente, depois o veículo, e devolver o veículo com o dono', () => {

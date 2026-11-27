@@ -16,7 +16,9 @@ import { MensagemService } from '../core/mensagem.service';
 import { NovaOsComponent } from './nova-os.component';
 import { COLUNAS_QUADRO, OrdemCriada, OrdemResumo, StatusOS } from './ordens.modelos';
 import { OrdensService } from './ordens.service';
-import { MovimentoNoQuadro, agruparPorStatus, emAlerta, infoDoCartao, movimentoNoQuadro, situacaoDoCartao } from './quadro';
+import {
+  MovimentoNoQuadro, agruparPorStatus, doisDigitos, emAlerta, movimentoNoQuadro, resumoDoQuadro, tempoDoCartao, valorDoCartao,
+} from './quadro';
 import { comCarregamento } from '../shared/carregamento';
 
 interface Mecanico {
@@ -62,8 +64,11 @@ export class QuadroComponent implements OnInit {
   readonly podeAbrirOs = computed(() => this.auth.temPerfil('ATENDENTE', 'ADMINISTRADOR'));
 
   readonly emAlerta = (os: OrdemResumo) => emAlerta(os, this.agora());
-  readonly info = (os: OrdemResumo) => infoDoCartao(os, this.agora());
-  readonly situacao = (os: OrdemResumo) => situacaoDoCartao(os, this.agora());
+  readonly valor = valorDoCartao;
+  readonly tempo = (os: OrdemResumo) => tempoDoCartao(os, this.agora());
+  readonly resumo = computed(() => resumoDoQuadro(this.ordens()));
+  readonly dois = doisDigitos;
+  readonly primeiroNome = (nome: string) => nome.split(' ')[0];
 
   /** No toque, o arraste só começa após segurar o cartão (o toque rápido continua rolando o quadro). */
   readonly atrasoDoArraste = { touch: 250, mouse: 0 };

@@ -1,22 +1,25 @@
 @use 'sass:map';
 @use '@angular/material' as mat;
 
-// Paletas do protótipo: azul-escuro #1F3A5F (navegação) e laranja #F28C28 (ação principal).
-$torque-azul: (
-  50: #e4e8ee,
-  100: #bcc6d4,
-  200: #8fa1b8,
-  300: #627b9b,
-  400: #415f85,
-  500: #1f3a5f,
-  600: #1b3457,
-  700: #172c4d,
-  800: #122543,
-  900: #0a1832,
-  A100: #6d9bff,
-  A200: #3a78ff,
-  A400: #0756ff,
-  A700: #004bec,
+// Visual "Grafite e Lima" (docs/prototipos/grafite-e-lima): navegação grafite, conteúdo claro em off-white e
+// ação principal em verde-lima com texto escuro.
+
+// Grafite: cor primária dos componentes do Material (foco dos campos, seleção, paginador).
+$torque-grafite: (
+  50: #e8e9ea,
+  100: #c6c7ca,
+  200: #a0a2a7,
+  300: #7a7d83,
+  400: #5d6067,
+  500: #40434a,
+  600: #3a3d43,
+  700: #32353a,
+  800: #2a2d32,
+  900: #1d1f23,
+  A100: #7fb2ff,
+  A200: #4c93ff,
+  A400: #1975ff,
+  A700: #0068ff,
   contrast: (
     50: rgba(0, 0, 0, 0.87), 100: rgba(0, 0, 0, 0.87), 200: rgba(0, 0, 0, 0.87), 300: #fff, 400: #fff,
     500: #fff, 600: #fff, 700: #fff, 800: #fff, 900: #fff,
@@ -24,48 +27,45 @@ $torque-azul: (
   ),
 );
 
-$torque-laranja: (
-  50: #fef1e5,
-  100: #fbdcbf,
-  200: #f9c694,
-  300: #f6af69,
-  400: #f49d48,
-  500: #f28c28,
-  600: #f08424,
-  700: #ee791e,
-  800: #ec6f18,
-  900: #e85c0f,
-  A100: #fff,
-  A200: #ffeadf,
-  A400: #ffc9ac,
-  A700: #ffb892,
+// Lima: destaque (ação principal, item ativo do menu).
+$torque-lima: (
+  50: #f8fde8,
+  100: #eefbc6,
+  200: #e2f8a1,
+  300: #d6f57b,
+  400: #cff25e,
+  500: #c8f04a,
+  600: #b5dc3c,
+  700: #9cc22e,
+  800: #84a822,
+  900: #5b7a12,
+  A100: #ffffff,
+  A200: #f6ffd9,
+  A400: #ebffa6,
+  A700: #e4ff8c,
   contrast: (
-    50: rgba(0, 0, 0, 0.87), 100: rgba(0, 0, 0, 0.87), 200: rgba(0, 0, 0, 0.87), 300: rgba(0, 0, 0, 0.87),
-    400: rgba(0, 0, 0, 0.87), 500: #fff, 600: #fff, 700: #fff, 800: #fff, 900: #fff,
-    A100: rgba(0, 0, 0, 0.87), A200: rgba(0, 0, 0, 0.87), A400: rgba(0, 0, 0, 0.87), A700: rgba(0, 0, 0, 0.87),
+    50: #1d1f23, 100: #1d1f23, 200: #1d1f23, 300: #1d1f23, 400: #1d1f23, 500: #1d1f23, 600: #1d1f23,
+    700: #1d1f23, 800: #1d1f23, 900: #fff,
+    A100: #1d1f23, A200: #1d1f23, A400: #1d1f23, A700: #1d1f23,
   ),
 );
 
-// Tema escuro em grafite. O azul #1F3A5F continua na navegação e o laranja #F28C28 na ação principal; nos
-// componentes do Material o azul usa um tom mais claro (200), legível sobre o fundo escuro.
-$tema-base: mat.m2-define-dark-theme((
+$tema-base: mat.m2-define-light-theme((
   color: (
-    primary: mat.m2-define-palette($torque-azul, 200, 100, 400),
-    accent: mat.m2-define-palette($torque-laranja, 500),
-    warn: mat.m2-define-palette(mat.$m2-red-palette, 300),
+    primary: mat.m2-define-palette($torque-grafite, 900, 500, 900),
+    accent: mat.m2-define-palette($torque-lima, 500, 300, 700),
+    warn: mat.m2-define-palette(mat.$m2-red-palette, 700),
   ),
   typography: mat.m2-define-typography-config($font-family: '"Inter", "Segoe UI", Roboto, Arial, sans-serif'),
   density: 0,
 ));
 
-// Superfícies do Material (painéis de select/autocomplete, diálogos, menus, tabelas) no grafite do Torque.
+// Superfícies do Material (diálogos, menus, painéis de select) no off-white/branco do Torque.
 $superficies: (
-  background: #2b3038,
-  card: #363c46,
-  dialog: #363c46,
-  app-bar: #1f3a5f,
-  status-bar: #1f3a5f,
-  hover: rgba(255, 255, 255, 0.06),
+  background: #f4f4f1,
+  card: #ffffff,
+  dialog: #ffffff,
+  hover: rgba(29, 31, 35, 0.05),
 );
 $cor: map.get($tema-base, color);
 $cor: map.merge($cor, (background: map.merge(map.get($cor, background), $superficies)));
@@ -75,21 +75,28 @@ $tema: map.merge($tema-base, (color: $cor, background: map.get($cor, background)
 @include mat.all-component-themes($tema);
 
 :root {
-  color-scheme: dark;
-  --torque-azul: #1f3a5f;
-  --torque-laranja: #f28c28;
-  --torque-fundo: #2b3038;
-  --torque-superficie: #363c46;
-  --torque-superficie-baixa: #252930;
-  --torque-superficie-alta: #414854;
-  --torque-texto: #e6e9ee;
-  --torque-texto-suave: #a3acb9;
-  --torque-borda: #4a515c;
-  --torque-borda-suave: #3f4550;
-  --torque-perigo: #f97066;
-  --torque-sucesso: #5fc77a;
-  --torque-aviso: #f5b454;
-  --torque-link: #8fbaf0;
+  --torque-grafite: #1d1f23;
+  --torque-grafite-2: #2b2e34;
+  --torque-lima: #c8f04a;
+  --torque-lima-texto: #4d6b0f;
+  --torque-fundo: #f4f4f1;
+  --torque-superficie: #ffffff;
+  --torque-superficie-baixa: #ebebe6;
+  --torque-superficie-alta: #f7f7f4;
+  --torque-texto: #1d1f23;
+  --torque-texto-suave: #6b6e75;
+  --torque-borda: #e2e2dc;
+  --torque-borda-suave: #ecece7;
+  --torque-perigo: #c0362c;
+  --torque-sucesso: #2f8a4a;
+  --torque-aviso: #a86a00;
+  --torque-link: #4d6b0f;
+
+  // Campos e botões arredondados como nos mockups.
+  --mdc-outlined-text-field-container-shape: 8px;
+  --mdc-outlined-text-field-outline-color: var(--torque-borda);
+  --mdc-outlined-text-field-hover-outline-color: #c4c4bc;
+  --mdc-dialog-container-shape: 14px;
 }
 
 * {
@@ -116,128 +123,214 @@ p {
   margin: 0;
 }
 
-// Componentes visuais do protótipo (base.css), reaproveitados pelas telas.
+a {
+  color: var(--torque-link);
+}
+
+// Ícones do menu e da marca: SVG em public/icones usado como máscara, na cor do texto (currentColor).
+.icone {
+  display: inline-block;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  -webkit-mask: var(--icone) center / contain no-repeat;
+  mask: var(--icone) center / contain no-repeat;
+}
+
 .logo {
   font-weight: 800;
-  font-size: 20px;
-  letter-spacing: 0.5px;
+  font-size: 22px;
+  letter-spacing: -0.2px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+
+  .icone {
+    --icone: url('/icones/marca.svg');
+    width: 24px;
+    height: 24px;
+    color: var(--torque-lima);
+  }
 }
 
-// Engrenagem da marca: o SVG da aba (favicon.svg) usado como máscara, pintado com o laranja da marca.
-.marca-icone {
-  width: 1.1em;
-  height: 1.1em;
-  flex: none;
-  display: inline-block;
-  background: var(--torque-laranja);
-  -webkit-mask: url('/favicon.svg') center / contain no-repeat;
-  mask: url('/favicon.svg') center / contain no-repeat;
-}
-
+// Cabeçalho das páginas: título grande, subtítulo e ação principal à direita.
 .page-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 
   h1 {
-    font-size: 20px;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
   }
+
+  > :last-child:not(.titulo):not(h1) {
+    margin-left: auto;
+  }
+}
+
+.subtitulo {
+  color: var(--torque-texto-suave);
+  font-size: 14.5px;
+  margin-top: 6px;
 }
 
 .card {
   background: var(--torque-superficie);
   border: 1px solid var(--torque-borda);
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .muted {
   color: var(--torque-texto-suave);
 }
 
-// Placa em destaque (cartões do quadro, veículos, histórico).
 .placa {
   font-weight: 800;
-  font-size: 14px;
-  letter-spacing: 0.5px;
+  font-size: 15px;
+  letter-spacing: 0.3px;
   font-variant-numeric: tabular-nums;
 }
 
-// Ação principal sempre laranja, com cantos arredondados como no protótipo.
+// Ação principal em lima com texto grafite.
 .mat-mdc-unelevated-button.acao-principal:not(:disabled) {
-  background-color: var(--torque-laranja);
-  color: #fff;
+  background-color: var(--torque-lima);
+  color: var(--torque-grafite);
+  font-weight: 600;
 }
 
 .mdc-button {
   border-radius: 8px !important;
+  letter-spacing: 0 !important;
+}
+
+// Campos de uma linha (busca, filtros, quantidade, mecânico): mais baixos e brancos, como nos mockups.
+mat-form-field[subscriptSizing='dynamic'] {
+  @include mat.form-field-density(-3);
+  @include mat.select-density(-3);
+
+  .mat-mdc-text-field-wrapper { background: var(--torque-superficie); border-radius: 8px; }
+}
+
+.mat-mdc-outlined-button:not(:disabled) {
+  border-color: var(--torque-borda);
+  background: var(--torque-superficie);
+}
+
+// Mensagens (snackbar) como faixas claras, no estilo do aviso do mockup da OS.
+.msg-erro,
+.msg-sucesso,
+.msg-aviso {
+  --mat-snack-bar-button-color: currentColor;
+  .mdc-snackbar__surface {
+    border: 1px solid;
+    border-radius: 10px !important;
+    box-shadow: 0 6px 18px rgba(29, 31, 35, 0.12) !important;
+  }
 }
 
 .msg-erro {
-  --mdc-snackbar-container-color: #b42318;
-  --mdc-snackbar-supporting-text-color: #fff;
-  --mat-snack-bar-button-color: #fff;
+  --mdc-snackbar-container-color: #fdecea;
+  --mdc-snackbar-supporting-text-color: #8a1f17;
+  --mat-snack-bar-button-color: #8a1f17;
+  .mdc-snackbar__surface { border-color: #f4c7c2; }
 }
 
 .msg-sucesso {
-  --mdc-snackbar-container-color: #1e7a34;
-  --mdc-snackbar-supporting-text-color: #fff;
-  --mat-snack-bar-button-color: #fff;
+  --mdc-snackbar-container-color: #eef7ea;
+  --mdc-snackbar-supporting-text-color: #24592f;
+  --mat-snack-bar-button-color: #24592f;
+  .mdc-snackbar__surface { border-color: #cfe5c6; }
 }
 
 .msg-aviso {
-  --mdc-snackbar-container-color: #1f3a5f;
-  --mdc-snackbar-supporting-text-color: #fff;
-  --mat-snack-bar-button-color: #f9c694;
+  --mdc-snackbar-container-color: #fdf6e3;
+  --mdc-snackbar-supporting-text-color: #6b4a00;
+  --mat-snack-bar-button-color: #6b4a00;
+  .mdc-snackbar__surface { border-color: #f0dca6; }
 }
 
-// Chip de status da OS: mesmas cores do protótipo (base.css), em versão translúcida para o fundo escuro.
-.chip {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 999px;
-  text-transform: uppercase;
-  white-space: nowrap;
-  background: rgba(255, 255, 255, 0.1);
-  color: #c8d0db;
+// Status da OS: cor de cada etapa (bolinha das colunas, chip e números do resumo do quadro).
+.st-ABERTA { --cor-status: #7a7d83; }
+.st-AGUARDANDO_APROVACAO { --cor-status: #c98a12; }
+.st-APROVADA { --cor-status: #2f8a4a; }
+.st-EM_EXECUCAO { --cor-status: #2563eb; }
+.st-AGUARDANDO_PECA { --cor-status: #e0711a; }
+.st-CONCLUIDA { --cor-status: #6d4fd1; }
+.st-ENTREGUE { --cor-status: #1d1f23; }
+.st-RECUSADA, .st-CANCELADA { --cor-status: #c0362c; }
 
-  &.st-ABERTA { background: rgba(120, 160, 215, 0.2); color: #a9c6ee; }
-  &.st-AGUARDANDO_APROVACAO { background: rgba(242, 140, 40, 0.2); color: #f9c694; }
-  &.st-APROVADA { background: rgba(46, 155, 79, 0.24); color: #86dba0; }
-  &.st-EM_EXECUCAO { background: rgba(60, 130, 220, 0.26); color: #9cc4f5; }
-  &.st-AGUARDANDO_PECA, &.st-RECUSADA, &.st-CANCELADA { background: rgba(214, 69, 69, 0.24); color: #f6a8a8; }
-  &.st-CONCLUIDA { background: rgba(106, 91, 214, 0.28); color: #c2b9f7; }
+.bolinha {
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cor-status, var(--torque-texto-suave));
+}
+
+// Chip de status da OS: bolinha + nome, em pílula clara.
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  background: var(--torque-superficie-baixa);
+  color: var(--torque-texto);
+
+  &::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--cor-status, var(--torque-texto-suave));
+  }
 }
 
 // Peças de tela compartilhadas (OS, histórico do veículo, admin).
-a { color: var(--torque-link); }
-.crumb { font-size: 12.5px; color: var(--torque-texto-suave); margin-bottom: 8px; a { color: inherit; } }
-.kv { font-size: 12px; color: var(--torque-texto-suave); b { display: block; color: var(--torque-texto); font-size: 13.5px; margin-top: 2px; } }
+.crumb {
+  font-size: 13px;
+  color: var(--torque-texto-suave);
+  margin-bottom: 10px;
+  a { color: inherit; text-decoration: none; }
+  a:hover { color: var(--torque-texto); }
+}
+.kv {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--torque-texto-suave);
+  b { display: block; color: var(--torque-texto); font-size: 14px; letter-spacing: 0; text-transform: none; margin-top: 6px; }
+  small { display: block; font-size: 12.5px; font-weight: 400; letter-spacing: 0; text-transform: none; margin-top: 4px; }
+}
 .secao {
-  padding: 14px 16px; margin-bottom: 14px;
-  h2 { font-size: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+  padding: 18px 20px; margin-bottom: 16px;
+  h2 { font-size: 16.5px; font-weight: 700; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
   h3 { font-size: 12px; margin: 12px 0 4px; }
 }
-.tabela-simples { width: 100%; border-collapse: collapse; font-size: 13px; }
-.tabela-simples th { text-align: left; font-size: 11.5px; color: var(--torque-texto-suave); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--torque-borda); }
-.tabela-simples td { padding: 6px 8px; border-bottom: 1px solid var(--torque-borda-suave); }
-.r { text-align: right; }
+.tabela-simples { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; border: 1px solid var(--torque-borda); border-radius: 10px; overflow: hidden; }
+.tabela-simples th { text-align: left; font-size: 12px; color: var(--torque-texto-suave); font-weight: 600; padding: 10px 14px; background: var(--torque-superficie-baixa); }
+.tabela-simples td { padding: 11px 14px; border-top: 1px solid var(--torque-borda-suave); }
+.r { text-align: right !important; }
 .linha-tempo {
-  list-style: none; margin: 0; padding: 0; font-size: 12.5px;
-  li { padding: 6px 0 6px 14px; border-left: 2px solid var(--torque-borda); position: relative; }
-  li::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--torque-link); position: absolute; left: -5px; top: 10px; }
+  list-style: none; margin: 0; padding: 0; font-size: 13px;
+  li { padding: 5px 0 5px 16px; border-left: 2px solid var(--torque-borda); position: relative; }
+  li::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--torque-lima-texto); position: absolute; left: -5px; top: 11px; }
 }
-.dica { font-size: 11.5px; color: var(--torque-texto-suave); margin-top: 4px; }
+.dica { font-size: 12px; color: var(--torque-texto-suave); margin-top: 4px; }
 
 // Quadro, arrastar cartões (CDK): cartão flutuando, origem esmaecida e coluna sob o cursor destacada.
 // Fica no CSS global porque o cartão flutuando é anexado ao body.
-.cartao.cdk-drag-preview { box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35); cursor: grabbing; }
+.cartao.cdk-drag-preview { box-shadow: 0 12px 28px rgba(29, 31, 35, 0.22); cursor: grabbing; }
 .cartao.cdk-drag-placeholder { opacity: 0.35; }
 .cartao.cdk-drag-animating { transition: transform 200ms cubic-bezier(0, 0, 0.2, 1); }
-.coluna.cdk-drop-list-dragging { outline: 2px dashed var(--torque-laranja); outline-offset: -2px; }
+.coluna.cdk-drop-list-dragging { outline: 2px dashed var(--torque-lima-texto); outline-offset: -2px; }

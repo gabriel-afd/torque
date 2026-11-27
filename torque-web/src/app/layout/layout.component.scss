@@ -1,40 +1,76 @@
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  height: 56px;
-  background: var(--torque-azul);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 0 16px;
+.casca { min-height: 100vh; background: var(--torque-fundo); }
+
+// Menu lateral grafite.
+.lateral {
+  width: 200px;
+  background: var(--torque-grafite);
+  color: #c9cbcf;
+  border-right: 0;
+  border-radius: 0;
+  padding: 22px 14px 18px;
+
+  ::ng-deep .mat-drawer-inner-container { display: flex; flex-direction: column; }
 }
 
-.logo {
-  color: #fff;
-  text-decoration: none;
+.logo { color: #fff; text-decoration: none; padding: 0 10px; }
+
+.grupo {
+  margin: 34px 12px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #8b8e94;
 }
 
 .nav {
   display: flex;
+  flex-direction: column;
   gap: 4px;
-  margin-left: 8px;
 
   a {
-    color: #c9d6e8;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    color: #c9cbcf;
     text-decoration: none;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 13.5px;
-    white-space: nowrap;
+    font-size: 14.5px;
+
+    &:hover { background: var(--torque-grafite-2); color: #fff; }
 
     &.on {
-      background: rgba(255, 255, 255, 0.14);
+      background: var(--torque-grafite-2);
+      border-color: rgba(200, 240, 74, 0.35);
+      box-shadow: inset 3px 0 0 var(--torque-lima);
       color: #fff;
-      font-weight: 600;
+      font-weight: 700;
     }
   }
+}
+
+.versao { margin: auto 12px 0; padding-top: 24px; font-size: 12px; color: #8b8e94; }
+
+// Barra superior branca: trilha e usuário.
+.topo {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 28px;
+  background: var(--torque-superficie);
+  border-bottom: 1px solid var(--torque-borda);
+}
+
+.trilha {
+  font-size: 14px;
+  color: var(--torque-texto-suave);
+  b { color: var(--torque-texto); font-weight: 500; }
 }
 
 .usuario {
@@ -42,52 +78,43 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 4px 6px;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  text-align: left;
 
-  .nome {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    font-size: 13px;
-    color: #dde6f2;
-
-    span {
-      font-size: 11.5px;
-      color: #b8c7db;
-    }
-  }
+  &:hover { background: var(--torque-superficie-alta); }
+  mat-icon { color: var(--torque-texto-suave); }
 }
 
 .avatar {
-  background: var(--torque-laranja);
-  color: #fff;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #eef7d0;
+  color: var(--torque-grafite);
   font-weight: 700;
   font-size: 13px;
 }
 
-.so-celular {
-  display: none;
-  color: #fff;
+.nome {
+  display: flex;
+  flex-direction: column;
+  font-size: 13.5px;
+  line-height: 1.25;
+  small { font-size: 12px; color: var(--torque-texto-suave); }
 }
 
-.pagina {
-  padding: 20px 24px;
-}
+.pagina { padding: 28px; }
 
 @media (max-width: 900px) {
-  .so-tela-grande {
-    display: none;
-  }
-
-  .so-celular {
-    display: inline-flex;
-  }
-
-  .topbar {
-    gap: 8px;
-    padding: 0 8px;
-  }
-
-  .pagina {
-    padding: 16px;
-  }
+  .so-tela-grande { display: none; }
+  .topo { padding: 0 8px 0 4px; }
+  .pagina { padding: 18px 14px; }
 }

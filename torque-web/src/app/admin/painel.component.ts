@@ -15,7 +15,10 @@ import { comCarregamento } from '../shared/carregamento';
   imports: [CurrencyPipe, MatButtonModule, MatIconModule, MatProgressBarModule],
   template: `
     <div class="page-head">
-      <h1>Painel do mês</h1>
+      <div class="titulo">
+        <h1>Painel do mês</h1>
+        <p class="subtitulo">Os números da oficina no mês escolhido.</p>
+      </div>
       <div class="seletor">
         <button mat-icon-button (click)="mudarMes(-1)" aria-label="Mês anterior" data-testid="mes-anterior"><mat-icon>chevron_left</mat-icon></button>
         <span class="mes" data-testid="mes">{{ rotuloMes() }}</span>

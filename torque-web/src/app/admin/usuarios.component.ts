@@ -21,7 +21,10 @@ import { ListaPaginada } from '../shared/lista-paginada';
   imports: [MatButtonModule, MatIconModule, MatPaginatorModule, MatProgressBarModule],
   template: `
     <div class="page-head">
-      <h1>Usuários</h1>
+      <div class="titulo">
+        <h1>Usuários</h1>
+        <p class="subtitulo">Quem acessa o sistema e com qual perfil.</p>
+      </div>
       <button mat-flat-button class="acao-principal" (click)="editar()" data-testid="novo-usuario">
         <mat-icon>add</mat-icon> Novo usuário
       </button>

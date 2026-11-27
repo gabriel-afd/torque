@@ -57,6 +57,15 @@ describe('QuadroComponent', () => {
     req.flush(pagina([]));
   });
 
+  it('deve mostrar o texto da busca inteiro sem precisar clicar (placeholder, não rótulo flutuante)', () => {
+    montar('ATENDENTE');
+    requisicaoDoQuadro().flush(pagina([]));
+    const campo: HTMLElement = fixture.nativeElement.querySelector('[data-testid="busca-quadro"]').closest('mat-form-field');
+
+    expect(campo.querySelector('mat-label, .mdc-floating-label')).toBeNull();
+    expect(campo.querySelector('input')!.getAttribute('placeholder')).toBe('Buscar placa ou cliente');
+  });
+
   it('deve agrupar os cartões por status com contador em cada coluna', () => {
     montar('ATENDENTE');
     requisicaoDoQuadro().flush(pagina([
@@ -70,7 +79,18 @@ describe('QuadroComponent', () => {
     expect(coluna('ABERTA').textContent).toContain('MZK2310');
     expect(coluna('EM_EXECUCAO').textContent).toContain('LKJ9087');
     expect(coluna('APROVADA').textContent).toContain('Nenhuma OS');
-    expect(fixture.nativeElement.querySelector('[data-testid="total-andamento"]').textContent).toContain('4 OS');
+    expect(fixture.nativeElement.querySelector('[data-testid="total-andamento"]').textContent).toContain('4 ordens de serviço');
+  });
+
+  it('deve mostrar o resumo do topo com os números do quadro', () => {
+    montar('ATENDENTE');
+    requisicaoDoQuadro().flush(pagina([
+      ordem('ABERTA'), ordem('AGUARDANDO_APROVACAO'), ordem('AGUARDANDO_APROVACAO'), ordem('EM_EXECUCAO'), ordem('CONCLUIDA'),
+    ]));
+    fixture.detectChanges();
+
+    const numeros = todos('[data-testid="resumo-quadro"] b').map((b) => b.textContent!.trim());
+    expect(numeros).toEqual(['05', '02', '01', '01']);
   });
 
   it('deve mostrar número da OS, placa, veículo, cliente e mecânico no cartão', () => {
