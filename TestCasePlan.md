@@ -157,6 +157,7 @@ Status: Não executado · Aprovado · Reprovado · Bloqueado.
 | CT65 | HU02 | Novo cliente em diálogo | Clientes → "+ Novo cliente"; salvar; cancelar; abrir /clientes/novo | Cadastro abre sobre a lista; salvo, vai para o cliente; cancelado, continua na lista; 409 de CPF no campo com o diálogo aberto; /clientes/novo abre o diálogo e volta para /clientes ao cancelar | Média | F | Aprovado | novo-cliente.component.spec.ts "deve cadastrar e fechar devolvendo o cliente", "não deve chamar a API com o formulário inválido", "deve mostrar o 409 de CPF duplicado no campo e manter o diálogo aberto", "\"Novo cliente\" deve abrir o cadastro em diálogo e ir para o cliente cadastrado", "não deve sair da lista quando o diálogo for cancelado", "/clientes/novo: deve abrir o diálogo sobre a lista e voltar para /clientes ao cancelar" (2026-11-26) |
 | CT66 | HU03, RN01 | Novo veículo sem buscar a placa | Veículos → "+ Novo veículo" | Cadastro rápido com placa em branco (dono existente ou novo); cadastrado, abre o histórico do veículo; MECANICO não vê o botão | Média | F | Aprovado | veiculos-pagina.component.spec.ts (3 testes); cadastro-rapido.component.spec.ts "deve vir com a placa buscada já preenchida" (título com a placa) (2026-11-26) |
 | CT67 | RNF01 | Visual Grafite e Lima | Abrir login, quadro, OS, clientes, novo cliente, veículos, histórico, painel, catálogo e usuários em 1440 px e 390 px | Telas conforme docs/prototipos/grafite-e-lima; menu lateral com ícones por perfil e trilha "Oficina / …"; resumo do quadro; busca e paginador legíveis; celular sem rolagem horizontal | Média | M | Aprovado | layout.component.spec.ts "deve mostrar o ícone de cada item do menu", "deve montar a trilha…"; quadro.spec.ts "cartão e resumo do quadro (visual Grafite e Lima)" (3 testes); quadro.component.spec.ts "deve mostrar o resumo do topo…", "deve mostrar o texto da busca inteiro…"; login.component.spec.ts "deve mostrar e ocultar a senha…"; paginador-intl.spec.ts; 15 prints conferidos (Chrome headless, API com dados demo), 390 px: scrollWidth = 390 no quadro, na OS e no login; prints em docs/prints (2026-11-26) |
+| CT68 | — | Crédito do autor | Abrir o login (1440 px e 390 px) e o menu lateral logado | "Desenvolvido por Gabriel Medeiros de Mendonça" no rodapé do painel grafite do login (também no celular) e no rodapé do menu lateral | Baixa | F | Aprovado | login.component.spec.ts "deve mostrar o crédito do autor na tela inicial"; layout.component.spec.ts "deve mostrar o crédito do autor no menu lateral"; prints conferidos (Chrome headless) (2026-11-26) |
 
 ## 6. Execuções
 
@@ -194,6 +195,7 @@ Cada execução registrada com data, comando, resultado e commit testado.
 | 2026-11-26 | feature/19-ajustes-visuais-quadro | Chrome headless via DevTools contra `ng serve` + API (jar, perfil demo) | 6 verificações + 13 prints | 0 | CT62, CT63 (arraste real com o mouse) e CT64 em 1366 px e 360 px. |
 | 2026-11-26 | feature/20-visual-grafite-lima | `npm run build && npm test -- --watch=false --browsers=ChromeHeadless` (web) | 194 | 0 | CT65 a CT67, D12 e D13. Build sem avisos após ajustar os orçamentos (estilo por componente 4 kB; pacote inicial 900 kB por causa do menu lateral do Material). Avisos intermediários corrigidos: ícone do botão "Entrar" fora do slot (NG8011) e estilo do login acima do orçamento. Nenhuma falha de teste. |
 | 2026-11-26 | feature/20-visual-grafite-lima | Chrome headless via DevTools contra `ng serve` + API (jar, perfil demo, banco zerado) | 15 prints | 0 | CT67 em 1440 px e 390 px. Primeira rodada mostrou campos de filtro altos com texto cortado e a 6ª coluna fora da tela em 1440 px; corrigidos (d40ed1d) e prints refeitos. |
+| 2026-11-26 | feature/21-credito-autor | `npm run build && npm test -- --watch=false --browsers=ChromeHeadless` (web) | 196 | 2 → 0 | CT68. 2 falhas por teste mal escrito (regex de espaços gravada sem a barra invertida). Nenhum defeito de código. |
 
 ## 7. Defeitos
 
@@ -217,7 +219,7 @@ Defeitos encontrados durante o desenvolvimento e os testes, com causa e correç�
 
 ## 8. Resumo final
 
-Preenchido ao fim da Macro Entrega 3. Os casos da Macro Entrega 4 (CT58–CT67, seções 5.8 e 5.9) ficam fora deste resumo.
+Preenchido ao fim da Macro Entrega 3. Os casos da Macro Entrega 4 (CT58–CT68, seções 5.8 e 5.9) ficam fora deste resumo.
 
 | Indicador | Valor |
 | --- | --- |
