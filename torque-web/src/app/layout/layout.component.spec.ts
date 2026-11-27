@@ -68,6 +68,13 @@ describe('LayoutComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/login']);
   });
 
+  it('deve mostrar o crédito do autor no menu lateral', () => {
+    const elemento: HTMLElement = montar('MECANICO').nativeElement;
+
+    expect(elemento.querySelector('.lateral [data-testid="credito"]')!.textContent!.replace(/\s+/g, ' ').trim())
+      .toBe('Desenvolvido por Gabriel Medeiros de Mendonça');
+  });
+
   it('deve mostrar o ícone de cada item do menu', () => {
     const elemento: HTMLElement = montar('ADMINISTRADOR').nativeElement;
     const icones = Array.from(elemento.querySelectorAll('[data-testid="item-menu"] .icone')).map(
